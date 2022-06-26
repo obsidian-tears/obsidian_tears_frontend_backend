@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "dfx": "0.10.0",
+  "canisters": {
+    "obsidian_tears": {
+      "type": "motoko",
+      "main": "src/obsidian_tears/main.mo"
+    },
+    "obsidian_tears_assets": {
+      "type": "assets",
+      "source": [
+        "src/obsidian_tears_assets/assets"
+      ],
+      "dependencies": [
+        "obsidian_tears"
+      ]
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "",
+      "args": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  }
+}

@@ -1,0 +1,231 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90%;
+    width: 100%;
+    flex-basis: 100%;
+    background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/photo_2022-05-05_23-28-10.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#app {
+    background-color: #2878bf;
+    height: 100%;
+    min-height: 600px;
+}
+
+#header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: space-between;
+    height: 10%; max-height: 80px;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.rightHeader {
+    flex-direction: row;
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.title {
+    color: #ffffff; font-family: 'Raleway',sans-serif; 
+    font-size: 62px; 
+    font-weight: 800; 
+    line-height: 72px; 
+    margin: 0 0 24px; 
+    text-align: center; 
+    text-transform: uppercase; 
+}
+
+.myButton {
+    background-color: transparent;
+    color: white;
+    border: 2px solid;
+    border-radius: 10px;
+    border-color: white;
+    font-size: 20px;
+}
+
+.specialButton {
+    background-color: transparent;
+    color: #81dbdb;
+    border: 2px solid;
+    border-radius: 10px;
+    border-color: #81dbdb;
+    font-size: 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 8px;
+}
+
+.row img {
+    margin: 8px;
+    width: 200px;
+    height: 200px;
+    vertical-align: middle;
+}
+
+.whiteText {
+    color: #ffffff; font-family: 'Raleway',sans-serif; 
+    font-size: 32px; 
+}
+
+
+
+
+.button-30 {
+  align-items: center;
+  appearance: none;
+  background-color: #FCFCFD;
+  border-radius: 4px;
+  border-width: 0;
+  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #36395A;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "JetBrains Mono",monospace;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+}
+
+.button-30:focus {
+  box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+}
+
+.button-30:hover {
+  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.button-30:active {
+  box-shadow: #D6D6E7 0 3px 7px inset;
+  transform: translateY(2px);
+}
+
+
+
+
+
+.button-29 {
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "JetBrains Mono",monospace;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+}
+
+.button-29:focus {
+  box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+.button-29:hover {
+  box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.button-29:active {
+  box-shadow: #3c4fe0 0 3px 7px inset;
+  transform: translateY(2px);
+}
+
+
+
+
+
+
+* {
+    font-family: Helvetica;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+
+.container {
+    width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 2em 2em 2em;
+    grid-auto-rows: 3em;
+    grid-gap: 20px;
+}
+
+.unityContainer {
+  position: relative;
+  /* The container determains the size. */
+  width: 800px;
+  height: 600px;
+}
+.unityContainer > .loading-overlay {
+  /* We'll render the overlay on top of the Unity Application. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: grey;
+  /* We'll set the following Flex properties in order to center the text. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.unityContainer > .unity {
+  /* The Unity Application matches it size to the container. */
+  width: 100%;
+  height: 100%;
+}

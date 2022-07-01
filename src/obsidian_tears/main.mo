@@ -30,8 +30,15 @@ actor class ObsidianTearsRpg() = this {
     type CommonError = ExtCore.CommonError;
     type SessionData = {
         createdAt : Time.Time;
-        goldEarned : Nat16;
+        goldEarned : Nat32;
+        xpEarned : Nat32;
         itemsEarned : Nat8;
+    };
+    type PlayerData = {
+        xp : Nat32;
+        level : Nat16;
+        kills : Nat16;
+        deaths : Nat16;
     };
     public type TxReceipt = {
         #Ok: Nat;
@@ -55,7 +62,8 @@ actor class ObsidianTearsRpg() = this {
     private stable var SESSION_LIFE : Time.Time = 24*60*60*1_000_000_000; // remove sessions after 24 hr (clear gain limits)
     private stable var SESSION_CHECK : Time.Time = 60*60*1_000_000_000; // check sessions every 1 hr
     private stable var REGISTRY_CHECK : Time.Time = 10*60*1_000_000_000; // check sessions every 1 hr
-    private stable var MAX_GOLD : Nat16 = 10_000; // max amount of gold earned in 1 session
+    private stable var MAX_GOLD : Nat32 = 5_000; // max amount of gold earned in 1 session
+    private stable var MAX_XP : Nat32 = 5_000; // max amount of gold earned in 1 session
     private stable var MAX_ITEMS : Nat8 = 10; // max amount of gold earned in 1 session
     private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
     private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
@@ -76,12 +84,14 @@ actor class ObsidianTearsRpg() = this {
     private stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
     private stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
     private stable var _equippedItemState : [(TokenIndex, [TokenIndex])] = [];
-    private stable var _goldState : [(AccountIdentifier, Nat16)] = [];
+    private stable var _playerDataState : [(TokenIndex, PlayerData)] = [];
+    private stable var _goldState : [(AccountIdentifier, Nat32)] = [];
     // local
     private var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _sessions : HashMap.HashMap<TokenIndex, SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _equippedItems : HashMap.HashMap<TokenIndex, [TokenIndex]> = HashMap.fromIter(_equippedItemState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _gold : HashMap.HashMap<AccountIdentifier, Nat16> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+    private var _playerData : HashMap.HashMap<TokenIndex, PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
     // TODO map all items to item metadata for minting
     // TODO map all monsters to experience, level, gold, etc
     // TODO map all chests to (json id, opened, item) for loading and deciding what to mint when opening
@@ -102,6 +112,7 @@ actor class ObsidianTearsRpg() = this {
         _characterRegistryState := Iter.toArray(_characterRegistry.entries());
         _itemRegistryState := Iter.toArray(_itemRegistry.entries());
         _equippedItemState := Iter.toArray(_equippedItems.entries());
+        _playerDataState := Iter.toArray(_playerData.entries());
         _goldState := Iter.toArray(_gold.entries());
     };
 
@@ -111,6 +122,7 @@ actor class ObsidianTearsRpg() = this {
         _characterRegistryState := [];
         _itemRegistryState := [];
         _equippedItemState := [];
+        _playerDataState := [];
         _goldState := [];
     };
 
@@ -192,6 +204,7 @@ actor class ObsidianTearsRpg() = this {
             };
             case(_) {};
         };
+        // TODO update session
         // TODO select an item to open
         let item : [Nat8] = [];
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
@@ -206,6 +219,8 @@ actor class ObsidianTearsRpg() = this {
             case(_) {};
         };
         // TODO check that the item exists in a valid shop inventory
+        // TODO check that player has enough gold
+        // TODO update player session (counts as receiving an item)
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
         return await mintItem(itemData, address);
     };
@@ -227,6 +242,23 @@ actor class ObsidianTearsRpg() = this {
         // equip items
         _equippedItems.put(characterIndex, itemIndices);
         #Ok;
+    };
+
+    public shared({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : TokenIndex) : async(X.ApiResponse<()>) {
+        switch(checkSession(caller, characterIndex)) {
+            case(#err e) {
+               return #Err e;
+            };
+            case(_) {};
+        };
+        switch(_playerData.get(characterIndex)) {
+            case(?playerData) {
+            };
+            case(_) {
+
+            };
+        };
+        #Ok()
     };
 
     public shared(msg) func checkIn() : async() {};
@@ -252,6 +284,10 @@ actor class ObsidianTearsRpg() = this {
     // -----------------------------------
     // helper functions
     // -----------------------------------
+    // update session when you earn gold, xp, or items
+    func updateSession(characterIndex : TokenIndex, xp : Nat32, gold : Nat32, items : Nat8) : X.ApiResponse<()> {
+        #Ok();
+    };
     // load game data formatted in json so that unity can load correctly
     func loadGame(characterIndex : TokenIndex) : Text {
         // TODO load json directly
@@ -289,7 +325,7 @@ actor class ObsidianTearsRpg() = this {
         switch(_sessions.get(tokenIndex)) {
             // if their session has been reset, replace it
             case(?session) {
-                if (session.goldEarned >= MAX_GOLD or session.itemsEarned >= MAX_ITEMS){
+                if (session.goldEarned >= MAX_GOLD or session.itemsEarned >= MAX_ITEMS or session.xpEarned >= MAX_XP){
                     return #err(#Limit);
                 } else {
                     return #ok session;
@@ -299,6 +335,7 @@ actor class ObsidianTearsRpg() = this {
                 let newSession : SessionData = {
                     createdAt = Time.now(); 
                     goldEarned = 0; 
+                    xpEarned = 0; 
                     itemsEarned = 0; 
                 };
                 _sessions.put(tokenIndex, newSession);

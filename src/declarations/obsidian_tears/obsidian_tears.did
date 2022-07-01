@@ -1,0 +1,91 @@
+type TokenIndex = nat32;
+type Result = 
+ variant {
+   err: ApiError;
+   ok;
+ };
+type ObsidianTearsRpg = 
+ service {
+   acceptCycles: () -> () oneway;
+   adminKillHeartbeat: () -> ();
+   adminStartHeartbeat: () -> ();
+   balance: () -> (nat) query;
+   buyItem: (TokenIndex, vec nat8) -> (ApiResponse_2);
+   checkIn: () -> ();
+   defeatMonster: (TokenIndex, TokenIndex) -> (ApiResponse_1);
+   equipItems: (TokenIndex, vec TokenIndex) -> (ApiResponse_1);
+   getEquippedItems: (TokenIndex) -> (vec TokenIndex);
+   http_request: (HttpRequest) -> (HttpResponse) query;
+   isHeartbeatRunning: () -> (bool) query;
+   login: (TokenIndex) -> (ApiResponse_3);
+   openChest: (TokenIndex) -> (ApiResponse_2);
+   saveGame: (TokenIndex, text) -> (ApiResponse_1);
+   setMinter: (principal) -> (Result);
+   verify: () -> (ApiResponse);
+ };
+type HttpStreamingStrategy = variant {
+                               Callback:
+                                record {
+                                  callback:
+                                   func (HttpStreamingCallbackToken) ->
+                                    (HttpStreamingCallbackResponse) query;
+                                  token: HttpStreamingCallbackToken;
+                                };};
+type HttpStreamingCallbackToken = 
+ record {
+   content_encoding: text;
+   index: nat;
+   key: text;
+   sha256: opt blob;
+ };
+type HttpStreamingCallbackResponse = 
+ record {
+   body: blob;
+   token: opt HttpStreamingCallbackToken;
+ };
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+   streaming_strategy: opt HttpStreamingStrategy;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+type ApiResponse_3 = 
+ variant {
+   Err: ApiError;
+   Ok: text;
+ };
+type ApiResponse_2 = 
+ variant {
+   Err: ApiError;
+   Ok: vec nat8;
+ };
+type ApiResponse_1 = 
+ variant {
+   Err: ApiError;
+   Ok;
+ };
+type ApiResponse = 
+ variant {
+   Err: ApiError;
+   Ok: vec TokenIndex;
+ };
+type ApiError = 
+ variant {
+   Limit;
+   Other: text;
+   Unauthorized;
+ };
+service : () -> ObsidianTearsRpg

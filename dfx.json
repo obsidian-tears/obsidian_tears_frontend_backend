@@ -5,6 +5,19 @@
     "obsidian_tears": {
       "type": "motoko",
       "main": "src/obsidian_tears/main.mo"
+    },
+    "obsidian_tears_assets": {
+      "dependencies": [
+        "obsidian_tears"
+      ],
+      "frontend": {
+        "entrypoint": "src/obsidian_tears_assets/src/index.html"
+      },
+      "source": [
+        "src/obsidian_tears_assets/assets",
+        "dist/obsidian_tears_assets/"
+      ],
+      "type": "assets"
     }
   },
   "defaults": {

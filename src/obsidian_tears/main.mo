@@ -129,6 +129,7 @@ actor class ObsidianTearsRpg() = this {
     system func heartbeat() : async () {
         if(_runHeartbeat and Time.now() >= _lastRegistryUpdate + REGISTRY_CHECK) {
             // every ten minutes, pull the latest character and item registry
+            _lastRegistryUpdate := Time.now();
             try {
                 await getCharacterRegistry();
                 await getItemRegistry();
@@ -138,9 +139,9 @@ actor class ObsidianTearsRpg() = this {
         };
         if(_runHeartbeat == true and Time.now() >= _lastCleared + SESSION_CHECK) {
             // every hour check all the sessions and delete old ones
+            _lastCleared := Time.now();
             try{
                 cleanSessions();
-                _lastCleared := Time.now();
             } catch(e){
               _runHeartbeat := false;
             };

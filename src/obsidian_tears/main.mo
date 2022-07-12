@@ -22,6 +22,10 @@ import Time "mo:base/Time";
 import AID "../motoko/util/AccountIdentifier";
 import ExtCore "../motoko/ext/Core";
 import X "./types";
+import Ref "./reference";
+
+
+// TODO: track what item transfers go through and which don't. any failed transfers will be stored 
 
 actor class ObsidianTearsRpg() = this {
     // Types
@@ -71,7 +75,8 @@ actor class ObsidianTearsRpg() = this {
     private stable var _minter : Principal = Principal.fromText("6ulqo-ikasf-xzltp-ylrhu-qt4gt-nv4rz-gd46e-nagoe-3bo7b-kbm3h-bqe");
     private stable var _itemCanister : Text = "goei2-daaaa-aaaao-aaiua-cai"; 
     private stable var _characterCanister : Text = "dhyds-jaaaa-aaaao-aaiia-cai";
-    // private stable var _goldCanister : Text = "gjfoo-oyaaa-aaaao-aaiuq-cai";  TODO: migrate to standard when it comes out
+    // TODO: migrate to separate canister under token standard when it comes out: "castar"
+    // private stable var _goldCanister : Text = "gjfoo-oyaaa-aaaao-aaiuq-cai";  
 
     // Actors
     let _itemActor = actor(_itemCanister) : actor { mintItem : ({ data : [Nat8]; recipient : AccountIdentifier }) -> async (); getRegistry : () -> async [(TokenIndex, AccountIdentifier)]};
@@ -84,22 +89,28 @@ actor class ObsidianTearsRpg() = this {
     private stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
     private stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
     private stable var _equippedItemState : [(TokenIndex, [TokenIndex])] = [];
-    private stable var _playerDataState : [(TokenIndex, PlayerData)] = [];
+    private stable var _ownedItemsState : [(TokenIndex, [TokenIndex])] = [];
+    private stable var _completedPlotEventsState : [(TokenIndex, [Nat16])] = []; // which plot events have characters completed
+    private stable var _openedTreasuresState : [(TokenIndex, [Nat16])] = []; // which treasure chests have characters found
+    private stable var _playerDataState : [(TokenIndex, PlayerData)] = []; 
     private stable var _goldState : [(AccountIdentifier, Nat32)] = [];
-    // local
+    // Dynamic
     private var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _sessions : HashMap.HashMap<TokenIndex, SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _equippedItems : HashMap.HashMap<TokenIndex, [TokenIndex]> = HashMap.fromIter(_equippedItemState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _playerData : HashMap.HashMap<TokenIndex, PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _openedTreasures : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_openedTreasuresState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _completedPlotEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedPlotEventsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
     // TODO map all items to item metadata for minting
     // TODO map all monsters to experience, level, gold, etc
     // TODO map all chests to (json id, opened, item) for loading and deciding what to mint when opening
     // TODO map all markets to items in market
-    // TODO track player position in their session. 
-    // TODO track player story progress [Nat8]
-    // TODO for each treasure chest, market, boss have a list of prerequisite story points that must be toggled
+    // TODO track player position and time updated. keep a map of transition times for moving from one area to another 
+    // TODO create sections in game (based on position) mapped to everything available in the area (and which areas you can transition to)
+    // TODO track player story progress map (with prerequisites)
     // TODO map all story points to their index in story progress, with list of prerequisites and optional map position
+    // TODO for each treasure chest, market, boss have a list of prerequisite story points that must be toggled ^^
     // TODO in game asynchronously call checkins and updates to story progress as needed
     // TODO in game await calls that deliver data in game;
     private var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
@@ -167,68 +178,64 @@ actor class ObsidianTearsRpg() = this {
     };
 
     // login when user selects 
-    public shared({ caller }) func login(characterIndex : TokenIndex) : async(X.ApiResponse<Text>) {
+    public shared({ caller }) func loadGame(characterIndex : TokenIndex) : async(X.ApiResponse<Text>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
-            case(session) {};
+            case(_) {};
         };
-        // TODO check if they have a saved game
-        switch(_saveData.get(characterIndex)) {
-            case(?save) {
-                // TODO return the saved game summary
-                return #Ok save;
-            };
-            case(_) {
-                return #Err(#Other("No save data"));
-            };
-        };
+        // check if they have a saved game
+        return _load(characterIndex);
     };
 
     // save game data formatted in json so that unity can load correctly
-    public shared({ caller }) func saveGame(characterIndex: TokenIndex, gameData : Text) : async(X.ApiResponse<()>) {
+    public shared({ caller }) func saveGame(characterIndex: TokenIndex, gameData : Text) : async(X.ApiResponse<Text>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
             case(_) {};
         };
-        // TODO save location and dialogs
-        #Ok
+        // TODO save boring data (everything but items and player stats)
+        _saveData.put(characterIndex, gameData);
+        return _load(characterIndex);
     };
 
-    public shared({ caller }) func openChest(characterIndex : TokenIndex ) : async(X.ApiResponse<[Nat8]>) {
+    public shared({ caller }) func openChest(characterIndex : TokenIndex) : async(X.ApiResponse<[Nat8]>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
-            case(_) {};
+            case(#Ok session) {
+                ignore(updateSession(characterIndex, session, 0, 0, 0));
+                // TODO select an item to open
+                let item : [Nat8] = [];
+                let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+                return await mintItem(item, address);
+            };
         };
-        // TODO update session
-        // TODO select an item to open
-        let item : [Nat8] = [];
-        let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-        return await mintItem(item, address);
     };
 
     public shared({ caller }) func buyItem(characterIndex: TokenIndex, itemData : [Nat8]) : async(X.ApiResponse<[Nat8]>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
-            case(_) {};
+            case(#Ok session) {
+                // TODO check that the item exists in a valid shop inventory
+                // TODO check that player has enough gold
+                let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+                // update player session (counts as receiving an item)
+                ignore(updateSession(characterIndex, session, 0, 0, 1));
+                return await mintItem(itemData, address);
+            };
         };
-        // TODO check that the item exists in a valid shop inventory
-        // TODO check that player has enough gold
-        // TODO update player session (counts as receiving an item)
-        let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-        return await mintItem(itemData, address);
     };
 
     public shared({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [TokenIndex]) : async(X.ApiResponse<()>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
             case(_) {};
@@ -247,23 +254,29 @@ actor class ObsidianTearsRpg() = this {
 
     public shared({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : TokenIndex) : async(X.ApiResponse<()>) {
         switch(checkSession(caller, characterIndex)) {
-            case(#err e) {
+            case(#Err e) {
                return #Err e;
             };
-            case(_) {};
-        };
-        switch(_playerData.get(characterIndex)) {
-            case(?playerData) {
+            case(#Ok session) {
+                ignore(updateSession(characterIndex, session, 0, 0, 0));
+                // TODO add monster rewards to character
+                switch(_playerData.get(characterIndex)) {
+                    case(?playerData) {
+                    };
+                    case(_) {
+                    
+                    };
+                };
+                #Ok()
             };
-            case(_) {
-
-            };
         };
-        #Ok()
     };
 
     public shared(msg) func checkIn() : async() {};
 
+    // -----------------------------------
+    // http
+    // -----------------------------------
     public query func http_request(request : X.HttpRequest) : async X.HttpResponse {
         return {
           status_code = 200;
@@ -286,14 +299,27 @@ actor class ObsidianTearsRpg() = this {
     // helper functions
     // -----------------------------------
     // update session when you earn gold, xp, or items
-    func updateSession(characterIndex : TokenIndex, xp : Nat32, gold : Nat32, items : Nat8) : X.ApiResponse<()> {
+    func updateSession(characterIndex: TokenIndex, session : SessionData, xp : Nat32, gold : Nat32, items : Nat8) : X.ApiResponse<()> {
+        _sessions.put(characterIndex, {
+            createdAt=session.createdAt;
+            goldEarned=session.goldEarned + gold;
+            xpEarned = session.xpEarned + xp;
+            itemsEarned = session.itemsEarned + items;
+        });
         #Ok();
     };
     // load game data formatted in json so that unity can load correctly
-    func loadGame(characterIndex : TokenIndex) : Text {
-        // TODO load json directly
-        // return _saveData.get(msg.caller)
-        return "";
+    func _load(characterIndex : TokenIndex) : X.ApiResponse<Text> {
+        switch(_saveData.get(characterIndex)) {
+            case(?save) {
+                // TODO piece together the inventory and player stats
+                return #Ok save;
+            };
+            case(_) {
+                // TODO return the character stats. that's included in saved data
+                return #Err(#Other("No save data"));
+            };
+        };
     };
 
     // manage session memory
@@ -307,19 +333,17 @@ actor class ObsidianTearsRpg() = this {
     };
 
 
-    func checkSession(caller : Principal, tokenIndex : TokenIndex) : Result.Result<SessionData, X.ApiError> {
+    func checkSession(caller : Principal, tokenIndex : TokenIndex) : X.ApiResponse<SessionData> {
         // convert principal into wallet
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
         // make sure the principal owns this tokenIndex
         switch(_characterRegistry.get(tokenIndex)) {
             case(?owner) {
                 if (owner != address) {
-                    return #err(#Unauthorized);
+                    return #Err(#Unauthorized);
                 };
             };
-            case(_) {
-                return #err(#Unauthorized);
-            };
+            case(_) {};
         };
 
         // make sure player hasn't exceeded limits for the day
@@ -327,9 +351,9 @@ actor class ObsidianTearsRpg() = this {
             // if their session has been reset, replace it
             case(?session) {
                 if (session.goldEarned >= MAX_GOLD or session.itemsEarned >= MAX_ITEMS or session.xpEarned >= MAX_XP){
-                    return #err(#Limit);
+                    return #Err(#Limit);
                 } else {
-                    return #ok session;
+                    return #Ok session;
                 }
             };
             case(_) {
@@ -340,7 +364,7 @@ actor class ObsidianTearsRpg() = this {
                     itemsEarned = 0; 
                 };
                 _sessions.put(tokenIndex, newSession);
-                #ok newSession;
+                #Ok newSession;
             };
         };
     };
@@ -401,7 +425,7 @@ actor class ObsidianTearsRpg() = this {
             return #Ok(metadata);
         } catch(e) {
             return #Err(#Other("Unable to communicate with item canister"));
-        }
+        };
     };
 
     func getItemRegistry() : async () {

@@ -23,6 +23,7 @@ actor {
   stable var _characterCanister : Text;
   stable var _characterRegistryState :
     [(TokenIndex__1, AccountIdentifier__2)];
+  stable var _completedPlotEventsState : [(TokenIndex__1, [Nat16])];
   stable var _equippedItemState : [(TokenIndex__1, [TokenIndex__1])];
   stable var _goldState : [(AccountIdentifier__2, Nat32)];
   stable var _itemCanister : Text;
@@ -30,6 +31,8 @@ actor {
   stable var _lastCleared : Int;
   stable var _lastRegistryUpdate : Int;
   stable var _minter : Principal;
+  stable var _openedTreasuresState : [(TokenIndex__1, [Nat16])];
+  stable var _ownedItemsState : [(TokenIndex__1, [TokenIndex__1])];
   stable var _playerDataState : [(TokenIndex__1, PlayerData)];
   stable var _runHeartbeat : Bool;
   stable var _saveDataState : [(TokenIndex__1, Text)];

@@ -6,6 +6,8 @@ const Game = (props) => {
   const loadingPercentage = Math.round(props.loadingProgression * 100);
 
   return (
+    <div id="body">
+      <div className="centerMe">
       <div className="unityContainer">
         {props.isLoaded === false && (
           // We'll conditionally render the loading overlay if the Unity
@@ -16,6 +18,8 @@ const Game = (props) => {
         )}
         <Unity className="unity" unityProvider={props.unityProvider} />
       </div>
+      </div>
+    </div>
   );
 };
 

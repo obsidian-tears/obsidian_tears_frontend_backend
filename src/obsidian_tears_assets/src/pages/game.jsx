@@ -1,39 +1,117 @@
 import * as React from 'react'
+import { useUnityContext } from 'react-unity-webgl'
 import { Unity } from 'react-unity-webgl'
 import '../../assets/main.css'
 
 const Game = (props) => {
-  const loadingPercentage = Math.round(props.loadingProgression * 100)
+  const [loadingPercentage, setLoadingPercentage] = React.useState(0);
+
+  const {
+    unityProvider,
+    isLoaded,
+    loadingProgression,
+    addEventListener,
+    removeEventListener,
+    sendMessage,
+  } = useUnityContext({
+    loaderUrl: 'unity/Build/Desktop.loader.js',
+    dataUrl: 'unity/Build/Desktop.data',
+    frameworkUrl: 'unity/Build/Desktop.framework.js',
+    codeUrl: 'unity/Build/Desktop.wasm',
+  })
+
+  React.useEffect(() => {
+    if (isLoaded) {
+      // register unity functions
+      addEventListener('SaveGame', async function (gameData, objectName) {
+        let result = await props.gameActorRef.current.saveGame(
+          props.selectedNftIndexRef.current,
+          gameData,
+        )
+        if (result['Ok']) {
+          window.result = result['Ok']
+          sendMessage(objectName, 'ListenSaveGame', result['Ok'])
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          console.log('Error in SaveGame')
+        }
+      })
+      addEventListener('LoadGame', async function (objectName) {
+        let result = await props.gameActorRef.current.loadGame(
+          props.selectedNftIndexRef.current,
+        )
+        if (result['Ok']) {
+          sendMessage(objectName, 'ListenLoadGame', result['Ok'])
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          console.log('Error in LoadGame')
+        }
+      })
+      addEventListener('BuyItem', async function (metadata, objectName) {
+        let result = await props.gameActorRef.current.buyItem(
+          props.selectedNftIndexRef.current,
+          metadata,
+        )
+        //todo: check result, take action on error
+        sendMessage(objectName, 'Bought', result)
+      })
+      addEventListener('OpenChest', async function (chestId, objectName) {
+        let result = await props.gameActorRef.current.openChest(
+          props.selectedNftIndexRef.current,
+          chestId,
+        )
+        //todo: check result, take action on error, put the item in the game on success
+        sendMessage(objectName, 'LoadTreasure', result)
+      })
+      addEventListener('EquipItems', async function (itemIndices, objectName) {
+        let result = await props.gameActorRef.current.equipItems(
+          props.selectedNftIndexRef.current,
+          itemIndices,
+        )
+        //todo: check result, take action on error
+        sendMessage(objectName, 'Equipped', result)
+      })
+      addEventListener('DefeatMonster', async function (monsterId, objectName) {
+        let result = await props.gameActorRef.current.defeatMonster(
+          props.selectedNftIndexRef.current,
+          monsterId,
+        )
+        sendMessage(objectName, 'DefeatMonster', result)
+      })
+    }
+  }, [isLoaded])
+
+  React.useEffect(() => {
+    setLoadingPercentage(Math.round(loadingProgression * 100))
+  }, [loadingProgression])
 
   const test = () => {
-    props.sendMessage('ReactController', 'ListenSaveGame', '{test: 1}')
+    sendMessage('ReactController', 'ListenSaveGame', '{test: 1}')
   }
 
   return (
-
     <>
-
-    <div id="body">
-      <div className="centerMe">
-
-      <div className="unityContainer">
-        {props.isLoaded === false && (
-          // We'll conditionally render the loading overlay if the Unity
-          // Application is not loaded.
-          <div className="loading-overlay">
-            <p>Loading... ({loadingPercentage}%)</p>
+      <div id="body">
+        <div className="centerMe">
+          <div className="unityContainer">
+            {isLoaded === false && (
+              // We'll conditionally render the loading overlay if the Unity
+              // Application is not loaded.
+              <div className="loading-overlay">
+                <p>Loading... ({loadingPercentage}%)</p>
+              </div>
+            )}
+            <Unity className="unity" unityProvider={unityProvider} />
           </div>
-        )}
-        <Unity className="unity" unityProvider={props.unityProvider} />
+        </div>
       </div>
-      </div>
-    </div>
-          <div>
+      <div>
         <button onClick={test}>Spawn Enemies</button>
       </div>
-      </>
-  );
-};
-
+    </>
+  )
+}
 
 export default Game

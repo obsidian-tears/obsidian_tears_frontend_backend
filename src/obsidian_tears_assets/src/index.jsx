@@ -7,7 +7,6 @@ import Game from './pages/game'
 
 import '../assets/main.css'
 
-import { useUnityContext } from 'react-unity-webgl'
 import { idlFactory } from '../../declarations/obsidian_tears'
 import { itemIdlFactory, characterIdlFactory } from './types'
 import principalToAccountIdentifier from './utils'
@@ -190,19 +189,6 @@ const ObsidianTears = () => {
     return connected
   }
 
-  const {
-    unityProvider,
-    isLoaded,
-    loadingProgression,
-    addEventListener,
-    removeEventListener,
-    sendMessage,
-  } = useUnityContext({
-    loaderUrl: 'unity/Build/Desktop.loader.js',
-    dataUrl: 'unity/Build/Desktop.data',
-    frameworkUrl: 'unity/Build/Desktop.framework.js',
-    codeUrl: 'unity/Build/Desktop.wasm',
-  })
 
   const logout = () => {
     window.ic.plug.disconnect()
@@ -218,58 +204,6 @@ const ObsidianTears = () => {
     }
   }, [gameActor, itemActor, charActor])
 
-  React.useEffect(async () => {
-    // register unity functions
-    addEventListener('SaveGame', async function (gameData, objectName) {
-      console.log(`gameData: ${gameData}`)
-      let result = await gameActorRef.current.saveGame(
-        selectedNftIndexRef.current,
-        gameData,
-      )
-      console.log('awaited with result: ' + result)
-      //todo: check result, take action on error
-      sendMessage(objectName, 'ListenSaveGame', result)
-      console.log('sent game message')
-    })
-    addEventListener('LoadGame', async function (objectName) {
-      let result = await gameActorRef.current.loadGame(
-        selectedNftIndexRef.current,
-      )
-      //todo: check result, take action on error
-      _sendMessage(objectName, 'ListenLoadGame', result)
-    })
-    addEventListener('BuyItem', async function (metadata, objectName) {
-      let result = await gameActorRef.current.buyItem(
-        selectedNftIndexRef.current,
-        metadata,
-      )
-      //todo: check result, take action on error
-      sendMessage(objectName, 'Bought', result)
-    })
-    addEventListener('OpenChest', async function (chestId, objectName) {
-      let result = await gameActorRef.current.openChest(
-        selectedNftIndexRef.current,
-        chestId,
-      )
-      //todo: check result, take action on error, put the item in the game on success
-      sendMessage(objectName, 'LoadTreasure', result)
-    })
-    addEventListener('EquipItems', async function (itemIndices, objectName) {
-      let result = await gameActorRef.current.equipItems(
-        selectedNftIndexRef.current,
-        itemIndices,
-      )
-      //todo: check result, take action on error
-      sendMessage(objectName, 'Equipped', result)
-    })
-    addEventListener('DefeatMonster', async function (monsterId, objectName) {
-      let result = await gameActorRef.current.defeatMonster(
-        selectedNftIndexRef.current,
-        monsterId,
-      )
-      sendMessage(objectName, 'Victory', result)
-    })
-  }, [unityProvider, sendMessage])
 
   return (
     <>
@@ -334,12 +268,8 @@ const ObsidianTears = () => {
         />
       ) : route == 'game' ? (
         <Game
-          unityProvider={unityProvider}
-          isLoaded={isLoaded}
-          loadingProgression={loadingProgression}
-          sendMessage={sendMessage}
-          setSendMessageRef={setSendMessageRef}
-          addEventListener={addEventListener}
+          gameActorRef={gameActorRef}
+          selectedNftIndexRef={selectedNftIndexRef}
         />
       ) : (
         <></>

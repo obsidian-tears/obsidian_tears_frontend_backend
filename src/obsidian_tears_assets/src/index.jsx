@@ -1,3 +1,4 @@
+
 import * as React from 'react'
 import { render } from 'react-dom'
 
@@ -272,42 +273,44 @@ const ObsidianTears = () => {
 
   return (
     <>
+    
       <div id="header">
-        <div>
+        <div className="leftHeader">
           <img
             alt="logo"
             src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/icpbadge100d.png"
             height="50"
           ></img>
         </div>
-        <div style={{ flex: 1 }}></div>
-
-        <div>
           <div className="rightHeader">
-            <button className="button-30" onClick={() => setRoute('home')}>
-              Home
-            </button>
-            {loggedIn ? (
-              <div className="rightHeader">
-                {expandHeader ? (
-                  <button className="button-30" onClick={() => logout()}>
+
+              <button className="buttonWood" onClick={() => setRoute('home')}>
+                Home
+              </button>
+
+              <button
+                  className="buttonWood"
+                  onClick={() => window.open('https://entrepot.app/marketplace/obsidian-tears')}>
+                  Shop NFTs
+              </button>
+
+              {loggedIn ? (
+                <div className="rightHeader2">
+
+                  <button className="buttonWood">
+                    {principal.slice(0, 5)}
+                  </button>   
+
+                  <button className="buttonWood" onClick={() => logout()}>
                     Logout
                   </button>
-                ) : (
-                  <></>
-                )}
-                <button
-                  className="button-30"
-                  onClick={() => setExpandHeader(!expandHeader)}
-                >
-                  {principal.slice(0, 5)}
-                </button>
+
+
               </div>
             ) : (
               <></>
             )}
           </div>
-        </div>
       </div>
       {route == 'home' ? (
         <Home

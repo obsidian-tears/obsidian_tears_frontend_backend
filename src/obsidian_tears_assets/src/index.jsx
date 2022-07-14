@@ -29,26 +29,26 @@ const ObsidianTears = () => {
   const [itemActor, _setItemActor] = React.useState(null)
   const [stoicHttpAgent, setStoicHttpAgent] = React.useState(null)
   const [selectedNftIndex, _setSelectedNftIndex] = React.useState(null)
-  const gameActorRef = React.useRef(gameActor);
-  const itemActorRef = React.useRef(itemActor);
-  const charActorRef = React.useRef(charActor);
-  const selectedNftIndexRef = React.useRef(selectedNftIndex);
-  const setSelectedNftIndex = data => {
-    selectedNftIndexRef.current = data;
-    _setSelectedNftIndex(data);
-  };
-  const setItemActor = data => {
-    itemActorRef.current = data;
-    _setItemActor(data);
-  };
-  const setGameActor = data => {
-    gameActorRef.current = data;
-    _setGameActor(data);
-  };
-  const setCharActor = data => {
-    charActorRef.current = data;
-    _setCharActor(data);
-  };
+  const gameActorRef = React.useRef(gameActor)
+  const itemActorRef = React.useRef(itemActor)
+  const charActorRef = React.useRef(charActor)
+  const selectedNftIndexRef = React.useRef(selectedNftIndex)
+  const setSelectedNftIndex = (data) => {
+    selectedNftIndexRef.current = data
+    _setSelectedNftIndex(data)
+  }
+  const setItemActor = (data) => {
+    itemActorRef.current = data
+    _setItemActor(data)
+  }
+  const setGameActor = (data) => {
+    gameActorRef.current = data
+    _setGameActor(data)
+  }
+  const setCharActor = (data) => {
+    charActorRef.current = data
+    _setCharActor(data)
+  }
 
   const gameCanister = 'gagfs-yqaaa-aaaao-aaiva-cai'
   const itemCanister = 'goei2-daaaa-aaaao-aaiua-cai'
@@ -209,10 +209,6 @@ const ObsidianTears = () => {
     setLoggedIn(false)
   }
 
-  const sendTheMessage = (gameObject, funcName, arg) =>  {
-    sendMessage(gameObject, funcName, arg)
-  }
-
   React.useEffect(async () => {
     // connect
     console.log(gameActor, itemActor, charActor)
@@ -223,42 +219,56 @@ const ObsidianTears = () => {
 
   React.useEffect(async () => {
     // register unity functions
-    addEventListener('GameOver', async function () {
-      // setRoute('home')
-    })
-    // addEventListener('SaveGame', async function (gameData, objectName) {
-    //   console.log(`gameData: ${gameData}`)
-    //   let result = await gameActorRef.current.saveGame(selectedNftIndexRef.current, gameData)
-    //   console.log('awaited with result: ' + result)
-    //   //todo: check result, take action on error
-    //   sendTheMessage(objectName, 'ListenSaveGame', result)
-    //   console.log('sent game message')
-    // })
-    addEventListener('LoadGame', async function (objectName) {
-      let result = await gameActorRef.current.loadGame(selectedNftIndexRef.current)
+    addEventListener('SaveGame', async function (gameData, objectName) {
+      console.log(`gameData: ${gameData}`)
+      let result = await gameActorRef.current.saveGame(
+        selectedNftIndexRef.current,
+        gameData,
+      )
+      console.log('awaited with result: ' + result)
       //todo: check result, take action on error
-      sendTheMessage(objectName, 'ListenLoadGame', result)
+      sendMessage(objectName, 'ListenSaveGame', result)
+      console.log('sent game message')
+    })
+    addEventListener('LoadGame', async function (objectName) {
+      let result = await gameActorRef.current.loadGame(
+        selectedNftIndexRef.current,
+      )
+      //todo: check result, take action on error
+      _sendMessage(objectName, 'ListenLoadGame', result)
     })
     addEventListener('BuyItem', async function (metadata, objectName) {
-      let result = await gameActorRef.current.buyItem(selectedNftIndexRef.current, metadata)
+      let result = await gameActorRef.current.buyItem(
+        selectedNftIndexRef.current,
+        metadata,
+      )
       //todo: check result, take action on error
-      sendTheMessage(objectName, 'Bought', result)
+      sendMessage(objectName, 'Bought', result)
     })
     addEventListener('OpenChest', async function (chestId, objectName) {
-      let result = await gameActorRef.current.openChest(selectedNftIndexRef.current, chestId)
+      let result = await gameActorRef.current.openChest(
+        selectedNftIndexRef.current,
+        chestId,
+      )
       //todo: check result, take action on error, put the item in the game on success
-      sendTheMessage(objectName, 'LoadTreasure', result)
+      sendMessage(objectName, 'LoadTreasure', result)
     })
     addEventListener('EquipItems', async function (itemIndices, objectName) {
-      let result = await gameActorRef.current.equipItems(selectedNftIndexRef.current, itemIndices)
+      let result = await gameActorRef.current.equipItems(
+        selectedNftIndexRef.current,
+        itemIndices,
+      )
       //todo: check result, take action on error
-      sendTheMessage(objectName, 'Equipped', result)
+      sendMessage(objectName, 'Equipped', result)
     })
     addEventListener('DefeatMonster', async function (monsterId, objectName) {
-      let result = await gameActorRef.current.defeatMonster(selectedNftIndexRef.current, monsterId)
-      sendTheMessage(objectName, 'Victory', result)
+      let result = await gameActorRef.current.defeatMonster(
+        selectedNftIndexRef.current,
+        monsterId,
+      )
+      sendMessage(objectName, 'Victory', result)
     })
-  }, [])
+  }, [unityProvider, sendMessage])
 
   return (
     <>
@@ -325,7 +335,8 @@ const ObsidianTears = () => {
           isLoaded={isLoaded}
           loadingProgression={loadingProgression}
           sendMessage={sendMessage}
-    addEventListener={addEventListener}
+          setSendMessageRef={setSendMessageRef}
+          addEventListener={addEventListener}
         />
       ) : (
         <></>

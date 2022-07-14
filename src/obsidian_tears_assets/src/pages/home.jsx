@@ -5,20 +5,16 @@ import '../../assets/main.css'
 const Home = (props) => {
   return (
     <div id="body">
-      <h2 className="title">Obsidian Tears</h2>
+        <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/BigLogo2.png"></img>
 
       {props.loggedIn ? (
         !props.loading ? (
           <>
-            <button
-              className="button-30"
-              onClick={() =>
-                window.open('https://entrepot.app/marketplace/obsidian-tears')
-              }
-            >
-              Buy NFT for Game
-            </button>
-            <br></br>
+              <div className="centerMe">
+              <h2 className="title2">Select a Character to Start the Game</h2>
+              <br></br>
+              </div>
+
 
             <div className="container">
               {props.myNfts.map((nft, i) => (
@@ -30,11 +26,11 @@ const Home = (props) => {
                     <img
                       alt="nft"
                       src={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.ic0.app/?index=${nft[0]}`}
-                      height="100%"
+                      height="230px;"
                     ></img>
                   </a>
-                  <button className="button-30" onClick={() => props.selectNft(nft[0])}>
-                    select character
+                  <button className="buttonWoodGrid" onClick={() => props.selectNft(nft[0])}>
+                    Select
                   </button>
                 </div>
               ))}
@@ -45,6 +41,8 @@ const Home = (props) => {
         )
       ) : (
         <>
+        <div className="space50"></div>
+        <div className="centerMe">
           <PlugConnect
             whitelist={props.whitelist}
             onConnectCallback={async () => {
@@ -57,16 +55,26 @@ const Home = (props) => {
             }}
           />
           <br></br>
-          <button
-            className={'button-30'}
-            onClick={async () => {
-              await props.connectToStoic()
-            }}
-          >
-            Connect to Stoic
-          </button>
+          </div>
+          <div className="centerMe">
+            <button
+              className={'buttonWoodGridXL'}
+              onClick={async () => {
+                await props.connectToStoic()
+              }}
+            >
+              Connect to Stoic
+            </button>
+          </div>
+          <br></br>
+          <div className="space50"></div>
+          <div className="centerMe">
+              <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/menu-fighter1a.png" alt='fighter1' height="200px"></img>
+          </div>
         </>
       )}
+
+
     </div>
   )
 }

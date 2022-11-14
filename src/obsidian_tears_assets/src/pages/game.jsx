@@ -24,9 +24,16 @@ const Game = (props) => {
     if (isLoaded) {
       // register unity functions
       addEventListener('SaveGame', async function (gameData, objectName) {
+        window.saveData = gameData;
+        // sort through the data
+        var gameDataParsed = JSON.parse(gameData);
+        gameDataParsed['m_list'].find((val, index) => val["key"] == "player_inv_curr")['data'] = "playerInvCurrData"
+        gameDataParsed['m_list'].find((val, index) => val["key"] == "charStats_SaverCharStatsSaver")['data'] = "charStatsData"
+        var preppedData = JSON.stringify(gameDataParsed)
+        // call the actor function
         let result = await props.gameActorRef.current.saveGame(
           props.selectedNftIndexRef.current,
-          gameData,
+          preppedData,
         )
         if (result['Ok']) {
           window.result = result['Ok']
@@ -42,10 +49,12 @@ const Game = (props) => {
           props.selectedNftIndexRef.current,
         )
         if (result['Ok']) {
+          window.loadData = result['Ok'];
           sendMessage(objectName, 'ListenLoadGame', result['Ok'])
         }
         if (result['Err']) {
           // TODO send message to display unity error
+          window.loadData = result['Err'];
           console.log('Error in LoadGame')
         }
       })

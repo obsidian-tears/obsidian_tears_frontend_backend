@@ -11,6 +11,7 @@ import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
+import Nat16 "mo:base/Nat16";
 import Nat8 "mo:base/Nat8";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
@@ -326,7 +327,7 @@ actor class ObsidianTearsRpg() = this {
         // make sure that caller owns all items;
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
         // get player owned game items 
-        let gameItems = getOwnedItems(characterIndex, address);
+        let gameItems = getOwnedItems(address);
         // get player equipped game items
         let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
         switch(optEquippedItems) {
@@ -339,19 +340,19 @@ actor class ObsidianTearsRpg() = this {
                     switch(optItem) {
                         case (?itemToEquip) {
                             // make sure item isn't already equipped
-                            let equippedMatchingItems : [Ref.Item] = Array.filter(equippedItems, func (eItem : Ref.Item) : Bool {
-                                eItem.id == itemToEquip.id;
+                            let equippedMatchingItems : [Nat16] = Array.filter(equippedItems, func (eItem : Nat16) : Bool {
+                                eItem == itemToEquip.id;
                             });
                             if (equippedMatchingItems.size() > 0) {
                                 return #Err(#Other("Cannot equip more than one of the same item"));
-                            }
+                            };
                             // make sure they own unequipped item
                             let unequippedMatchingItem : [Ref.Item] = Array.filter(gameItems, func (item : Ref.Item) : Bool {
                                 item.metadata == item.metadata;
                             });
                             if (unequippedMatchingItem.size() == 0) {
                                 return #Err(#Other("Cannot equip item not owned by user"));
-                            }
+                            };
                         };
                         case _ return #Err(#Other("Server Error: Item Definition Missing"));
                     };
@@ -433,6 +434,20 @@ actor class ObsidianTearsRpg() = this {
     // -----------------------------------
     // helper functions
     // -----------------------------------
+    // compare metadata and a [Nat8]
+    func compareMetadata(arrData : [Nat8], metadata: Metadata) : Bool {
+        switch(metadata) {
+            case (#nonfungible r)  {
+                switch(r.metadata) {
+                    case (?data) {
+                        data == Blob.fromArray(arrData);
+                    };
+                    case _ false;
+                };
+            };
+            case _ false;
+        };
+    };
     // update session when you earn gold, xp, or items
     func updateSession(characterIndex: TokenIndex, session : SessionData, xp : Nat32, gold : Nat32, items : Nat8) : X.ApiResponse<()> {
         _sessions.put(characterIndex, {
@@ -443,28 +458,31 @@ actor class ObsidianTearsRpg() = this {
         });
         #Ok();
     };
-    func getOwnedItems(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : [Ref.Item] {
+    func getOwnedItems(accountIdentifier : AccountIdentifier) : [Ref.Item] {
         // filter all item nfts owned by character
-        let ownedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, AccountIdentifier>(
-            _itemRegistry.entries(), 
+        let ownedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
+            _itemRegistry,
             ExtCore.TokenIndex.equal, 
             ExtCore.TokenIndex.hash, 
-            func (index : TokenIndex, account : AccountIdentifier) : ?AccountIdentifier {
+            func (index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
                 if (account == accountIdentifier) {
-                    return index;
+                    return ?index;
                 };
+                null;
             }).keys());
         // make sure metadata that identifies what the item is (see item nft canister) 
         let ownedItemsMeta : [Metadata] = Array.map<TokenIndex, Metadata>(ownedItems, func (tokenIndex : TokenIndex) : Metadata {
             let optMetadata : ?Metadata =  _itemMetadata.get(tokenIndex);
-            switch(opMetadata) {
+            switch(optMetadata) {
                 case (?metadata) metadata;
-                case _ [];
+                case _ #nonfungible({metadata=?Blob.fromArray([])});
             };
         });
         // matches corresponding metadata in item list
         let gameItems : [Ref.Item] = Array.mapFilter<Metadata, Ref.Item>(ownedItemsMeta, func (metadata : Metadata) : ?Ref.Item {
-            Array.find(Ref.items, func (i : Ref.Item) : ?Ref.Item {i.metadata == metadata;});
+            Array.find(Ref.items, func (i : Ref.Item) : Bool {
+                compareMetadata(i.metadata, metadata);
+            });
         });
         gameItems;
     };
@@ -481,12 +499,12 @@ actor class ObsidianTearsRpg() = this {
                 let optCurrency : ?Nat32 = _gold.get(accountIdentifier);
                 switch(optCurrency) {
                     case(?currency) {
-                        goldString #= currency;
+                        goldString #= Nat32.toText(currency);
                     };
-                    case _ goldString #= 0;
+                    case _ goldString #= Nat8.toText(0);
                 };
                 // get the unityId for owned items
-                let ownedItems : [Text] = getOwnedItems(characterIndex, acc);
+                let ownedItems : [Ref.Item] = getOwnedItems(accountIdentifier);
                 switch(_equippedItems.get(characterIndex)) {
                     case (?items) {
                         // add all equipped items to equipped items string. everything else to items string
@@ -511,10 +529,14 @@ actor class ObsidianTearsRpg() = this {
                         equippedItemsString #= unityIds;
 
                         // add the rest to items string
-                        let unequippedOwnedItems : [Text] = Array.filter(ownedItems, func (item : Ref.Item) : Bool {
-                            Array.find(equippedItems, func (id : Nat16) : Bool {
+                        let unequippedOwnedItems : [Ref.Item] = Array.filter(ownedItems, func (item : Ref.Item) : Bool {
+                            let returnId : ?Nat16 = Array.find(items, func (id : Nat16) : Bool {
                                 id == item.id;
-                            }) == null;
+                            });
+                            switch(returnId) {
+                                case(?id) false;
+                                case _ true;
+                            }
                         });
                         let unequippedUnityIds : Text = Array.foldLeft(unequippedOwnedItems, "", func (prev : Text, item : Ref.Item) : Text {
                             var returnText = "";
@@ -560,23 +582,23 @@ actor class ObsidianTearsRpg() = this {
                     case(?playerData) {
                         statsString #= "\\\\\"characterName\\\\\":\\\\\"" # playerData.characterName # "\\\\\",";
                         statsString #= "\\\\\"characterClass\\\\\":\\\\\"" # playerData.characterClass # "\\\\\",";
-                        statsString #= "\\\\\"level\\\\\":" # playerData.level # ",";
-                        statsString #= "\\\\\"xp\\\\\":" # playerData.xp # ",";
-                        statsString #= "\\\\\"xpToLevelUp\\\\\":" # playerData.xpToLevelUp # ",";
-                        statsString #= "\\\\\"pointsRemaining\\\\\":" # playerData.pointsRemaining # ",";
-                        statsString #= "\\\\\"healthBase\\\\\":" # playerData.healthBase # ",";
-                        statsString #= "\\\\\"healthTotal\\\\\":" # playerData.healthTotal # ",";
-                        statsString #= "\\\\\"healthMax\\\\\":" # playerData.healthMax # ",";
-                        statsString #= "\\\\\"magicBase\\\\\":" # playerData.magicBase # ",";
-                        statsString #= "\\\\\"magicTotal\\\\\":" # playerData.magicTotal # ",";
-                        statsString #= "\\\\\"magicMax\\\\\":" # playerData.magicMax # ",";
-                        statsString #= "\\\\\"attackBase\\\\\":" # playerData.attackBase # ",";
-                        statsString #= "\\\\\"attackTotal\\\\\":" # playerData.attackTotal # ",";
-                        statsString #= "\\\\\"defenseBase\\\\\":" # playerData.defenseBase # ",";
-                        statsString #= "\\\\\"defenseTotal\\\\\":" # playerData.defenseTotal # ",";
-                        statsString #= "\\\\\"speedBase\\\\\":" # playerData.speedBase # ",";
-                        statsString #= "\\\\\"speedTotal\\\\\":" # playerData.speedTotal # ",";
-                        statsString #= "\\\\\"criticalHitProbability\\\\\":" # playerData.criticalHitProbability # ",";
+                        statsString #= "\\\\\"level\\\\\":" # Nat16.toText(playerData.level) # ",";
+                        statsString #= "\\\\\"xp\\\\\":" # Nat32.toText(playerData.xp) # ",";
+                        statsString #= "\\\\\"xpToLevelUp\\\\\":" # Nat32.toText(playerData.xpToLevelUp) # ",";
+                        statsString #= "\\\\\"pointsRemaining\\\\\":" # Nat32.toText(playerData.pointsRemaining) # ",";
+                        statsString #= "\\\\\"healthBase\\\\\":" # Nat16.toText(playerData.healthBase) # ",";
+                        statsString #= "\\\\\"healthTotal\\\\\":" # Nat16.toText(playerData.healthTotal) # ",";
+                        statsString #= "\\\\\"healthMax\\\\\":" # Nat16.toText(playerData.healthMax) # ",";
+                        statsString #= "\\\\\"magicBase\\\\\":" # Nat16.toText(playerData.magicBase) # ",";
+                        statsString #= "\\\\\"magicTotal\\\\\":" # Nat16.toText(playerData.magicTotal) # ",";
+                        statsString #= "\\\\\"magicMax\\\\\":" # Nat16.toText(playerData.magicMax) # ",";
+                        statsString #= "\\\\\"attackBase\\\\\":" # Nat16.toText(playerData.attackBase) # ",";
+                        statsString #= "\\\\\"attackTotal\\\\\":" # Nat16.toText(playerData.attackTotal) # ",";
+                        statsString #= "\\\\\"defenseBase\\\\\":" # Nat16.toText(playerData.defenseBase) # ",";
+                        statsString #= "\\\\\"defenseTotal\\\\\":" # Nat16.toText(playerData.defenseTotal) # ",";
+                        statsString #= "\\\\\"speedBase\\\\\":" # Nat16.toText(playerData.speedBase) # ",";
+                        statsString #= "\\\\\"speedTotal\\\\\":" # Nat16.toText(playerData.speedTotal) # ",";
+                        statsString #= "\\\\\"criticalHitProbability\\\\\":" # Float.toText(playerData.criticalHitProbability) # ",";
                         statsString #= "\\\\\"characterEffects\\\\\":[]";
                         // TODO: format character effects into json string
                     };
@@ -817,39 +839,54 @@ actor class ObsidianTearsRpg() = this {
         switch(_equippedItems.get(characterIndex)) {
             case(?equippedItems) {
                 // get the item nft token indices for all equipped items
-                let optEquippedItems : ?[Ref.Item] = _equippedItems.get(characterIndex);
+                let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
                 switch(optEquippedItems) {
                     case(?equippedItems) {
-                        let optOwnedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, AccountIdentifier>(
-                            _itemRegistry.entries(), 
+                        let optOwnedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
+                            _itemRegistry,
                             ExtCore.TokenIndex.equal, 
                             ExtCore.TokenIndex.hash, 
-                            func (index : TokenIndex, account : AccountIdentifier) : ?AccountIdentifier {
+                            func (index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
                                 if (account == accountIdentifier) {
-                                    return index;
+                                    return ?index;
                                 };
+                                return null;
                             }).keys());
                         switch(optOwnedItems) {
-                            case(?ownedItems) {
+                            case(ownedItems) {
                                 // make sure metadata that identifies what the item is (see item nft canister) 
                                 let ownedItemsMeta : [{index: TokenIndex; data: Metadata;}] = Array.map<TokenIndex, {index: TokenIndex; data: Metadata;}>(
                                     ownedItems, 
                                     func (tokenIndex : TokenIndex) : {index: TokenIndex; data: Metadata;} {
                                         let optMetadata : ?Metadata =  _itemMetadata.get(tokenIndex);
-                                        switch(opMetadata) {
-                                            case (?metadata) {index = tokenIndex; data = metadata;};
-                                            case _ {index = 0; data = [];};
+                                        switch(optMetadata) {
+                                            case (?metadata) return {index=tokenIndex; data = metadata;};
+                                            case _ return {index = 0; data = #nonfungible({metadata = ?Blob.fromArray([])});};
                                         };
                                     });
-                                let equippedIndices : [TokenIndex] = Array.mapFilter<{index: TokenIndex; data: Metadata}, TokenIndex>(
-                                    ownedItemsMeta,
-                                    func (map : {index: TokenIndex; data: Metadata;}) : ?TokenIndex {
-                                        let optFoundItem : ?Ref.Item = Array.find(equippedItems, func (item : Ref.Item) : Bool {
-                                            item.metadata == map.data;
-                                        };
-                                        switch(optFoundItem) {
-                                            case(?foundItem) map.index;
-                                            case _ {};
+                                let ownedItemObjs : [Ref.Item] = getOwnedItems(accountIdentifier);
+                                let equippedIndices : [TokenIndex] = Array.mapFilter<Nat16, TokenIndex>(
+                                    equippedItems,
+                                    func (id: Nat16) : ?TokenIndex {
+                                        // get the owned item object corresponding to the equipped item id
+                                        let optOwnedItemObj : ?Ref.Item = Array.find(ownedItemObjs, func (item : Ref.Item) : Bool {
+                                            item.id == id;
+                                        });
+                                        switch(optOwnedItemObj) {
+                                            case(?ownedItemObj) {
+                                                // compare ownedItem object to the owned item meta mapping. return tokenindex
+                                                let optFoundItemMeta : ?{index: TokenIndex; data: Metadata;} = Array.find(ownedItemsMeta, func (ownedItemMeta : {index: TokenIndex; data: Metadata;}) : Bool {
+                                                    compareMetadata(ownedItemObj.metadata, ownedItemMeta.data);
+                                                });
+                                                switch(optFoundItemMeta) {
+                                                    case (?foundItemMeta) {
+                                                        // reeturn the tokenidnex
+                                                        ?foundItemMeta.index;
+                                                    };
+                                                    case _ null;
+                                                };
+                                            };
+                                            case _ null;
                                         };
                                     }
                                 );

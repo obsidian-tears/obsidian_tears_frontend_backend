@@ -46,7 +46,7 @@ type HeaderField =
 type ApiResponse_3 = 
  variant {
    Err: ApiError;
-   Ok;
+   Ok: text;
  };
 type ApiResponse_2 = 
  variant {
@@ -56,7 +56,7 @@ type ApiResponse_2 =
 type ApiResponse_1 = 
  variant {
    Err: ApiError;
-   Ok: text;
+   Ok;
  };
 type ApiResponse = 
  variant {
@@ -76,12 +76,12 @@ service : {
   balance: () -> (nat) query;
   buyItem: (TokenIndex, vec nat8) -> (ApiResponse_2);
   checkIn: () -> ();
-  defeatMonster: (TokenIndex, TokenIndex) -> (ApiResponse_3);
-  equipItems: (TokenIndex, vec TokenIndex) -> (ApiResponse_3);
+  defeatMonster: (TokenIndex, TokenIndex) -> (ApiResponse_1);
+  equipItems: (TokenIndex, vec TokenIndex) -> (ApiResponse_1);
   getEquippedItems: (TokenIndex) -> (vec TokenIndex);
   http_request: (HttpRequest) -> (HttpResponse) query;
   isHeartbeatRunning: () -> (bool) query;
-  loadGame: (TokenIndex) -> (ApiResponse_1);
+  login: (TokenIndex) -> (ApiResponse_3);
   openChest: (TokenIndex) -> (ApiResponse_2);
   saveGame: (TokenIndex, text) -> (ApiResponse_1);
   setMinter: (principal) -> (Result);

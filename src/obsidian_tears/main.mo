@@ -892,7 +892,6 @@ actor class ObsidianTearsRpg() = this {
                                 );
                                 equippedIndices;
                             };
-                            case _ [];
                         };
                     };
                     case _ [];

@@ -5,11 +5,18 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Null,
     'Other' : IDL.Text,
   });
-  const ApiResponse_2 = IDL.Variant({
+  const ApiResponse_4 = IDL.Variant({
     'Ok' : IDL.Vec(IDL.Nat8),
     'Err' : ApiError,
   });
+  const RewardInfo = IDL.Record({
+    'xp' : IDL.Nat32,
+    'gold' : IDL.Nat32,
+    'itemIds' : IDL.Vec(IDL.Nat16),
+  });
+  const ApiResponse_2 = IDL.Variant({ 'Ok' : RewardInfo, 'Err' : ApiError });
   const ApiResponse_3 = IDL.Variant({ 'Ok' : IDL.Null, 'Err' : ApiError });
+  const AccountIdentifier = IDL.Text;
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const HttpRequest = IDL.Record({
     'url' : IDL.Text,
@@ -54,19 +61,27 @@ export const idlFactory = ({ IDL }) => {
     'adminKillHeartbeat' : IDL.Func([], [], []),
     'adminStartHeartbeat' : IDL.Func([], [], []),
     'balance' : IDL.Func([], [IDL.Nat], ['query']),
-    'buyItem' : IDL.Func([TokenIndex, IDL.Vec(IDL.Nat8)], [ApiResponse_2], []),
+    'buyItem' : IDL.Func(
+        [TokenIndex, IDL.Nat16, IDL.Nat16],
+        [ApiResponse_4],
+        [],
+      ),
     'checkIn' : IDL.Func([], [], []),
-    'defeatMonster' : IDL.Func([TokenIndex, TokenIndex], [ApiResponse_3], []),
+    'defeatMonster' : IDL.Func([TokenIndex, IDL.Nat16], [ApiResponse_2], []),
     'equipItems' : IDL.Func(
-        [TokenIndex, IDL.Vec(TokenIndex)],
+        [TokenIndex, IDL.Vec(IDL.Nat16)],
         [ApiResponse_3],
         [],
       ),
-    'getEquippedItems' : IDL.Func([TokenIndex], [IDL.Vec(TokenIndex)], []),
+    'getEquippedItems' : IDL.Func(
+        [TokenIndex, AccountIdentifier],
+        [IDL.Vec(TokenIndex)],
+        [],
+      ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'isHeartbeatRunning' : IDL.Func([], [IDL.Bool], ['query']),
     'loadGame' : IDL.Func([TokenIndex], [ApiResponse_1], []),
-    'openChest' : IDL.Func([TokenIndex], [ApiResponse_2], []),
+    'openChest' : IDL.Func([TokenIndex, IDL.Nat16], [ApiResponse_2], []),
     'saveGame' : IDL.Func([TokenIndex, IDL.Text], [ApiResponse_1], []),
     'setMinter' : IDL.Func([IDL.Principal], [Result], []),
     'verify' : IDL.Func([], [ApiResponse], []),

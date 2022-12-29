@@ -4,7 +4,7 @@ import { Unity } from 'react-unity-webgl'
 import '../../assets/main.css'
 
 const Game = (props) => {
-  const [loadingPercentage, setLoadingPercentage] = React.useState(0);
+  const [loadingPercentage, setLoadingPercentage] = React.useState(0)
 
   const {
     unityProvider,
@@ -24,11 +24,15 @@ const Game = (props) => {
     if (isLoaded) {
       // register unity functions
       addEventListener('SaveGame', async function (gameData, objectName) {
-        window.saveData = gameData;
+        window.saveData = gameData
         // sort through the data
-        var gameDataParsed = JSON.parse(gameData);
-        gameDataParsed['m_list'].find((val, index) => val["key"] == "player_inv_curr")['data'] = "playerInvCurrData"
-        gameDataParsed['m_list'].find((val, index) => val["key"] == "charStats_SaverCharStatsSaver")['data'] = "charStatsData"
+        var gameDataParsed = JSON.parse(gameData)
+        gameDataParsed['m_list'].find(
+          (val, index) => val['key'] == 'player_inv_curr',
+        )['data'] = 'playerInvCurrData'
+        gameDataParsed['m_list'].find(
+          (val, index) => val['key'] == 'charStats_SaverCharStatsSaver',
+        )['data'] = 'charStatsData'
         var preppedData = JSON.stringify(gameDataParsed)
         // call the actor function
         let result = await props.gameActorRef.current.saveGame(
@@ -49,30 +53,52 @@ const Game = (props) => {
           props.selectedNftIndexRef.current,
         )
         if (result['Ok']) {
-          window.loadData = result['Ok'];
+          window.loadData = result['Ok']
           sendMessage(objectName, 'ListenLoadGame', result['Ok'])
         }
         if (result['Err']) {
           // TODO send message to display unity error
-          window.loadData = result['Err'];
+          window.loadData = result['Err']
           console.log('Error in LoadGame')
         }
       })
-      addEventListener('BuyItem', async function (metadata, objectName) {
+      addEventListener('BuyItem', async function (
+        shopIndex,
+        itemIndex,
+        objectName,
+      ) {
         let result = await props.gameActorRef.current.buyItem(
           props.selectedNftIndexRef.current,
-          metadata,
+          shopIndex,
+          itemIndex,
         )
         //todo: check result, take action on error
-        sendMessage(objectName, 'Bought', result)
+        if (result['Ok']) {
+          window.buyItemData = result['Ok']
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          window.buyItemData = result['Err']
+          sendMessage(objectName, 'DisplayError', result['Ok'])
+          console.log('Error in LoadGame')
+        }
       })
       addEventListener('OpenChest', async function (chestId, objectName) {
         let result = await props.gameActorRef.current.openChest(
           props.selectedNftIndexRef.current,
           chestId,
         )
+        if (result['Ok']) {
+          window.chestData = result['Ok']
+          sendMessage(objectName, 'ListenOpenChest', result['Ok'])
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          window.chestData = result['Err']
+          sendMessage(objectName, 'DisplayError', result['Err'])
+          console.log('Error in LoadGame')
+        }
         //todo: check result, take action on error, put the item in the game on success
-        sendMessage(objectName, 'LoadTreasure', result)
       })
       addEventListener('EquipItems', async function (itemIndices, objectName) {
         let result = await props.gameActorRef.current.equipItems(
@@ -80,14 +106,34 @@ const Game = (props) => {
           itemIndices,
         )
         //todo: check result, take action on error
-        sendMessage(objectName, 'Equipped', result)
+        if (result['Ok']) {
+          window.equipdata = result['Ok']
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          window.equipData = result['Err']
+          sendMessage(objectName, 'DisplayError', result['Err'])
+          console.log('Error in LoadGame')
+        }
       })
-      addEventListener('DefeatMonster', async function (monsterId, objectName) {
+      addEventListener('DefeatMonster', async function (
+        monsterIndex,
+        objectName,
+      ) {
         let result = await props.gameActorRef.current.defeatMonster(
           props.selectedNftIndexRef.current,
-          monsterId,
+          monsterIndex,
         )
-        sendMessage(objectName, 'DefeatMonster', result)
+        if (result['Ok']) {
+          window.monsterData = result['Ok']
+          sendMessage(objectName, 'ListenDefeatMonster', result['Ok'])
+        }
+        if (result['Err']) {
+          // TODO send message to display unity error
+          window.monsterData = result['Err']
+          sendMessage(objectName, 'DisplayError', result['Err'])
+          console.log('Error in LoadGame')
+        }
       })
     }
   }, [isLoaded])

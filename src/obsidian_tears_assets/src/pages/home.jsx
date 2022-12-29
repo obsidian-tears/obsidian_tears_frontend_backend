@@ -51,7 +51,9 @@ const Home = (props) => {
               props.setLoggedIn(true)
               let p = await window.ic.plug.agent.getPrincipal()
               props.setPrincipal(p.toText())
-              await props.loadActors(true, false, p.toText())
+              let charActor = await props.loadActors(true, false, p.toText())
+              console.log('loaded actors from onconnectcallback');
+              await props.loadCharacters(charActor, p.toText())
             }}
           />
           <br></br>

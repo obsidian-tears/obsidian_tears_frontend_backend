@@ -1,4 +1,10 @@
 type TokenIndex = nat32;
+type RewardInfo = 
+ record {
+   gold: nat32;
+   itemIds: vec nat16;
+   xp: nat32;
+ };
 type Result = 
  variant {
    err: ApiError;
@@ -43,20 +49,25 @@ type HeaderField =
    text;
    text;
  };
-type ApiResponse_3 = 
- variant {
-   Err: ApiError;
-   Ok: text;
- };
-type ApiResponse_2 = 
+type ApiResponse_4 = 
  variant {
    Err: ApiError;
    Ok: vec nat8;
  };
-type ApiResponse_1 = 
+type ApiResponse_3 = 
  variant {
    Err: ApiError;
    Ok;
+ };
+type ApiResponse_2 = 
+ variant {
+   Err: ApiError;
+   Ok: RewardInfo;
+ };
+type ApiResponse_1 = 
+ variant {
+   Err: ApiError;
+   Ok: text;
  };
 type ApiResponse = 
  variant {
@@ -69,20 +80,21 @@ type ApiError =
    Other: text;
    Unauthorized;
  };
+type AccountIdentifier = text;
 service : {
   acceptCycles: () -> () oneway;
   adminKillHeartbeat: () -> ();
   adminStartHeartbeat: () -> ();
   balance: () -> (nat) query;
-  buyItem: (TokenIndex, vec nat8) -> (ApiResponse_2);
+  buyItem: (TokenIndex, nat16, nat16) -> (ApiResponse_4);
   checkIn: () -> ();
-  defeatMonster: (TokenIndex, TokenIndex) -> (ApiResponse_1);
-  equipItems: (TokenIndex, vec TokenIndex) -> (ApiResponse_1);
-  getEquippedItems: (TokenIndex) -> (vec TokenIndex);
+  defeatMonster: (TokenIndex, nat16) -> (ApiResponse_2);
+  equipItems: (TokenIndex, vec nat16) -> (ApiResponse_3);
+  getEquippedItems: (TokenIndex, AccountIdentifier) -> (vec TokenIndex);
   http_request: (HttpRequest) -> (HttpResponse) query;
   isHeartbeatRunning: () -> (bool) query;
-  login: (TokenIndex) -> (ApiResponse_3);
-  openChest: (TokenIndex) -> (ApiResponse_2);
+  loadGame: (TokenIndex) -> (ApiResponse_1);
+  openChest: (TokenIndex, nat16) -> (ApiResponse_2);
   saveGame: (TokenIndex, text) -> (ApiResponse_1);
   setMinter: (principal) -> (Result);
   verify: () -> (ApiResponse);

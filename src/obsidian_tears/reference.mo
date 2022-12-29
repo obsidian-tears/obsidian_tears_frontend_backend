@@ -120,6 +120,7 @@ module Reference = {
         { id=21; name="Bow";                  unityId="363272315";    metadata=[2,3,4]; ableClasses=[];      tier=1 },
         { id=22; name="Blades of Duality";    unityId="2847687731";   metadata=[0,1,2]; ableClasses=[0,1,2]; tier=1 },
         { id=23; name="Iron Sword";           unityId="976575711";    metadata=[0,1,1]; ableClasses=[0,1,2]; tier=1 },
+        { id=24; name="Thors Hammer";         unityId="4030616533";    metadata=[0,1,1]; ableClasses=[0,1,2]; tier=1 },
     ];
 
 

@@ -2,7 +2,38 @@
 type AccountIdentifier = Text;
 type AccountIdentifier__1 = AccountIdentifier;
 type AccountIdentifier__2 = AccountIdentifier__1;
-type PlayerData = {deaths : Nat16; kills : Nat16; level : Nat16; xp : Nat32};
+type Metadata =
+  {
+    #fungible :
+      {decimals : Nat8; metadata : ?Blob; name : Text; symbol : Text};
+    #nonfungible : {metadata : ?Blob}
+  };
+type Metadata__1 = Metadata;
+type PlayerData =
+  {
+    attackBase : Nat16;
+    attackTotal : Nat16;
+    characterClass : Text;
+    characterEffects : [Text];
+    characterName : Text;
+    criticalHitProbability : Float;
+    deaths : Nat16;
+    defenseBase : Nat16;
+    defenseTotal : Nat16;
+    healthBase : Nat16;
+    healthMax : Nat16;
+    healthTotal : Nat16;
+    kills : Nat16;
+    level : Nat16;
+    magicBase : Nat16;
+    magicMax : Nat16;
+    magicTotal : Nat16;
+    pointsRemaining : Nat32;
+    speedBase : Nat16;
+    speedTotal : Nat16;
+    xp : Nat32;
+    xpToLevelUp : Nat32
+  };
 type SessionData =
   {
     createdAt : Time;
@@ -23,16 +54,16 @@ actor {
   stable var _characterCanister : Text;
   stable var _characterRegistryState :
     [(TokenIndex__1, AccountIdentifier__2)];
-  stable var _completedPlotEventsState : [(TokenIndex__1, [Nat16])];
-  stable var _equippedItemState : [(TokenIndex__1, [TokenIndex__1])];
+  stable var _completedEventsState : [(TokenIndex__1, [Nat16])];
+  stable var _equippedItemsState : [(TokenIndex__1, [Nat16])];
   stable var _goldState : [(AccountIdentifier__2, Nat32)];
   stable var _itemCanister : Text;
+  stable var _itemMetadataState : [(TokenIndex__1, Metadata__1)];
   stable var _itemRegistryState : [(TokenIndex__1, AccountIdentifier__2)];
   stable var _lastCleared : Int;
   stable var _lastRegistryUpdate : Int;
   stable var _minter : Principal;
-  stable var _openedTreasuresState : [(TokenIndex__1, [Nat16])];
-  stable var _ownedItemsState : [(TokenIndex__1, [TokenIndex__1])];
+  stable var _ownedNonNftItemsState : [(TokenIndex__1, [Nat16])];
   stable var _playerDataState : [(TokenIndex__1, PlayerData)];
   stable var _runHeartbeat : Bool;
   stable var _saveDataState : [(TokenIndex__1, Text)];

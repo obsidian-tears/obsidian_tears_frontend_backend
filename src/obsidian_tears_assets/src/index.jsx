@@ -105,8 +105,10 @@ const ObsidianTears = () => {
 
   const loadCharacters = async (characterActor, p) => {
     setLoading(true)
+    console.log(`load characters`);
     let registry = await characterActor.getRegistry()
     const address = principalToAccountIdentifier(p)
+    console.log(`address: ${address}`);
     let nfts = registry.filter((val, i, arr) => val[1] == address)
     console.log(`nfts: ${nfts}`)
     setMyNfts(nfts)
@@ -142,7 +144,10 @@ const ObsidianTears = () => {
       connected = await tryToConnect()
     }
     if (connected) {
+
+      console.log('about to load actors');
       let characterActor = await loadActors(usingPlug, usingStoic, agent)
+      console.log('finished loading actors. now load characters');
       await loadCharacters(characterActor, p.toText())
       console.log(
         `loaded actors: c,i,g: ${charActor}, ${itemActor}, ${gameActor}`,
@@ -168,11 +173,11 @@ const ObsidianTears = () => {
     setSelectedNftIndex(index)
     // TODO load player save data from game canister
     const verifiedNfts = await gameActor.verify()
-    console.log(verifiedNfts)
+    console.log(`verifiedNfts: ${verifiedNfts}`)
     if (!verifiedNfts['Ok']) {
     }
     const loginData = await gameActor.loadGame(index)
-    console.log(loginData + ', index: ' + index)
+    console.log(`loginData ${loginData + ', index: ' + index}`)
     setRoute('game')
   }
 
@@ -198,8 +203,8 @@ const ObsidianTears = () => {
 
   React.useEffect(async () => {
     // connect
-    console.log(gameActor, itemActor, charActor)
-    if (gameActor == null && itemActor == null && charActor == null) {
+    console.log(`actors: ${gameActor}, ${itemActor}, ${charActor}`)
+    if (gameActor == null && itemActor == null && charActor == null ) {
       await verifyConnectionAndAgent()
     }
   }, [gameActor, itemActor, charActor])
@@ -254,6 +259,7 @@ const ObsidianTears = () => {
           setMyNfts={setMyNfts}
           connectToStoic={connectToStoic}
           loadActors={loadActors}
+          loadCharacters={loadCharacters}
           setUsingPlug={setUsingPlug}
           setUsingStoic={setUsingStoic}
           usingPlug={usingPlug}
@@ -263,7 +269,6 @@ const ObsidianTears = () => {
           setRoute={setRoute}
           loggedIn={loggedIn}
           setLoggedIn={setLoggedIn}
-          charActor={charActor}
           selectNft={selectNft}
         />
       ) : route == 'game' ? (

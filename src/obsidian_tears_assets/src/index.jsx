@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { render } from 'react-dom'
 
@@ -58,7 +57,7 @@ const ObsidianTears = () => {
   // const characterCanister = 'ryjl3-tyaaa-aaaaa-aaaba-cai'
   const whitelist = [gameCanister, itemCanister, characterCanister]
   // const host = 'http://127.0.0.1:8000'
-  const host = 'https://mainnet.dfinity.network'
+  // const host = 'https://mainnet.dfinity.network'
 
   const loadActors = async (plug, stoic, a) => {
     console.log('loading actors')
@@ -105,10 +104,10 @@ const ObsidianTears = () => {
 
   const loadCharacters = async (characterActor, p) => {
     setLoading(true)
-    console.log(`load characters`);
+    console.log(`load characters`)
     let registry = await characterActor.getRegistry()
     const address = principalToAccountIdentifier(p)
-    console.log(`address: ${address}`);
+    console.log(`address: ${address}`)
     let nfts = registry.filter((val, i, arr) => val[1] == address)
     console.log(`nfts: ${nfts}`)
     setMyNfts(nfts)
@@ -120,7 +119,6 @@ const ObsidianTears = () => {
     if (usingPlug) {
       connected = await window.ic.plug.isConnected()
     } else if (usingStoic) {
-      console.log('using stoic');
       StoicIdentity.load().then(async (id) => {
         connected = id !== false
       })
@@ -145,10 +143,9 @@ const ObsidianTears = () => {
       connected = await tryToConnect()
     }
     if (connected) {
-
-      console.log('about to load actors');
+      console.log('about to load actors')
       let characterActor = await loadActors(usingPlug, usingStoic, agent)
-      console.log('finished loading actors. now load characters');
+      console.log('finished loading actors. now load characters')
       await loadCharacters(characterActor, p.toText())
       console.log(
         `loaded actors: c,i,g: ${charActor}, ${itemActor}, ${gameActor}`,
@@ -158,16 +155,21 @@ const ObsidianTears = () => {
   }
 
   const connectToStoic = async () => {
-    let i = await StoicIdentity.connect()
-    let p = i.getPrincipal()
-    setIdentity(i)
-    setPrincipal(p.toText())
-    let agent = new HttpAgent({ identity: i, host })
-    setStoicHttpAgent(agent)
-    setLoggedIn(true)
-    setUsingStoic(true)
-    let characterActor = await loadActors(false, true, agent)
-    await loadCharacters(characterActor, p.toText())
+    StoicIdentity.load().then(async (identity) => {
+      console.log('here')
+      //No existing connection, lets make one!
+      identity = await StoicIdentity.connect()
+      let p = identity.getPrincipal()
+      setIdentity(identity)
+      setPrincipal(p.toText())
+      let agent = new HttpAgent({ identity: identity })
+      setStoicHttpAgent(agent)
+      setLoggedIn(true)
+      let characterActor = await loadActors(false, true, agent)
+      await loadCharacters(characterActor, p.toText())
+      setUsingStoic(true)
+      setUsingPlug(false)
+    })
   }
 
   const selectNft = async (index) => {
@@ -195,7 +197,6 @@ const ObsidianTears = () => {
     return connected
   }
 
-
   const logout = () => {
     window.ic.plug.disconnect()
     setRoute('home')
@@ -203,17 +204,13 @@ const ObsidianTears = () => {
   }
 
   React.useEffect(async () => {
-    // connect
-    console.log(`actors: ${gameActor}, ${itemActor}, ${charActor}`)
-    if (gameActor == null && itemActor == null && charActor == null ) {
+    if (gameActor == null && itemActor == null && charActor == null) {
       await verifyConnectionAndAgent()
     }
   }, [gameActor, itemActor, charActor])
 
-
   return (
     <>
-    
       <div id="header">
         <div className="leftHeader">
           <img
@@ -222,35 +219,32 @@ const ObsidianTears = () => {
             height="50"
           ></img>
         </div>
-          <div className="rightHeader">
+        <div className="rightHeader">
+          <button className="buttonWood" onClick={() => setRoute('home')}>
+            Home
+          </button>
 
-              <button className="buttonWood" onClick={() => setRoute('home')}>
-                Home
+          <button
+            className="buttonWood"
+            onClick={() =>
+              window.open('https://entrepot.app/marketplace/obsidian-tears')
+            }
+          >
+            Shop NFTs
+          </button>
+
+          {loggedIn ? (
+            <div className="rightHeader2">
+              <button className="buttonWood">{principal.slice(0, 5)}</button>
+
+              <button className="buttonWood" onClick={() => logout()}>
+                Logout
               </button>
-
-              <button
-                  className="buttonWood"
-                  onClick={() => window.open('https://entrepot.app/marketplace/obsidian-tears')}>
-                  Shop NFTs
-              </button>
-
-              {loggedIn ? (
-                <div className="rightHeader2">
-
-                  <button className="buttonWood">
-                    {principal.slice(0, 5)}
-                  </button>   
-
-                  <button className="buttonWood" onClick={() => logout()}>
-                    Logout
-                  </button>
-
-
-              </div>
-            ) : (
-              <></>
-            )}
-          </div>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
       {route == 'home' ? (
         <Home

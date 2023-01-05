@@ -5,16 +5,15 @@ import '../../assets/main.css'
 const Home = (props) => {
   return (
     <div id="body">
-        <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/BigLogo2.png"></img>
+      <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/BigLogo2.png"></img>
 
       {props.loggedIn ? (
         !props.loading ? (
           <>
-              <div className="centerMe">
+            <div className="centerMe">
               <h2 className="title2">Select a Character to Start the Game</h2>
               <br></br>
-              </div>
-
+            </div>
 
             <div className="container">
               {props.myNfts.map((nft, i) => (
@@ -29,7 +28,10 @@ const Home = (props) => {
                       height="230px;"
                     ></img>
                   </a>
-                  <button className="buttonWoodGrid" onClick={() => props.selectNft(nft[0])}>
+                  <button
+                    className="buttonWoodGrid"
+                    onClick={() => props.selectNft(nft[0])}
+                  >
                     Select
                   </button>
                 </div>
@@ -41,22 +43,22 @@ const Home = (props) => {
         )
       ) : (
         <>
-        <div className="space50"></div>
-        <div className="centerMe">
-          <PlugConnect
-            whitelist={props.whitelist}
-            onConnectCallback={async () => {
-              props.setUsingPlug(true)
-              props.setUsingStoic(false)
-              props.setLoggedIn(true)
-              let p = await window.ic.plug.agent.getPrincipal()
-              props.setPrincipal(p.toText())
-              let charActor = await props.loadActors(true, false, p.toText())
-              console.log('loaded actors from onconnectcallback');
-              await props.loadCharacters(charActor, p.toText())
-            }}
-          />
-          <br></br>
+          <div className="space50"></div>
+          <div className="centerMe">
+            <PlugConnect
+              whitelist={props.whitelist}
+              onConnectCallback={async () => {
+                props.setUsingPlug(true)
+                props.setUsingStoic(false)
+                props.setLoggedIn(true)
+                let p = await window.ic.plug.agent.getPrincipal()
+                props.setPrincipal(p.toText())
+                let charActor = await props.loadActors(true, false, p.toText())
+                console.log('loaded actors from onconnectcallback')
+                await props.loadCharacters(charActor, p.toText())
+              }}
+            />
+            <br></br>
           </div>
           <div className="centerMe">
             <button
@@ -71,12 +73,14 @@ const Home = (props) => {
           <br></br>
           <div className="space50"></div>
           <div className="centerMe">
-              <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/menu-fighter1a.png" alt='fighter1' height="200px"></img>
+            <img
+              src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/menu-fighter1a.png"
+              alt="fighter1"
+              height="200px"
+            ></img>
           </div>
         </>
       )}
-
-
     </div>
   )
 }

@@ -9,13 +9,13 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : IDL.Vec(IDL.Nat8),
     'Err' : ApiError,
   });
+  const ApiResponse_3 = IDL.Variant({ 'Ok' : IDL.Null, 'Err' : ApiError });
   const RewardInfo = IDL.Record({
     'xp' : IDL.Nat32,
     'gold' : IDL.Nat32,
     'itemIds' : IDL.Vec(IDL.Nat16),
   });
   const ApiResponse_2 = IDL.Variant({ 'Ok' : RewardInfo, 'Err' : ApiError });
-  const ApiResponse_3 = IDL.Variant({ 'Ok' : IDL.Null, 'Err' : ApiError });
   const AccountIdentifier = IDL.Text;
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const HttpRequest = IDL.Record({
@@ -67,6 +67,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'checkIn' : IDL.Func([], [], []),
+    'consumeItem' : IDL.Func([TokenIndex, IDL.Nat16], [ApiResponse_3], []),
     'defeatMonster' : IDL.Func([TokenIndex, IDL.Nat16], [ApiResponse_2], []),
     'equipItems' : IDL.Func(
         [TokenIndex, IDL.Vec(IDL.Nat16)],

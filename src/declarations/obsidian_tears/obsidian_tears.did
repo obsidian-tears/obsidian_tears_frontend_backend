@@ -18,6 +18,7 @@ type ObsidianTearsRpg =
    balance: () -> (nat) query;
    buyItem: (TokenIndex, nat16, nat16) -> (ApiResponse_4);
    checkIn: () -> ();
+   consumeItem: (TokenIndex, nat16) -> (ApiResponse_3);
    defeatMonster: (TokenIndex, nat16) -> (ApiResponse_2);
    equipItems: (TokenIndex, vec nat16) -> (ApiResponse_3);
    getEquippedItems: (TokenIndex, AccountIdentifier) -> (vec TokenIndex);

@@ -51,6 +51,7 @@ export interface ObsidianTearsRpg {
   'balance' : ActorMethod<[], bigint>,
   'buyItem' : ActorMethod<[TokenIndex, number, number], ApiResponse_4>,
   'checkIn' : ActorMethod<[], undefined>,
+  'consumeItem' : ActorMethod<[TokenIndex, number], ApiResponse_3>,
   'defeatMonster' : ActorMethod<[TokenIndex, number], ApiResponse_2>,
   'equipItems' : ActorMethod<[TokenIndex, Array<number>], ApiResponse_3>,
   'getEquippedItems' : ActorMethod<

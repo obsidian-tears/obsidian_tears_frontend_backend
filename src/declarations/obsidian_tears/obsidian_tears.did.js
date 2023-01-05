@@ -78,6 +78,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(TokenIndex)],
         [],
       ),
+    'getItemRegistryCopy' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier))],
+        ['query'],
+      ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'isHeartbeatRunning' : IDL.Func([], [IDL.Bool], ['query']),
     'loadGame' : IDL.Func([TokenIndex], [ApiResponse_1], []),

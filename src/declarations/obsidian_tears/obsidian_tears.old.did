@@ -91,6 +91,11 @@ service : {
   defeatMonster: (TokenIndex, nat16) -> (ApiResponse_2);
   equipItems: (TokenIndex, vec nat16) -> (ApiResponse_3);
   getEquippedItems: (TokenIndex, AccountIdentifier) -> (vec TokenIndex);
+  getItemRegistryCopy: () ->
+   (vec record {
+          TokenIndex;
+          AccountIdentifier;
+        }) query;
   http_request: (HttpRequest) -> (HttpResponse) query;
   isHeartbeatRunning: () -> (bool) query;
   loadGame: (TokenIndex) -> (ApiResponse_1);

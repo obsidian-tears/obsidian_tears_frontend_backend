@@ -120,6 +120,7 @@ const ObsidianTears = () => {
     if (usingPlug) {
       connected = await window.ic.plug.isConnected()
     } else if (usingStoic) {
+      console.log('using stoic');
       StoicIdentity.load().then(async (id) => {
         connected = id !== false
       })

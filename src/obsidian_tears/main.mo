@@ -10,8 +10,8 @@ import HashMap "mo:base/HashMap";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
 import Nat16 "mo:base/Nat16";
+import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
@@ -21,8 +21,8 @@ import Text "mo:base/Text";
 import Time "mo:base/Time";
 
 import AID "../motoko/util/AccountIdentifier";
-import ExtCore "../motoko/ext/Core";
 import ExtCommon "../motoko/ext/Common";
+import ExtCore "../motoko/ext/Core";
 import Ref "./reference";
 import X "./types";
 
@@ -110,7 +110,7 @@ actor class ObsidianTearsRpg() = this {
     // private stable var _goldCanister : Text = "gjfoo-oyaaa-aaaao-aaiuq-cai";  
 
     // Actors
-    let _itemActor = actor(_itemCanister) : actor { mintItem : ({ data : [Nat8]; recipient : AccountIdentifier }) -> async (); getRegistry : () -> async [(TokenIndex, AccountIdentifier)]; getMetadata : () -> async [(TokenIndex, Metadata)]};
+    let _itemActor = actor(_itemCanister) : actor { mintItem : (data : [Nat8], recipient : AccountIdentifier) -> async (); burnItem : (TokenIndex) -> async (); getRegistry : () -> async [(TokenIndex, AccountIdentifier)]; getMetadata : () -> async [(TokenIndex, Metadata)]};
     let _characterActor = actor(_characterCanister) : actor { getRegistry : () -> async [(TokenIndex, AccountIdentifier)]; tokens : (aid : AccountIdentifier) -> async Result.Result<[TokenIndex], CommonError>};
     // let _goldActor = actor (_goldCanister) : actor { mint : (to: Principal, value: Nat) -> async TxReceipt};
 
@@ -262,7 +262,7 @@ actor class ObsidianTearsRpg() = this {
                         if (chest.gold > 0) {
                             ignore(_giveGold(chest.gold, caller, true));
                         };
-                        let itemResult : RewardInfo = await _mintRewardItems(chest.itemReward, caller);
+                        let itemResult : RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
                         rewardInfo := {
                             itemIds = itemResult.itemIds;
                             gold = rewardInfo.gold;
@@ -274,6 +274,21 @@ actor class ObsidianTearsRpg() = this {
                     };
                     case _ return #Err(#Other("Server Error: Chest Definition Missing"));
                 };
+            };
+        };
+    };
+
+    public shared({ caller }) func consumeItem(characterIndex : TokenIndex, itemIndex : Nat16) : async(X.ApiResponse<()>) {
+        switch(checkSession(caller, characterIndex)) {
+            case(#Err e) {
+               return #Err e;
+            };
+            case(#Ok session) {
+                // get item tokenindex by checking metadata or whatever. burn item
+                let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+                _unequipItem(itemIndex, characterIndex);
+                await _burnItem(address, characterIndex, itemIndex);
+                #Ok;
             };
         };
     };
@@ -306,14 +321,39 @@ actor class ObsidianTearsRpg() = this {
                 let optCurrGold : ?Nat32 = _gold.get(address);
                 switch(optCurrGold) {
                     case(?currGold) {
+                        if (currGold < goldCost) {
+                            return #Err(#Other "not enough gold to purchase item");
+                        };
                         ignore(_giveGold(goldCost, caller, false));
                     };
                     case _ return #Err(#Other "not enough gold to purchase item");
                 };
                 // update player session (counts as receiving an item)
                 ignore(updateSession(characterIndex, session, 0, 0, 1));
-                return await mintItem(itemIndex, address);
+                return await mintItem(itemIndex, address, characterIndex);
             };
+        };
+    };
+
+    func _unequipItem(itemIndex : Nat16, characterIndex : TokenIndex) : () {
+        let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
+        switch(optEquippedItems) {
+            case(?equippedItems) {
+                // take out one item that matches index.
+                let optFoundItem : ?Nat16 = Array.find(equippedItems, func (item : Nat16) : Bool {
+                    item == itemIndex;
+                });
+                switch(optFoundItem) {
+                    case(?foundItem) {
+                        let newEquippedItems : [Nat16] = Array.filter(equippedItems, func (item: Nat16) : Bool {
+                            item != itemIndex;
+                        }); 
+                        _equippedItems.put(characterIndex, newEquippedItems);
+                    };
+                    case _ {};
+                };
+            };
+            case _ {};
         };
     };
 
@@ -327,7 +367,7 @@ actor class ObsidianTearsRpg() = this {
         // make sure that caller owns all items;
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
         // get player owned game items 
-        let gameItems = getOwnedItems(address);
+        let gameItems = getOwnedItems(address, characterIndex);
         // get player equipped game items
         let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
         switch(optEquippedItems) {
@@ -382,11 +422,11 @@ actor class ObsidianTearsRpg() = this {
                 // add monster rewards to character and session
                 switch(optMonster) {
                     case(?monster) {
-                        let itemRewards : RewardInfo = await _mintRewardItems(monster.itemReward, caller);
+                        let itemRewards : RewardInfo = await _mintRewardItems(monster.itemReward, caller, characterIndex);
                         // give player gold
                         switch(_playerData.get(characterIndex)) {
                             case(?playerData) {
-                                let itemInfo : RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb);
+                                let itemInfo : RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
                                 let rewardInfo : RewardInfo = {
                                     gold = _giveGold(monster.gold, caller, true);
                                     xp = monster.xp;
@@ -458,7 +498,56 @@ actor class ObsidianTearsRpg() = this {
         });
         #Ok();
     };
-    func getOwnedItems(accountIdentifier : AccountIdentifier) : [Ref.Item] {
+    func _burnItem(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async () {
+        // filter all item nfts owned by character
+        let ownedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
+            _itemRegistry,
+            ExtCore.TokenIndex.equal, 
+            ExtCore.TokenIndex.hash, 
+            func (index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
+                if (account == accountIdentifier) {
+                    return ?index;
+                };
+                null;
+            }).keys());
+
+        let optItemToDelete : ?Ref.Item = Array.find(Ref.items, func (item : Ref.Item) : Bool {
+            item.id == itemIndex;
+        });
+        switch(optItemToDelete) {
+            case(?itemToDelete) {
+                // get token to burn
+                let optTokenToBurn : ?TokenIndex = Array.find(ownedItems, func (tokenIndex : TokenIndex) : Bool {
+                    let optMetadata : ?Metadata =  _itemMetadata.get(tokenIndex);
+                    switch(optMetadata) {
+                        case (?metadata) {
+                            switch(metadata) {
+                                case(#nonfungible nft) {
+                                    switch(nft.metadata) {
+                                        case (?meta) {
+                                            Blob.toArray(meta) == itemToDelete.metadata;
+                                        };
+                                        case _ false;
+                                    };
+                                };
+                                case _ false;
+                            };
+                        };
+                        case _ false;
+                    };
+                });
+                switch(optTokenToBurn) {
+                    case(?tokenToBurn) {
+                        await _itemActor.burnItem(tokenToBurn);
+                    };
+                    case _ {};
+                };
+            };
+            case _ {};
+        };
+    };
+    
+    func getOwnedItems(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex) : [Ref.Item] {
         // filter all item nfts owned by character
         let ownedItems : [TokenIndex] = Iter.toArray(HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
             _itemRegistry,
@@ -479,11 +568,24 @@ actor class ObsidianTearsRpg() = this {
             };
         });
         // matches corresponding metadata in item list
-        let gameItems : [Ref.Item] = Array.mapFilter<Metadata, Ref.Item>(ownedItemsMeta, func (metadata : Metadata) : ?Ref.Item {
+        var gameItems : [Ref.Item] = Array.mapFilter<Metadata, Ref.Item>(ownedItemsMeta, func (metadata : Metadata) : ?Ref.Item {
             Array.find(Ref.items, func (i : Ref.Item) : Bool {
                 compareMetadata(i.metadata, metadata);
             });
         });
+        // TODO get non nft items
+        let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
+        switch(optNonNftItems) {
+            case (?nonNftItems) {
+                let newItems : [Ref.Item] = Array.mapFilter<Nat16, Ref.Item>(nonNftItems, func (index : Nat16) : ?Ref.Item {
+                    Array.find(Ref.items, func (i : Ref.Item) : Bool {
+                        i.id == index;
+                    });
+                });
+                gameItems := _appendAll(gameItems, newItems);
+            };
+            case _ {};
+        };
         gameItems;
     };
     // load game data formatted in json so that unity can load correctly
@@ -492,9 +594,9 @@ actor class ObsidianTearsRpg() = this {
             case(?save) {
                 // piece together the inventory and player stats
                 // "{\\"items\\":[],\\"equippedItems\\":[\\"2069047119\\"],\\"currency\\":10}"
-                var itemsString = "\\\\\"items\\\\\":[";
-                var equippedItemsString = "\\\\\"equippedItems\\\\\":[";
-                var goldString = "\\\\\"currency\\\\\":";
+                var itemsString = "\\\"items\\\":[";
+                var equippedItemsString = "\\\"equippedItems\\\":[";
+                var goldString = "\\\"currency\\\":";
                 // get user gold
                 let optCurrency : ?Nat32 = _gold.get(accountIdentifier);
                 switch(optCurrency) {
@@ -504,7 +606,7 @@ actor class ObsidianTearsRpg() = this {
                     case _ goldString #= Nat8.toText(0);
                 };
                 // get the unityId for owned items
-                let ownedItems : [Ref.Item] = getOwnedItems(accountIdentifier);
+                let ownedItems : [Ref.Item] = getOwnedItems(accountIdentifier, characterIndex);
                 switch(_equippedItems.get(characterIndex)) {
                     case (?items) {
                         // add all equipped items to equipped items string. everything else to items string
@@ -519,7 +621,7 @@ actor class ObsidianTearsRpg() = this {
                             if (prev != "") {
                                 returnText #= ",";
                             };
-                            returnText #= "\\\\\"" # item.unityId # "\\\\\"";
+                            returnText #= "\\\"" # item.unityId # "\\\"";
                                     
                                 };
                                 case _ {};
@@ -543,7 +645,7 @@ actor class ObsidianTearsRpg() = this {
                             if (prev != "") {
                                 returnText #= ",";
                             };
-                            returnText #= "\\\\\"" # item.unityId # "\\\\\"";
+                            returnText #= "\\\"" # item.unityId # "\\\"";
                             prev # returnText;
                         });
                         itemsString #= unequippedUnityIds;
@@ -556,7 +658,7 @@ actor class ObsidianTearsRpg() = this {
                             if (prev != "") {
                                 returnText #= ",";
                             };
-                            returnText #= "\\\\\"" # item.unityId # "\\\\\"";
+                            returnText #= "\\\"" # item.unityId # "\\\"";
                             return prev # returnText;
                         });
                         itemsString #= unityIds;
@@ -565,7 +667,7 @@ actor class ObsidianTearsRpg() = this {
                 equippedItemsString #= "]";
                 itemsString #= "]";
 
-                let invCurrData  : Text = "\"{" # itemsString # "," # equippedItemsString # "," # goldString # "}\"";
+                let invCurrData  : Text = "{" # itemsString # "," # equippedItemsString # "," # goldString # "}";
                 let invCurrSplit  : Iter.Iter<Text> = Text.split(save, #text("playerInvCurrData"));
                 let invCurrStitch  : Text = Text.join(invCurrData, invCurrSplit);
 
@@ -576,56 +678,57 @@ actor class ObsidianTearsRpg() = this {
                 //   \"magicMax\":10,\"attackBase\":5,\"attackTotal\":5,\"magicPowerBase\":0,\"magicPowerTotal\":0,\"defenseBase\":5,
                 //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
                 // }"
-                var statsString = "\"{";
+                var statsString = "{";
                 let optPlayerData : ?PlayerData = _playerData.get(characterIndex);
                 switch(optPlayerData) {
                     case(?playerData) {
-                        statsString #= "\\\\\"characterName\\\\\":\\\\\"" # playerData.characterName # "\\\\\",";
-                        statsString #= "\\\\\"characterClass\\\\\":\\\\\"" # playerData.characterClass # "\\\\\",";
-                        statsString #= "\\\\\"level\\\\\":" # Nat16.toText(playerData.level) # ",";
-                        statsString #= "\\\\\"xp\\\\\":" # Nat32.toText(playerData.xp) # ",";
-                        statsString #= "\\\\\"xpToLevelUp\\\\\":" # Nat32.toText(playerData.xpToLevelUp) # ",";
-                        statsString #= "\\\\\"pointsRemaining\\\\\":" # Nat32.toText(playerData.pointsRemaining) # ",";
-                        statsString #= "\\\\\"healthBase\\\\\":" # Nat16.toText(playerData.healthBase) # ",";
-                        statsString #= "\\\\\"healthTotal\\\\\":" # Nat16.toText(playerData.healthTotal) # ",";
-                        statsString #= "\\\\\"healthMax\\\\\":" # Nat16.toText(playerData.healthMax) # ",";
-                        statsString #= "\\\\\"magicBase\\\\\":" # Nat16.toText(playerData.magicBase) # ",";
-                        statsString #= "\\\\\"magicTotal\\\\\":" # Nat16.toText(playerData.magicTotal) # ",";
-                        statsString #= "\\\\\"magicMax\\\\\":" # Nat16.toText(playerData.magicMax) # ",";
-                        statsString #= "\\\\\"attackBase\\\\\":" # Nat16.toText(playerData.attackBase) # ",";
-                        statsString #= "\\\\\"attackTotal\\\\\":" # Nat16.toText(playerData.attackTotal) # ",";
-                        statsString #= "\\\\\"defenseBase\\\\\":" # Nat16.toText(playerData.defenseBase) # ",";
-                        statsString #= "\\\\\"defenseTotal\\\\\":" # Nat16.toText(playerData.defenseTotal) # ",";
-                        statsString #= "\\\\\"speedBase\\\\\":" # Nat16.toText(playerData.speedBase) # ",";
-                        statsString #= "\\\\\"speedTotal\\\\\":" # Nat16.toText(playerData.speedTotal) # ",";
-                        statsString #= "\\\\\"criticalHitProbability\\\\\":" # Float.toText(playerData.criticalHitProbability) # ",";
-                        statsString #= "\\\\\"characterEffects\\\\\":[]";
+                        statsString #= "\\\"characterName\\\":\\\"" # playerData.characterName # "\\\",";
+                        statsString #= "\\\"characterClass\\\":\\\"" # playerData.characterClass # "\\\",";
+                        statsString #= "\\\"level\\\":" # Nat16.toText(playerData.level) # ",";
+                        statsString #= "\\\"xp\\\":" # Nat32.toText(playerData.xp) # ",";
+                        statsString #= "\\\"xpToLevelUp\\\":" # Nat32.toText(playerData.xpToLevelUp) # ",";
+                        statsString #= "\\\"pointsRemaining\\\":" # Nat32.toText(playerData.pointsRemaining) # ",";
+                        statsString #= "\\\"healthBase\\\":" # Nat16.toText(playerData.healthBase) # ",";
+                        statsString #= "\\\"healthTotal\\\":" # Nat16.toText(playerData.healthTotal) # ",";
+                        statsString #= "\\\"healthMax\\\":" # Nat16.toText(playerData.healthMax) # ",";
+                        statsString #= "\\\"magicBase\\\":" # Nat16.toText(playerData.magicBase) # ",";
+                        statsString #= "\\\"magicTotal\\\":" # Nat16.toText(playerData.magicTotal) # ",";
+                        statsString #= "\\\"magicMax\\\":" # Nat16.toText(playerData.magicMax) # ",";
+                        statsString #= "\\\"attackBase\\\":" # Nat16.toText(playerData.attackBase) # ",";
+                        statsString #= "\\\"attackTotal\\\":" # Nat16.toText(playerData.attackTotal) # ",";
+                        statsString #= "\\\"defenseBase\\\":" # Nat16.toText(playerData.defenseBase) # ",";
+                        statsString #= "\\\"defenseTotal\\\":" # Nat16.toText(playerData.defenseTotal) # ",";
+                        statsString #= "\\\"speedBase\\\":" # Nat16.toText(playerData.speedBase) # ",";
+                        statsString #= "\\\"speedTotal\\\":" # Nat16.toText(playerData.speedTotal) # ",";
+                        statsString #= "\\\"criticalHitProbability\\\":" # Float.toText(playerData.criticalHitProbability) # ",";
+                        statsString #= "\\\"characterEffects\\\":[]";
                         // TODO: format character effects into json string
                     };
                     case _ {
-                        statsString #= "\\\\\"characterName\\\\\":\\\\\"Phendrin\\\\\",";
-                        statsString #= "\\\\\"characterClass\\\\\":\\\\\"\\\\\",";
-                        statsString #= "\\\\\"level\\\\\":1,";
-                        statsString #= "\\\\\"xp\\\\\":0,";
-                        statsString #= "\\\\\"xpToLevelUp\\\\\":75,";
-                        statsString #= "\\\\\"pointsRemaining\\\\\":0,";
-                        statsString #= "\\\\\"healthBase\\\\\":15,";
-                        statsString #= "\\\\\"healthTotal\\\\\":15,";
-                        statsString #= "\\\\\"healthMax\\\\\":0,";
-                        statsString #= "\\\\\"magicBase\\\\\":0,";
-                        statsString #= "\\\\\"magicTotal\\\\\":0,";
-                        statsString #= "\\\\\"magicMax\\\\\":0,";
-                        statsString #= "\\\\\"attackBase\\\\\":0,";
-                        statsString #= "\\\\\"attackTotal\\\\\":0,";
-                        statsString #= "\\\\\"defenseBase\\\\\":0,";
-                        statsString #= "\\\\\"defenseTotal\\\\\":0,";
-                        statsString #= "\\\\\"speedBase\\\\\":0,";
-                        statsString #= "\\\\\"speedTotal\\\\\":0,";
-                        statsString #= "\\\\\"criticalHitProbability\\\\\":0.0,";
-                        statsString #= "\\\\\"characterEffects\\\\\":[]";
+                        statsString #= "\\\"characterName\\\":\\\"Phendrin\\\",";
+                        statsString #= "\\\"characterClass\\\":\\\"\\\",";
+                        statsString #= "\\\"level\\\":1,";
+                        statsString #= "\\\"xp\\\":0,";
+                        statsString #= "\\\"xpToLevelUp\\\":75,";
+                        statsString #= "\\\"pointsRemaining\\\":0,";
+                        statsString #= "\\\"healthBase\\\":15,";
+                        statsString #= "\\\"healthTotal\\\":15,";
+                        statsString #= "\\\"healthMax\\\":0,";
+                        statsString #= "\\\"magicBase\\\":0,";
+                        statsString #= "\\\"magicTotal\\\":0,";
+                        statsString #= "\\\"magicMax\\\":0,";
+                        statsString #= "\\\"attackBase\\\":0,";
+                        statsString #= "\\\"attackTotal\\\":0,";
+                        statsString #= "\\\"defenseBase\\\":0,";
+                        statsString #= "\\\"defenseTotal\\\":0,";
+                        statsString #= "\\\"speedBase\\\":0,";
+                        statsString #= "\\\"speedTotal\\\":0,";
+                        statsString #= "\\\"criticalHitProbability\\\":0.0,";
+                        statsString #= "\\\"characterEffects\\\":[]";
                     };
                 };
-                let statsData  : Text = "\"{" # statsString # "}\"";
+                statsString #= "}";
+                let statsData  : Text = statsString;
                 let statsSplit  : Iter.Iter<Text> = Text.split(invCurrStitch, #text("charStatsData"));
                 let statsStitch  : Text = Text.join(statsData, statsSplit);
 
@@ -654,7 +757,7 @@ actor class ObsidianTearsRpg() = this {
         // make sure the principal owns this tokenIndex
         switch(_characterRegistry.get(tokenIndex)) {
             case(?owner) {
-                if (owner != address) {
+                if (owner != address and caller != _minter) {
                     return #Err(#Unauthorized);
                 };
             };
@@ -733,28 +836,32 @@ actor class ObsidianTearsRpg() = this {
       return t;
     };
 
-    func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8) : async RewardInfo {
+    func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async RewardInfo {
         // check probability and mint items
-        let randomNumber : ?Nat = Random.Finite(Principal.toBlob(caller)).range(8);
-        ignore(do ? {
-            if (randomNumber! % 100 <= Nat8.toNat(itemProb)) {
-                await _mintRewardItems(itemReward, caller);
-            } else {
-                {
-                    xp = 0;
-                    gold = 0;
-                    itemIds = [];
+        let optRandomNumber : ?Nat = Random.Finite(Principal.toBlob(caller)).range(8);
+        switch(optRandomNumber) {
+            case (?randomNumber) {
+                if (randomNumber % 100 <= Nat8.toNat(itemProb)) {
+                    await _mintRewardItems(itemReward, caller, characterIndex);
+                } else {
+                    {
+                        xp = 0;
+                        gold = 0;
+                        itemIds = [];
+                    };
                 };
             };
-        });
-        {
-            xp = 0;
-            gold = 0;
-            itemIds = [];
+            case _ {
+                    {
+                        xp = 0;
+                        gold = 0;
+                        itemIds = [];
+                    };
+            };
         };
     };
 
-    func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal) : async RewardInfo {
+    func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async RewardInfo {
         let address : AccountIdentifier = AID.fromPrincipal(caller, null);
         var defaultReward : RewardInfo = {
             xp = 0;
@@ -771,7 +878,7 @@ actor class ObsidianTearsRpg() = this {
                     });
                     switch(optItem) {
                         case(?item) {
-                            ignore(await _mintItem(item.metadata, address));
+                            ignore(await _mintItem(item.metadata, address, characterIndex, item.id));
                             defaultReward := {
                                 itemIds= _append(defaultReward.itemIds, item.id);
                                 gold= 0;
@@ -794,7 +901,7 @@ actor class ObsidianTearsRpg() = this {
                     // choose a random item from the list
                     let item : Ref.Item = filteredItems[randomNumber! % filteredItems.size()];
                     // give item to user
-                    ignore(await _mintItem(item.metadata, address));
+                    ignore(await _mintItem(item.metadata, address, characterIndex, item.id));
                     defaultReward := {
                         itemIds= _append(defaultReward.itemIds, item.id);
                         gold= 0;
@@ -864,7 +971,7 @@ actor class ObsidianTearsRpg() = this {
                                             case _ return {index = 0; data = #nonfungible({metadata = ?Blob.fromArray([])});};
                                         };
                                     });
-                                let ownedItemObjs : [Ref.Item] = getOwnedItems(accountIdentifier);
+                                let ownedItemObjs : [Ref.Item] = getOwnedItems(accountIdentifier, characterIndex);
                                 let equippedIndices : [TokenIndex] = Array.mapFilter<Nat16, TokenIndex>(
                                     equippedItems,
                                     func (id: Nat16) : ?TokenIndex {
@@ -901,25 +1008,37 @@ actor class ObsidianTearsRpg() = this {
         };
     };
 
-    func mintItem(itemId : Nat16, recipient : AccountIdentifier) : async X.ApiResponse<[Nat8]> {
+    func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async X.ApiResponse<[Nat8]> {
         // get item metadata
         let itemContainer : ?Ref.Item = Array.find(Ref.items, func (item : Ref.Item) : Bool {
             return itemId == item.id;
         });
         switch(itemContainer) {
             case(?item) {
-                return await _mintItem(item.metadata, recipient);
+                return await _mintItem(item.metadata, recipient, characterIndex, itemId);
             };
             case _ #Err(#Other "Unable to retrieve item data");
         };
     };
 
-    func _mintItem(metadata: [Nat8], recipient : AccountIdentifier) : async X.ApiResponse<[Nat8]> {
+    func _mintItem(metadata: [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async X.ApiResponse<[Nat8]> {
         try {
-            let result = await _itemActor.mintItem({data= metadata; recipient = recipient;});
-            return #Ok(metadata);
+            if (metadata == []) {
+                let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
+                switch(optNonNftItems) {
+                    case(?nonNftItems) {
+                        _ownedNonNftItems.put(characterIndex, _append(nonNftItems, itemIndex));
+                        return #Ok(metadata);
+                    };
+                    case _ return #Err(#Other "item definition doesn't exist");
+                };
+            }
+            else {
+                let result = await _itemActor.mintItem(metadata, recipient);
+                return #Ok(metadata);
+            };
         } catch(e) {
-            return #Err(#Other("Unable to communicate with item canister"));
+            return #Err(#Other("Unable to communicate with item canister: " # Error.message(e)));
         };
     };
 
@@ -941,6 +1060,9 @@ actor class ObsidianTearsRpg() = this {
     // -----------------------------------
     // management
     // -----------------------------------
+    public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
+        Iter.toArray(_itemRegistry.entries());
+    }; 
     // heartbeat stuff
     public query func isHeartbeatRunning() : async Bool {
         _runHeartbeat;

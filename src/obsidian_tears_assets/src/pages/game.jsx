@@ -28,7 +28,7 @@ const Game = (props) => {
         // sort through the data
         var gameDataParsed = JSON.parse(gameData)
         gameDataParsed['m_list'].find(
-          (val, index) => val['key'] == 'player_inv_curr',
+          (val, index) => val['key'] == 'player_inv_currInventoryCurrencySaver',
         )['data'] = 'playerInvCurrData'
         gameDataParsed['m_list'].find(
           (val, index) => val['key'] == 'charStats_SaverCharStatsSaver',
@@ -40,12 +40,14 @@ const Game = (props) => {
           preppedData,
         )
         if (result['Ok']) {
-          window.result = result['Ok']
+          window.saveGame = result['Ok']
           sendMessage(objectName, 'ListenSaveGame', result['Ok'])
         }
         if (result['Err']) {
           // TODO send message to display unity error
+          window.saveGame = result['Err']
           console.log('Error in SaveGame')
+          console.log(result['Err'])
         }
       })
       addEventListener('LoadGame', async function (objectName) {

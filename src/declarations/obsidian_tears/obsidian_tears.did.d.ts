@@ -57,6 +57,10 @@ export interface ObsidianTearsRpg {
     [TokenIndex, AccountIdentifier],
     Array<TokenIndex>,
   >,
+  'getItemRegistryCopy' : ActorMethod<
+    [],
+    Array<[TokenIndex, AccountIdentifier]>,
+  >,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'isHeartbeatRunning' : ActorMethod<[], boolean>,
   'loadGame' : ActorMethod<[TokenIndex], ApiResponse_1>,

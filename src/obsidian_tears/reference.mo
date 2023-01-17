@@ -240,77 +240,128 @@ module Reference = {
 
 
     public let monsters : [Monster] = [
-        { id=2; name="Crypee";                 gold=5;   xp=90;  itemReward=#SpecificItem({items = [62]});     itemProb=100 },
-        { id=3; name="Dark Beoite";            gold=2;   xp=35;  itemReward=#SpecificItem({items = [35]});     itemProb=100 },
-        { id=3; name="Armed Grunkus";          gold=4;   xp=75;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
+        { id=0; name="Crypee";                 gold=5;   xp=90;  itemReward=#SpecificItem({items = [62]});     itemProb=100 },
+        { id=1; name="Dark Beoite";            gold=2;   xp=35;  itemReward=#SpecificItem({items = [35]});     itemProb=100 },
+        { id=2; name="Armed Grunkus";          gold=4;   xp=75;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
         { id=3; name="Beoite";                 gold=1;   xp=20;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
-        { id=3; name="Burrowing Spider Tree";  gold=3;   xp=40;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
-        { id=3; name="Cruranid";               gold=1;   xp=23;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
-        { id=3; name="Dark Cruranid";          gold=2;   xp=38;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
-        { id=3; name="Dark Grunkus";           gold=2;   xp=45;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
-        { id=3; name="Den Rat";                gold=1;   xp=30;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
-        { id=3; name="The Scolopendrea";       gold=20;  xp=200; itemReward=#SpecificItem({items = [32]});     itemProb=10  },
-        { id=3; name="Grunk";                  gold=1;   xp=18;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
-        { id=3; name="Grunkus";                gold=2;   xp=33;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
-        { id=3; name="Mud Slurghog";           gold=3;   xp=40;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
-        { id=3; name="Slurghog";               gold=2;   xp=35;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
-        { id=3; name="Scolodra";               gold=4;   xp=60;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
-        { id=3; name="Cruranidius";            gold=15;  xp=150; itemReward=#SpecificItem({items = [27]});     itemProb=10  },
-        { id=3; name="Tired Den Rat";          gold=1;   xp=22;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
+        { id=4; name="Burrowing Spider Tree";  gold=3;   xp=40;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
+        { id=5; name="Cruranid";               gold=1;   xp=23;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
+        { id=6; name="Dark Cruranid";          gold=2;   xp=38;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
+        { id=7; name="Dark Grunkus";           gold=2;   xp=45;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
+        { id=8; name="Den Rat";                gold=1;   xp=30;  itemReward=#SpecificItem({items = [32]});     itemProb=10  },
+        { id=9; name="The Scolopendrea";       gold=20;  xp=200; itemReward=#SpecificItem({items = [32]});     itemProb=10  },
+        { id=10; name="Grunk";                  gold=1;   xp=18;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
+        { id=11; name="Grunkus";                gold=2;   xp=33;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
+        { id=12; name="Mud Slurghog";           gold=3;   xp=40;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
+        { id=13; name="Slurghog";               gold=2;   xp=35;  itemReward=#SpecificItem({items = [92]});     itemProb=10  },
+        { id=14; name="Scolodra";               gold=4;   xp=60;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
+        { id=15; name="Cruranidius";            gold=15;  xp=150; itemReward=#SpecificItem({items = [27]});     itemProb=10  },
+        { id=16; name="Tired Den Rat";          gold=1;   xp=22;  itemReward=#SpecificItem({items = [27]});     itemProb=10  },
     ];
 
     public let chests : [TreasureChest] = [
+        // placed
         { id=0; name="2 full mana potions";             gold=0;  itemReward=#SpecificItem({items = [30, 30]});             prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=1; name="Fire Katana";                     gold=0;  itemReward=#SpecificItem({items = [39]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=2; name="Gold by Corn 25";                 gold=25; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=3; name="Gold by Corn 10";                 gold=10; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=4; name="5 full red potions";              gold=0;  itemReward=#SpecificItem({items = [68, 68, 68, 68, 68]}); prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=5; name="Tier 2 Overworld 1";              gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=6; name="Tier 2 Overworld 2";              gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=7; name="Tier 2 Overworld 3";              gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=8; name="Tier 2 Overworld 4";              gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=9; name="Tier 2 Overworld 5";              gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=10; name="Splash";                         gold=0;  itemReward=#SpecificItem({items = [78]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=11; name="Tier 2 City Corner";             gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=12; name="Tier 3 Platform Over Water";     gold=0;  itemReward=#RandomItem({tier = 3});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=13; name="Gold by Lake 10";                gold=10; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        //placed
         { id=14; name="Tier 3 in Skull Trees";          gold=0;  itemReward=#RandomItem({tier = 3});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=15; name="Amethyst Pendant";               gold=0;  itemReward=#SpecificItem{items = ([26])};                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=16; name="Tier 3 in Dead Trees";           gold=0;  itemReward=#RandomItem({tier = 3});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=17; name="Gold Below Obelisk Platform 15"; gold=15; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=18; name="2 yams";                         gold=0;  itemReward=#SpecificItem({items = [92, 92]});             prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=19; name="Bread";                          gold=0;  itemReward=#SpecificItem({items = [32]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=20; name="Tier 3 in Elf Ruins";            gold=0;  itemReward=#RandomItem({tier = 3});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=21; name="Fireblast";                      gold=0;  itemReward=#SpecificItem({items = [40]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=22; name="3 apples in grain storage 1";    gold=0;  itemReward=#SpecificItem({items = [27, 27, 27]});         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=23; name="Tier 1 grain storage 1";         gold=0;  itemReward=#RandomItem({tier = 1});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=24; name="Bread grain storage 2";          gold=0;  itemReward=#SpecificItem({items = [32]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=25; name="Gold grain storage 2 5";         gold=5;  itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=26; name="Leather Helmet Guardhouse";      gold=0;  itemReward=#SpecificItem({items = [52]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=27; name="Leather Boots Guardhouse2";      gold=0;  itemReward=#SpecificItem({items = [51]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=28; name="Gold house porch 3 5";           gold=5;  itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=29; name="Gold house wood 5";              gold=5;  itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=30; name="Tier 1 non gran gran";           gold=0;  itemReward=#RandomItem({tier = 1});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=31; name="Healing Potion Shop";            gold=0;  itemReward=#SpecificItem({items = [77]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=32; name="Cauldron Lid Tavern upstairs";   gold=0;  itemReward=#SpecificItem({items = [77]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=33; name="Gold Tavern upstairs 20";        gold=20; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=34; name="Melantyls Armor Town hall";      gold=0;  itemReward=#SpecificItem({items = [54]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
-        { id=35; name="Gold 2story upstairs 2 20";      gold=20; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
-        { id=36; name="Gold 2story upstairs 2 20";      gold=20; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
+        { id=35; name="Gold+ 2story upstairs 2 20";     gold=20; itemReward=#SpecificItem({items = [35]});                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=37; name="Fire Wand dead forest cave";     gold=0;  itemReward=#SpecificItem({items = [17]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=38; name="4 red potions dead forest cave"; gold=0;  itemReward=#SpecificItem({items = [68,68,68,68,68]});     prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=39; name="gold dead forest cave 15";       gold=15; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=40; name="5 half potions hiddenpath cave"; gold=0;  itemReward=#SpecificItem({items = [47, 47, 47, 47, 47]}); prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=41; name="rune of doom pond cave";         gold=0;  itemReward=#SpecificItem({items = [70]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=42; name="2 full potions pond cave";       gold=0;  itemReward=#SpecificItem({items = [68, 68]});             prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=43; name="gold pond cave 35";              gold=35; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=44; name="Tier 2 v. graveyard cave";       gold=0;  itemReward=#RandomItem({tier = 2});                       prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=45; name="light shard v. graveyard cave";  gold=0;  itemReward=#SpecificItem({items = [71]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=46; name="Blades from Tiana";              gold=0;  itemReward=#SpecificItem({items = [36]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=47; name="Bow from Archer";                gold=0;  itemReward=#SpecificItem({items = [31]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=48; name="Pendant from Herl";              gold=0;  itemReward=#SpecificItem({items = [63]});                 prerequisites=[]; position=?{x=1.0;y=1.0} },
-        { id=49; name="Grandma Star Gift";              gold=0;  itemReward=#SpecificItem({items = [68,68,68,68,68,38]});  prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
+        { id=49; name="Grandma Start Gift";             gold=0;  itemReward=#SpecificItem({items = [68,68,68,68,68,38]});  prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
         { id=50; name="Gold from Eldre";                gold=50; itemReward=#None;                                         prerequisites=[]; position=?{x=1.0;y=1.0} },
+        // placed
+        { id=51; name="Monster Jaw";                    gold=0; itemReward=#SpecificItem({items = [57]});                  prerequisites=[]; position=?{x=1.0;y=1.0} },
     ];
 
     public let events : [PlotEvent] = [

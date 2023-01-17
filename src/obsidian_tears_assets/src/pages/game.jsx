@@ -29,6 +29,8 @@ const Game = (props) => {
         var gameDataParsed = JSON.parse(gameData)
         gameDataParsed['m_list'].find(
           (val, index) => val['key'] == 'player_inv_currInventoryCurrencySaver',
+          // TODO find the item collection field and put equipped items in the right place
+          // TODO save the equipped items in the server
         )['data'] = 'playerInvCurrData'
         gameDataParsed['m_list'].find(
           (val, index) => val['key'] == 'charStats_SaverCharStatsSaver',
@@ -67,11 +69,13 @@ const Game = (props) => {
       addEventListener('BuyItem', async function (
         shopIndex,
         itemIndex,
+        qty,
         objectName,
       ) {
         let result = await props.gameActorRef.current.buyItem(
           props.selectedNftIndexRef.current,
           shopIndex,
+          qty,
           itemIndex,
         )
         //todo: check result, take action on error

@@ -13,7 +13,7 @@ export const idlFactory = ({ IDL }) => {
   const RewardInfo = IDL.Record({
     'xp' : IDL.Nat32,
     'gold' : IDL.Nat32,
-    'itemIds' : IDL.Vec(IDL.Nat16),
+    'itemIds' : IDL.Vec(IDL.Text),
   });
   const ApiResponse_2 = IDL.Variant({ 'Ok' : RewardInfo, 'Err' : ApiError });
   const AccountIdentifier = IDL.Text;

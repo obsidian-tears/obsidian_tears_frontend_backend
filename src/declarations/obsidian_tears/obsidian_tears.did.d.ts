@@ -75,7 +75,7 @@ export type Result = { 'ok' : null } |
 export interface RewardInfo {
   'xp' : number,
   'gold' : number,
-  'itemIds' : Array<number>,
+  'itemIds' : Array<string>,
 }
 export type TokenIndex = number;
 export interface _SERVICE extends ObsidianTearsRpg {}

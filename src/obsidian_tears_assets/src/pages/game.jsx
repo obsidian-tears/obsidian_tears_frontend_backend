@@ -81,28 +81,31 @@ const Game = (props) => {
         //todo: check result, take action on error
         if (result['Ok']) {
           window.buyItemData = result['Ok']
+          // bought items are given in game
         }
         if (result['Err']) {
           // TODO send message to display unity error
           window.buyItemData = result['Err']
-          sendMessage(objectName, 'DisplayError', result['Ok'])
+          sendMessage(objectName, 'DisplayError', JSON.stringify(result['Err']))
           console.log('Error in LoadGame')
         }
       })
       addEventListener('OpenChest', async function (chestId, objectName) {
+        console.log(`ERROR HERE: chestId: ${chestId}, objectName: ${objectName}`);
         let result = await props.gameActorRef.current.openChest(
           props.selectedNftIndexRef.current,
           chestId,
         )
+        console.log(`RESULT HERE: result: ${JSON.stringify(result)}`)
         if (result['Ok']) {
           window.chestData = result['Ok']
-          sendMessage(objectName, 'ListenOpenChest', result['Ok'])
+          sendMessage(objectName, 'ListenOpenChest', JSON.stringify(result['Ok']))
         }
         if (result['Err']) {
           // TODO send message to display unity error
           window.chestData = result['Err']
-          sendMessage(objectName, 'DisplayError', result['Err'])
-          console.log('Error in LoadGame')
+          sendMessage(objectName, 'DisplayError', JSON.stringify(result['Err']))
+          console.log('Error in OpenChest')
         }
         //todo: check result, take action on error, put the item in the game on success
       })
@@ -132,12 +135,12 @@ const Game = (props) => {
         )
         if (result['Ok']) {
           window.monsterData = result['Ok']
-          sendMessage(objectName, 'ListenDefeatMonster', result['Ok'])
+          sendMessage(objectName, 'ListenDefeatMonster', JSON.stringify(result['Ok']))
         }
         if (result['Err']) {
           // TODO send message to display unity error
           window.monsterData = result['Err']
-          sendMessage(objectName, 'DisplayError', result['Err'])
+          sendMessage(objectName, 'DisplayError', JSON.stringify(result['Err']))
           console.log('Error in LoadGame')
         }
       })
@@ -147,10 +150,6 @@ const Game = (props) => {
   React.useEffect(() => {
     setLoadingPercentage(Math.round(loadingProgression * 100))
   }, [loadingProgression])
-
-  const test = () => {
-    sendMessage('ReactController', 'ListenSaveGame', '{test: 1}')
-  }
 
   return (
     <>
@@ -167,9 +166,6 @@ const Game = (props) => {
             <Unity className="unity" unityProvider={unityProvider} />
           </div>
         </div>
-      </div>
-      <div>
-        <button onClick={test}>Spawn Enemies</button>
       </div>
     </>
   )

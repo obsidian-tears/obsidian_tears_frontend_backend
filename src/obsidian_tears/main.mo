@@ -43,7 +43,7 @@ actor class ObsidianTearsRpg() = this {
         itemsEarned : Nat8;
     };
     type RewardInfo = {
-        itemIds : [Nat16];
+        itemIds : [Text];
         gold : Nat32;
         xp : Nat32;
     };
@@ -99,7 +99,7 @@ actor class ObsidianTearsRpg() = this {
     private stable var REGISTRY_CHECK : Time.Time = 10*60*1_000_000_000; // check sessions every 10 minutes
     private stable var MAX_GOLD : Nat32 = 5_000; // max amount of gold earned in 1 session
     private stable var MAX_XP : Nat32 = 5_000; // max amount of gold earned in 1 session
-    private stable var MAX_ITEMS : Nat8 = 10; // max amount of gold earned in 1 session
+    private stable var MAX_ITEMS : Nat8 = 100; // max amount of gold earned in 1 session
     private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
     private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
     private stable var _runHeartbeat : Bool = true;
@@ -260,9 +260,14 @@ actor class ObsidianTearsRpg() = this {
                     case (?chest) {
                         var rewardInfo : RewardInfo = {itemIds = []; gold = 0; xp = 0;};
                         if (chest.gold > 0) {
-                            ignore(_giveGold(chest.gold, caller, true));
+                            rewardInfo := {
+                                itemIds = rewardInfo.itemIds;
+                                gold = _giveGold(chest.gold, caller, true);
+                                xp = rewardInfo.xp;
+                            };
                         };
                         let itemResult : RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
+                        // TODO: change itemIds into itemDefIds
                         rewardInfo := {
                             itemIds = itemResult.itemIds;
                             gold = rewardInfo.gold;
@@ -293,7 +298,7 @@ actor class ObsidianTearsRpg() = this {
         };
     };
 
-    public shared({ caller }) func buyItem(characterIndex: TokenIndex, shopIndex : Nat16, itemIndex : Nat16) : async(X.ApiResponse<[Nat8]>) {
+    public shared({ caller }) func buyItem(characterIndex: TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async(X.ApiResponse<()>) {
         switch(checkSession(caller, characterIndex)) {
             case(#Err e) {
                return #Err e;
@@ -330,7 +335,10 @@ actor class ObsidianTearsRpg() = this {
                 };
                 // update player session (counts as receiving an item)
                 ignore(updateSession(characterIndex, session, 0, 0, 1));
-                return await mintItem(itemIndex, address, characterIndex);
+                for (i in Iter.range(1, qty)) {
+                    ignore(await mintItem(itemIndex, address, characterIndex));
+                };
+                return #Ok;
             };
         };
     };
@@ -422,10 +430,11 @@ actor class ObsidianTearsRpg() = this {
                 // add monster rewards to character and session
                 switch(optMonster) {
                     case(?monster) {
-                        let itemRewards : RewardInfo = await _mintRewardItems(monster.itemReward, caller, characterIndex);
                         // give player gold
                         switch(_playerData.get(characterIndex)) {
-                            case(?playerData) {
+                            // TODO: give every player player data on start
+                            // case(?playerData) {
+                            case(_) {
                                 let itemInfo : RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
                                 let rewardInfo : RewardInfo = {
                                     gold = _giveGold(monster.gold, caller, true);
@@ -435,9 +444,9 @@ actor class ObsidianTearsRpg() = this {
                                 ignore(updateSession(characterIndex, session, rewardInfo.xp, rewardInfo.gold, Nat8.fromNat(rewardInfo.itemIds.size())));
                                 #Ok rewardInfo;
                             };
-                            case(_) {
-                                #Err(#Other("Server Error. Failed to find player data."));
-                            };
+                            // case(_) {
+                                // #Err(#Other("Server Error. Failed to find player data."));
+                            // };
                         };
                     };
                     case _ {
@@ -769,7 +778,8 @@ actor class ObsidianTearsRpg() = this {
             // if their session has been reset, replace it
             case(?session) {
                 if (session.goldEarned >= MAX_GOLD or session.itemsEarned >= MAX_ITEMS or session.xpEarned >= MAX_XP){
-                    return #Err(#Limit);
+                    // return #Err(#Limit);
+                    return #Ok session;
                 } else {
                     return #Ok session;
                 }
@@ -880,7 +890,7 @@ actor class ObsidianTearsRpg() = this {
                         case(?item) {
                             ignore(await _mintItem(item.metadata, address, characterIndex, item.id));
                             defaultReward := {
-                                itemIds= _append(defaultReward.itemIds, item.id);
+                                itemIds= _append(defaultReward.itemIds, item.unityId);
                                 gold= 0;
                                 xp = 0;
                             };
@@ -903,7 +913,7 @@ actor class ObsidianTearsRpg() = this {
                     // give item to user
                     ignore(await _mintItem(item.metadata, address, characterIndex, item.id));
                     defaultReward := {
-                        itemIds= _append(defaultReward.itemIds, item.id);
+                        itemIds= _append(defaultReward.itemIds, item.unityId);
                         gold= 0;
                         xp = 0;
                     };

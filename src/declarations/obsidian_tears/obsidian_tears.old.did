@@ -2,7 +2,7 @@ type TokenIndex = nat32;
 type RewardInfo = 
  record {
    gold: nat32;
-   itemIds: vec nat16;
+   itemIds: vec text;
    xp: nat32;
  };
 type Result = 

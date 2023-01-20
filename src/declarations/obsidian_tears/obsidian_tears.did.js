@@ -5,10 +5,6 @@ export const idlFactory = ({ IDL }) => {
     'Unauthorized' : IDL.Null,
     'Other' : IDL.Text,
   });
-  const ApiResponse_4 = IDL.Variant({
-    'Ok' : IDL.Vec(IDL.Nat8),
-    'Err' : ApiError,
-  });
   const ApiResponse_3 = IDL.Variant({ 'Ok' : IDL.Null, 'Err' : ApiError });
   const RewardInfo = IDL.Record({
     'xp' : IDL.Nat32,
@@ -62,8 +58,8 @@ export const idlFactory = ({ IDL }) => {
     'adminStartHeartbeat' : IDL.Func([], [], []),
     'balance' : IDL.Func([], [IDL.Nat], ['query']),
     'buyItem' : IDL.Func(
-        [TokenIndex, IDL.Nat16, IDL.Nat16],
-        [ApiResponse_4],
+        [TokenIndex, IDL.Nat16, IDL.Int, IDL.Nat16],
+        [ApiResponse_3],
         [],
       ),
     'checkIn' : IDL.Func([], [], []),

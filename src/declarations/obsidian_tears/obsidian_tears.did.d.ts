@@ -13,8 +13,6 @@ export type ApiResponse_2 = { 'Ok' : RewardInfo } |
   { 'Err' : ApiError };
 export type ApiResponse_3 = { 'Ok' : null } |
   { 'Err' : ApiError };
-export type ApiResponse_4 = { 'Ok' : Array<number> } |
-  { 'Err' : ApiError };
 export type HeaderField = [string, string];
 export interface HttpRequest {
   'url' : string,
@@ -49,7 +47,7 @@ export interface ObsidianTearsRpg {
   'adminKillHeartbeat' : ActorMethod<[], undefined>,
   'adminStartHeartbeat' : ActorMethod<[], undefined>,
   'balance' : ActorMethod<[], bigint>,
-  'buyItem' : ActorMethod<[TokenIndex, number, number], ApiResponse_4>,
+  'buyItem' : ActorMethod<[TokenIndex, number, bigint, number], ApiResponse_3>,
   'checkIn' : ActorMethod<[], undefined>,
   'consumeItem' : ActorMethod<[TokenIndex, number], ApiResponse_3>,
   'defeatMonster' : ActorMethod<[TokenIndex, number], ApiResponse_2>,

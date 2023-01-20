@@ -16,7 +16,7 @@ type ObsidianTearsRpg =
    adminKillHeartbeat: () -> ();
    adminStartHeartbeat: () -> ();
    balance: () -> (nat) query;
-   buyItem: (TokenIndex, nat16, nat16) -> (ApiResponse_4);
+   buyItem: (TokenIndex, nat16, int, nat16) -> (ApiResponse_3);
    checkIn: () -> ();
    consumeItem: (TokenIndex, nat16) -> (ApiResponse_3);
    defeatMonster: (TokenIndex, nat16) -> (ApiResponse_2);
@@ -73,11 +73,6 @@ type HeaderField =
  record {
    text;
    text;
- };
-type ApiResponse_4 = 
- variant {
-   Err: ApiError;
-   Ok: vec nat8;
  };
 type ApiResponse_3 = 
  variant {

@@ -27,7 +27,6 @@ import Ref "./reference";
 import X "./types";
 
 
-// TODO: track what item transfers go through and which don't. any failed transfers will be stored 
 
 actor class ObsidianTearsRpg() = this {
     // Types
@@ -134,19 +133,14 @@ actor class ObsidianTearsRpg() = this {
     private var _playerData : HashMap.HashMap<TokenIndex, PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
     // ********* NOW ********* //
-    // TODO map all items to item metadata for minting
-    // TODO map all monsters to experience, level, gold, etc
-    // TODO map all chests to (json id, opened, item) for loading and deciding what to mint when opening
-    // TODO map all markets to items in market
-    // TODO in game await calls that deliver data in game;
+    // TODO create new game function that sets player data at default
+    // TODO create level up function that increases player level and stats
 
     // ********* LATER ********* //
-    // TODO track player position and time updated. keep a map of transition times for moving from one area to another 
-    // TODO create sections in game (based on position) mapped to everything available in the area (and which areas you can transition to)
-    // TODO track player story progress map (with prerequisites)
-    // TODO map all story points to their index in story progress, with list of prerequisites and optional map position
-    // TODO for each treasure chest, market, boss have a list of prerequisite story points that must be toggled ^^
-    // TODO in game asynchronously call checkins and updates to story progress as needed
+    // TODO track player position with timestamps. based on event positions (eg. opening chests) determine whether player could have traveled that far
+    // TODO keep track of story progress for player (list of events in story that have been completed)
+    // TODO for each relevent event (eg. opening a chest at the end of a sidequest) have a list of story events that must be completed to open chest.
+    // TODO keep track of opened chests for each character
 
     private var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
@@ -240,6 +234,7 @@ actor class ObsidianTearsRpg() = this {
             };
             case(_) {};
         };
+        // TODO: save the equipped items data into the equipped items stable memory
         // save boring data (everything but items and player stats)
         _saveData.put(characterIndex, gameData);
         return _load(characterIndex, AID.fromPrincipal(caller, null));
@@ -267,7 +262,6 @@ actor class ObsidianTearsRpg() = this {
                             };
                         };
                         let itemResult : RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
-                        // TODO: change itemIds into itemDefIds
                         rewardInfo := {
                             itemIds = itemResult.itemIds;
                             gold = rewardInfo.gold;
@@ -433,7 +427,7 @@ actor class ObsidianTearsRpg() = this {
                         // give player gold
                         switch(_playerData.get(characterIndex)) {
                             // TODO: give every player player data on start
-                            // case(?playerData) {
+                            // case(?playerData) {}
                             case(_) {
                                 let itemInfo : RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
                                 let rewardInfo : RewardInfo = {
@@ -582,7 +576,6 @@ actor class ObsidianTearsRpg() = this {
                 compareMetadata(i.metadata, metadata);
             });
         });
-        // TODO get non nft items
         let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
         switch(optNonNftItems) {
             case (?nonNftItems) {

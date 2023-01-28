@@ -29,7 +29,7 @@ const Game = (props) => {
         var gameDataParsed = JSON.parse(gameData)
         gameDataParsed['m_list'].find(
           (val, index) => val['key'] == 'player_inv_currInventoryCurrencySaver',
-          // TODO find the item collection field and put equipped items in the right place
+          // TODO preserve the equipped item data that is erased here ^
           // TODO save the equipped items in the server
         )['data'] = 'playerInvCurrData'
         gameDataParsed['m_list'].find(
@@ -91,12 +91,10 @@ const Game = (props) => {
         }
       })
       addEventListener('OpenChest', async function (chestId, objectName) {
-        console.log(`ERROR HERE: chestId: ${chestId}, objectName: ${objectName}`);
         let result = await props.gameActorRef.current.openChest(
           props.selectedNftIndexRef.current,
           chestId,
         )
-        console.log(`RESULT HERE: result: ${JSON.stringify(result)}`)
         if (result['Ok']) {
           window.chestData = result['Ok']
           sendMessage(objectName, 'ListenOpenChest', JSON.stringify(result['Ok']))

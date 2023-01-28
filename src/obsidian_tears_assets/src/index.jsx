@@ -174,7 +174,7 @@ const ObsidianTears = () => {
 
   const selectNft = async (index) => {
     setSelectedNftIndex(index)
-    // TODO load player save data from game canister
+    // load player save data from game canister
     const verifiedNfts = await gameActor.verify()
     console.log(`verifiedNfts: ${verifiedNfts}`)
     if (!verifiedNfts['Ok']) {

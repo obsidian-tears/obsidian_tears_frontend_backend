@@ -1,8 +1,3 @@
-/**
-
-//TODO need a way to retreive the correct transfer request if it has been overwritten
-
- */
 import ExtCore "./Core";
 import Result "mo:base/Result";
 

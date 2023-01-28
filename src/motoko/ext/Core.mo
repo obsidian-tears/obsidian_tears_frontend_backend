@@ -1,6 +1,3 @@
-/**
-
- */
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
 import PrincipalEXT "../util/Principal";
@@ -11,7 +8,6 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat32 "mo:base/Nat32";
-//TODO pull in better
 import AID "../util/AccountIdentifier";
 import Hex "../util/Hex";
 import CRC32 "../util/CRC32";

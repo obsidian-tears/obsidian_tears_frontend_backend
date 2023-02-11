@@ -15,8 +15,9 @@ These canisters interact with several other canisters, including the obsidian te
 - 5 - delete current build files (obsidian_tears -> src -> obsidian_tears_assets -> assets -> unity)
 - 6 - copy/move there the current build files
 - 7 - "dfx identity list" (check you are using the right identity, if need to change: dfx identity use {identity name})
-- 8 - dfx deploy obsidian_tears_assets --network ic
+- 8 - dfx deploy --network ic
 
+Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
 
 # generic IC instructions
 

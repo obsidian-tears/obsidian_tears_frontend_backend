@@ -7,6 +7,17 @@ The backend canister contains all game data. Loss of data will result in players
 These canisters interact with several other canisters, including the obsidian tears character nft canister and obsidian tears items nft canister. Be aware that if the interface of these nft canisters changes, it may break this canister as a result. 
 
 
+## How to update unity build
+- 1 - On Unity Hub. File -> Build -> WebGL, double check if options make sense.
+- 2 - Go to obsidian_tears repo (probably by opening VS Code), open terminal and write:
+- 3 - "git status" (ensure no file was added, if so, do "git checkout .")
+- 4 - "git pull origin main" (this will update your branch to most recent version of main)
+- 5 - delete current build files (obsidian_tears -> src -> obsidian_tears_assets -> assets -> unity)
+- 6 - copy/move there the current build files
+- 7 - "dfx identity list" (check you are using the right identity, if need to change: dfx identity use {identity name})
+- 8 - dfx deploy obsidian_tears_assets --network ic
+
+
 # generic IC instructions
 
 Welcome to your new obsidian_tears project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.

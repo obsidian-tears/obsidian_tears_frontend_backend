@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "dfx": "0.10.0",
+  "dfx": "0.12.1",
   "canisters": {
     "obsidian_tears": {
       "type": "motoko",
@@ -24,12 +24,6 @@
     "build": {
       "packtool": "vessel sources",
       "args": ""
-    }
-  },
-  "networks": {
-    "local": {
-      "bind": "127.0.0.1:8000",
-      "type": "ephemeral"
     }
   }
 }

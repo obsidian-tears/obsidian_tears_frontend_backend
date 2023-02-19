@@ -76,23 +76,15 @@ module.exports = {
   // modules and CSS as described in the "Adding a stylesheet"
   // tutorial, uncomment the following lines:
   module: {
-   rules: [
-    { test: /\.(js|ts)x?$/, loader: "ts-loader" },
-    { test: /\.css$/, use: ['style-loader','css-loader'] }
-   ]
+    rules: [
+      { test: /\.(js|ts)x?$/, loader: "ts-loader" },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] }
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, asset_entry),
       cache: false,
-    }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.join(__dirname, "src", frontendDirectory, "assets"),
-          to: path.join(__dirname, "dist", frontendDirectory),
-        },
-      ],
     }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: "development",

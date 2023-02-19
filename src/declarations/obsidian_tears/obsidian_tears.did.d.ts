@@ -5,7 +5,7 @@ export type AccountIdentifier = string;
 export type ApiError = { 'Limit' : null } |
   { 'Unauthorized' : null } |
   { 'Other' : string };
-export type ApiResponse = { 'Ok' : Array<TokenIndex> } |
+export type ApiResponse = { 'Ok' : Uint32Array } |
   { 'Err' : ApiError };
 export type ApiResponse_1 = { 'Ok' : string } |
   { 'Err' : ApiError };
@@ -17,22 +17,22 @@ export type HeaderField = [string, string];
 export interface HttpRequest {
   'url' : string,
   'method' : string,
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
 }
 export interface HttpResponse {
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
   'streaming_strategy' : [] | [HttpStreamingStrategy],
   'status_code' : number,
 }
 export interface HttpStreamingCallbackResponse {
   'token' : [] | [HttpStreamingCallbackToken],
-  'body' : Array<number>,
+  'body' : Uint8Array,
 }
 export interface HttpStreamingCallbackToken {
   'key' : string,
-  'sha256' : [] | [Array<number>],
+  'sha256' : [] | [Uint8Array],
   'index' : bigint,
   'content_encoding' : string,
 }
@@ -51,14 +51,14 @@ export interface ObsidianTearsRpg {
   'checkIn' : ActorMethod<[], undefined>,
   'consumeItem' : ActorMethod<[TokenIndex, number], ApiResponse_3>,
   'defeatMonster' : ActorMethod<[TokenIndex, number], ApiResponse_2>,
-  'equipItems' : ActorMethod<[TokenIndex, Array<number>], ApiResponse_3>,
+  'equipItems' : ActorMethod<[TokenIndex, Uint16Array], ApiResponse_3>,
   'getEquippedItems' : ActorMethod<
     [TokenIndex, AccountIdentifier],
-    Array<TokenIndex>,
+    Uint32Array
   >,
   'getItemRegistryCopy' : ActorMethod<
     [],
-    Array<[TokenIndex, AccountIdentifier]>,
+    Array<[TokenIndex, AccountIdentifier]>
   >,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'isHeartbeatRunning' : ActorMethod<[], boolean>,

@@ -9,17 +9,22 @@ export type BatchOperationKind = { 'CreateAsset' : CreateAssetArguments } |
   { 'Clear' : ClearArguments };
 export type ChunkId = bigint;
 export type ClearArguments = {};
-export interface CreateAssetArguments { 'key' : Key, 'content_type' : string }
+export interface CreateAssetArguments {
+  'key' : Key,
+  'content_type' : string,
+  'headers' : [] | [Array<HeaderField>],
+  'max_age' : [] | [bigint],
+}
 export interface DeleteAssetArguments { 'key' : Key }
 export type HeaderField = [string, string];
 export interface HttpRequest {
   'url' : string,
   'method' : string,
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
 }
 export interface HttpResponse {
-  'body' : Array<number>,
+  'body' : Uint8Array,
   'headers' : Array<HeaderField>,
   'streaming_strategy' : [] | [StreamingStrategy],
   'status_code' : number,
@@ -27,17 +32,17 @@ export interface HttpResponse {
 export type Key = string;
 export interface SetAssetContentArguments {
   'key' : Key,
-  'sha256' : [] | [Array<number>],
+  'sha256' : [] | [Uint8Array],
   'chunk_ids' : Array<ChunkId>,
   'content_encoding' : string,
 }
 export interface StreamingCallbackHttpResponse {
   'token' : [] | [StreamingCallbackToken],
-  'body' : Array<number>,
+  'body' : Uint8Array,
 }
 export interface StreamingCallbackToken {
   'key' : Key,
-  'sha256' : [] | [Array<number>],
+  'sha256' : [] | [Uint8Array],
   'index' : bigint,
   'content_encoding' : string,
 }
@@ -54,43 +59,47 @@ export interface UnsetAssetContentArguments {
 }
 export interface _SERVICE {
   'authorize' : ActorMethod<[Principal], undefined>,
+  'certified_tree' : ActorMethod<
+    [{}],
+    { 'certificate' : Uint8Array, 'tree' : Uint8Array }
+  >,
   'clear' : ActorMethod<[ClearArguments], undefined>,
   'commit_batch' : ActorMethod<
     [{ 'batch_id' : BatchId, 'operations' : Array<BatchOperationKind> }],
-    undefined,
+    undefined
   >,
   'create_asset' : ActorMethod<[CreateAssetArguments], undefined>,
   'create_batch' : ActorMethod<[{}], { 'batch_id' : BatchId }>,
   'create_chunk' : ActorMethod<
-    [{ 'content' : Array<number>, 'batch_id' : BatchId }],
-    { 'chunk_id' : ChunkId },
+    [{ 'content' : Uint8Array, 'batch_id' : BatchId }],
+    { 'chunk_id' : ChunkId }
   >,
   'delete_asset' : ActorMethod<[DeleteAssetArguments], undefined>,
   'get' : ActorMethod<
     [{ 'key' : Key, 'accept_encodings' : Array<string> }],
     {
-      'content' : Array<number>,
-      'sha256' : [] | [Array<number>],
+      'content' : Uint8Array,
+      'sha256' : [] | [Uint8Array],
       'content_type' : string,
       'content_encoding' : string,
       'total_length' : bigint,
-    },
+    }
   >,
   'get_chunk' : ActorMethod<
     [
       {
         'key' : Key,
-        'sha256' : [] | [Array<number>],
+        'sha256' : [] | [Uint8Array],
         'index' : bigint,
         'content_encoding' : string,
       },
     ],
-    { 'content' : Array<number> },
+    { 'content' : Uint8Array }
   >,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'http_request_streaming_callback' : ActorMethod<
     [StreamingCallbackToken],
-    [] | [StreamingCallbackHttpResponse],
+    [] | [StreamingCallbackHttpResponse]
   >,
   'list' : ActorMethod<
     [{}],
@@ -100,27 +109,27 @@ export interface _SERVICE {
         'encodings' : Array<
           {
             'modified' : Time,
-            'sha256' : [] | [Array<number>],
+            'sha256' : [] | [Uint8Array],
             'length' : bigint,
             'content_encoding' : string,
           }
         >,
         'content_type' : string,
       }
-    >,
+    >
   >,
   'set_asset_content' : ActorMethod<[SetAssetContentArguments], undefined>,
   'store' : ActorMethod<
     [
       {
         'key' : Key,
-        'content' : Array<number>,
-        'sha256' : [] | [Array<number>],
+        'content' : Uint8Array,
+        'sha256' : [] | [Uint8Array],
         'content_type' : string,
         'content_encoding' : string,
       },
     ],
-    undefined,
+    undefined
   >,
   'unset_asset_content' : ActorMethod<[UnsetAssetContentArguments], undefined>,
 }

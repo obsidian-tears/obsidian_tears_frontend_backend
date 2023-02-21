@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { render } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 import Home from './pages/home'
 import Game from './pages/game'
@@ -203,10 +203,13 @@ const ObsidianTears = () => {
     setLoggedIn(false)
   }
 
-  React.useEffect(async () => {
-    if (gameActor == null && itemActor == null && charActor == null) {
-      await verifyConnectionAndAgent()
+  React.useEffect(() => {
+    async function checkAndRecoverSession() {
+      if (gameActor == null && itemActor == null && charActor == null) {
+        await verifyConnectionAndAgent()
+      }
     }
+    checkAndRecoverSession();
   }, [gameActor, itemActor, charActor])
 
   return (
@@ -278,4 +281,5 @@ const ObsidianTears = () => {
   )
 }
 
-render(<ObsidianTears />, document.getElementById('app'))
+const root = createRoot(document.getElementById('app'));
+root.render(<ObsidianTears />);

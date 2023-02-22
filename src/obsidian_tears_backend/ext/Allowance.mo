@@ -18,8 +18,8 @@ module ExtAllowance = {
   };
 
   public type ValidActor = actor {
-    allowance: shared query (request : AllowanceRequest) -> async Result.Result<ExtCore.Balance, ExtCore.CommonError>;
-        
-    approve: shared (request : ApproveRequest) -> async ();
+    allowance : shared query (request : AllowanceRequest) -> async Result.Result<ExtCore.Balance, ExtCore.CommonError>;
+
+    approve : shared (request : ApproveRequest) -> async ();
   };
 };

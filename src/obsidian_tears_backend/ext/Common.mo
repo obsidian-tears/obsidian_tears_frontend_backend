@@ -16,10 +16,10 @@ module ExtCommon = {
       metadata : ?Blob;
     };
   };
-  
-  public type Service = actor {
-    metadata: query (token : ExtCore.TokenIdentifier) -> async Result.Result<Metadata, ExtCore.CommonError>;
 
-    supply: query (token : ExtCore.TokenIdentifier) -> async Result.Result<ExtCore.Balance, ExtCore.CommonError>;
+  public type Service = actor {
+    metadata : query (token : ExtCore.TokenIdentifier) -> async Result.Result<Metadata, ExtCore.CommonError>;
+
+    supply : query (token : ExtCore.TokenIdentifier) -> async Result.Result<ExtCore.Balance, ExtCore.CommonError>;
   };
 };

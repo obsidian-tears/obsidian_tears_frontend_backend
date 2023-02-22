@@ -24,7 +24,7 @@ module Util {
         var ys : [A] = [];
         for (i in xs.keys()) {
             if (i >= n) {
-                ys := Array.append(ys, [xs[i]])
+                ys := Array.append(ys, [xs[i]]);
             };
         };
         ys;

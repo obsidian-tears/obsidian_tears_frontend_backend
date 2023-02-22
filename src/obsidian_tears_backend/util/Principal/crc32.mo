@@ -12,22 +12,22 @@ module CRC32 {
         slicingUpdate(0, slicingTable(), data);
     };
 
-    private func simpleUpdate(crc : Nat32, table: [Nat32], data : [Nat8]) : Nat32 {
+    private func simpleUpdate(crc : Nat32, table : [Nat32], data : [Nat8]) : Nat32 {
         var u = ^crc;
         for (v in data.vals()) {
-            u := table[Nat8.toNat(Util.nat32ToNat8(u) ^ v)] ^ (u >> 8)
+            u := table[Nat8.toNat(Util.nat32ToNat8(u) ^ v)] ^ (u >> 8);
         };
         ^u;
     };
 
-    private func slicingUpdate(crc : Nat32, table: [[Nat32]], data : [Nat8]) : Nat32 {
-        if (data.size() == 0 ) { return crc;    };
+    private func slicingUpdate(crc : Nat32, table : [[Nat32]], data : [Nat8]) : Nat32 {
+        if (data.size() == 0) { return crc };
         //if (data.size() >= 16) { assert(false); }; // Not supported.
         simpleUpdate(crc, table[0], data);
     };
 
     let IEEE : Nat32 = 0xedb88320;
-    
+
     private func simpleTable() : [var Nat32] {
         let t = Array.init<Nat32>(256, 0);
         for (i in Iter.range(0, 255)) {
@@ -54,8 +54,11 @@ module CRC32 {
                 t[j][i] := crc;
             };
         };
-        Array.tabulate(t.size(), func (i : Nat) : [Nat32] {
-            Array.freeze(t[i]);
-        });
+        Array.tabulate(
+            t.size(),
+            func(i : Nat) : [Nat32] {
+                Array.freeze(t[i]);
+            },
+        );
     };
 };

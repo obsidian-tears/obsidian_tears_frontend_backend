@@ -3,9 +3,9 @@
  */
 import ExtCore "./Core";
 module ExtLedger = {
-  public type AccountBalanceArgs = { 
+  public type AccountBalanceArgs = {
     account : ExtCore.AccountIdentifier;
-    token : ExtCore.TokenIdentifier; 
+    token : ExtCore.TokenIdentifier;
   };
   public type ICPTs = { e8s : Nat64 };
   public type BlockHeight = Nat64;
@@ -21,7 +21,7 @@ module ExtLedger = {
 
   public type ValidActor = actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-    
+
     send_dfx : shared SendArgs -> async BlockHeight;
   };
 };

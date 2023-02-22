@@ -20,7 +20,7 @@ module ExtCore = {
     #principal : Principal; //defaults to sub account 0
   };
   public type Balance = Nat;
-  public type TokenIdentifier  = Text;
+  public type TokenIdentifier = Text;
   public type TokenIndex = Nat32;
   public type TokenObj = {
     index : TokenIndex;
@@ -29,12 +29,12 @@ module ExtCore = {
   public type Extension = Text;
   public type Memo = Blob;
   public type CommonError = {
-    #InvalidToken: TokenIdentifier;
+    #InvalidToken : TokenIdentifier;
     #Other : Text;
   };
-  public type BalanceRequest = { 
-    user : User; 
-    token: TokenIdentifier;
+  public type BalanceRequest = {
+    user : User;
+    token : TokenIdentifier;
   };
   public type BalanceResponse = Result.Result<Balance, CommonError>;
 
@@ -47,25 +47,20 @@ module ExtCore = {
     notify : Bool;
     subaccount : ?SubAccount;
   };
-  public type TransferResponse = Result.Result<Balance, {
-    #Unauthorized: AccountIdentifier;
-    #InsufficientBalance;
-    #Rejected; //Rejected by canister
-    #InvalidToken: TokenIdentifier;
-    #CannotNotify: AccountIdentifier;
-    #Other : Text;
-  }>;
+  public type TransferResponse = Result.Result<Balance, { #Unauthorized : AccountIdentifier; #InsufficientBalance; #Rejected; /* Rejected by canister */ #InvalidToken : TokenIdentifier; #CannotNotify : AccountIdentifier; #Other : Text }>;
   public type NotifyCallback = shared (TokenIdentifier, User, Balance, Memo) -> async ?Balance;
-  public type NotifyService = actor { tokenTransferNotification : NotifyCallback};
+  public type NotifyService = actor {
+    tokenTransferNotification : NotifyCallback;
+  };
 
   public type Service = actor {
     extensions : query () -> async [Extension];
 
-    balance: query (request : BalanceRequest) -> async BalanceResponse;
-        
-    transfer: shared (request : TransferRequest) -> async TransferResponse;
+    balance : query (request : BalanceRequest) -> async BalanceResponse;
+
+    transfer : shared (request : TransferRequest) -> async TransferResponse;
   };
-  
+
   public module TokenIndex = {
     public func equal(x : TokenIndex, y : TokenIndex) : Bool {
       return Nat32.equal(x, y);
@@ -74,7 +69,7 @@ module ExtCore = {
       return x;
     };
   };
-  
+
   public module TokenIdentifier = {
     private let tds : [Nat8] = [10, 116, 105, 100]; //b"\x0Atid"
     public let equal = Text.equal;
@@ -125,7 +120,7 @@ module ExtCore = {
       for (b in bytes.vals()) {
         index += 1;
         if (index >= 5) {
-          if (index <= (length - 4)) {            
+          if (index <= (length - 4)) {
             _canister := Array.append(_canister, [b]);
           } else {
             _token_index := Array.append(_token_index, [b]);
@@ -138,13 +133,17 @@ module ExtCore = {
       };
       return v;
     };
-    
+
     private func bytestonat32(b : [Nat8]) : Nat32 {
       var index : Nat32 = 0;
-      Array.foldRight<Nat8, Nat32>(b, 0, func (u8, accum) {
-        index += 1;
-        accum + Nat32.fromNat(Nat8.toNat(u8)) << ((index-1) * 8);
-      });
+      Array.foldRight<Nat8, Nat32>(
+        b,
+        0,
+        func(u8, accum) {
+          index += 1;
+          accum + Nat32.fromNat(Nat8.toNat(u8)) << ((index -1) * 8);
+        },
+      );
     };
     private func nat32tobytes(n : Nat32) : [Nat8] {
       if (n < 256) {
@@ -152,31 +151,31 @@ module ExtCore = {
       } else if (n < 65536) {
         return [
           2,
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF))
+          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
         ];
       } else if (n < 16777216) {
         return [
           3,
-          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF))
+          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
         ];
       } else {
         return [
           4,
-          Nat8.fromNat(Nat32.toNat((n >> 24) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)), 
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF))
+          Nat8.fromNat(Nat32.toNat((n >> 24) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
+          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
         ];
       };
     };
   };
-  
+
   public module User = {
     public func toAID(user : User) : AccountIdentifier {
-      switch(user) {
+      switch (user) {
         case (#address address) address;
         case (#principal principal) {
           AID.fromPrincipal(principal, null);
@@ -184,19 +183,19 @@ module ExtCore = {
       };
     };
     public func toPrincipal(user : User) : ?Principal {
-      switch(user) {
+      switch (user) {
         case (#address address) null;
         case (#principal principal) ?principal;
       };
     };
     public func equal(x : User, y : User) : Bool {
-      let _x = switch(x) {
+      let _x = switch (x) {
         case (#address address) address;
         case (#principal principal) {
           AID.fromPrincipal(principal, null);
         };
       };
-      let _y = switch(y) {
+      let _y = switch (y) {
         case (#address address) address;
         case (#principal principal) {
           AID.fromPrincipal(principal, null);
@@ -205,7 +204,7 @@ module ExtCore = {
       return AID.equal(_x, _y);
     };
     public func hash(x : User) : Hash.Hash {
-      let _x = switch(x) {
+      let _x = switch (x) {
         case (#address address) address;
         case (#principal principal) {
           AID.fromPrincipal(principal, null);

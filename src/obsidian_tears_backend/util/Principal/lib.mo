@@ -14,21 +14,23 @@ module {
     public let toText : (p : Principal) -> Text = Principal.toText;
 
     public func fromBlob(b : Blob) : Principal {
-        let bs  = Blob.toArray(b);
-        let b32 = Base32.encode(Array.append<Nat8>(
-            CRC32.crc32(bs), 
-            bs,
-        ));
+        let bs = Blob.toArray(b);
+        let b32 = Base32.encode(
+            Array.append<Nat8>(
+                CRC32.crc32(bs),
+                bs,
+            ),
+        );
         var id = "";
         for (i in b32.keys()) {
             let c = Prim.charToLower(Char.fromNat32(Util.nat8ToNat32(b32[i])));
             id #= Char.toText(c);
             if ((i + 1) % 5 == 0 and i + 1 != b32.size()) {
-                id #= "-"
-            }
+                id #= "-";
+            };
         };
         Principal.fromText(id);
     };
 
     public let toBlob : (p : Principal) -> Blob = Principal.toBlob;
-}
+};

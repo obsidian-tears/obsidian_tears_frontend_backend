@@ -1,9 +1,8 @@
 import ExtCore "./Core";
 import Result "mo:base/Result";
 
-
 module ExtArchive = {
-  
+
   public type Date = Nat64;
   public type TransactionId = Nat;
   public type Transaction = {
@@ -19,12 +18,12 @@ module ExtArchive = {
       #date : (Date, Date); //from - to
       #page : (Nat, Nat); // all per page - page
       #all;
-    }
+    };
     token : TokenIdentifier;
   };
-  
+
   public type ValidActor = actor {
-  add : shared (request : TransferRequest) -> TransactionId;
-  transactions : query (request : TransactionsRequest) -> async Result.Result<[Transaction], ExtCore.CommonError>;
+    add : shared (request : TransferRequest) -> TransactionId;
+    transactions : query (request : TransactionsRequest) -> async Result.Result<[Transaction], ExtCore.CommonError>;
   };
 };

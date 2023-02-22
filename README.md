@@ -12,7 +12,7 @@ These canisters interact with several other canisters, including the obsidian te
 - 2 - Go to obsidian_tears repo (probably by opening VS Code), open terminal and write:
 - 3 - "git status" (ensure no file was added, if so, do "git checkout .")
 - 4 - "git pull origin main" (this will update your branch to most recent version of main)
-- 5 - delete current build files (obsidian_tears -> src -> obsidian_tears_assets -> assets -> unity)
+- 5 - delete current build files (obsidian_tears -> src -> obsidian_tears_frontend -> assets -> unity)
 - 6 - copy/move there the current build files
 - 7 - "dfx identity list" (check you are using the right identity, if need to change: dfx identity use {identity name})
 - 8 - dfx deploy --network ic

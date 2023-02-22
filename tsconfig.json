@@ -10,6 +10,6 @@
     "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
   },
   "include": [
-    "src/obsidian_tears_assets/**/*"
+    "src/obsidian_tears_frontend/**/*"
   ],
 }

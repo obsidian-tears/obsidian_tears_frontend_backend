@@ -1,0 +1,104 @@
+type TokenIndex = nat32;
+type RewardInfo = 
+ record {
+   gold: nat32;
+   itemIds: vec text;
+   xp: nat32;
+ };
+type Result = 
+ variant {
+   err: ApiError;
+   ok;
+ };
+type ObsidianTearsRpg = 
+ service {
+   acceptCycles: () -> () oneway;
+   adminKillHeartbeat: () -> ();
+   adminStartHeartbeat: () -> ();
+   balance: () -> (nat) query;
+   buyItem: (TokenIndex, nat16, int, nat16) -> (ApiResponse_3);
+   checkIn: () -> ();
+   consumeItem: (TokenIndex, nat16) -> (ApiResponse_3);
+   defeatMonster: (TokenIndex, nat16) -> (ApiResponse_2);
+   equipItems: (TokenIndex, vec nat16) -> (ApiResponse_3);
+   getEquippedItems: (TokenIndex, AccountIdentifier) -> (vec TokenIndex);
+   getItemRegistryCopy: () ->
+    (vec record {
+           TokenIndex;
+           AccountIdentifier;
+         }) query;
+   http_request: (HttpRequest) -> (HttpResponse) query;
+   isHeartbeatRunning: () -> (bool) query;
+   loadGame: (TokenIndex) -> (ApiResponse_1);
+   openChest: (TokenIndex, nat16) -> (ApiResponse_2);
+   saveGame: (TokenIndex, text) -> (ApiResponse_1);
+   setMinter: (principal) -> (Result);
+   verify: () -> (ApiResponse);
+ };
+type HttpStreamingStrategy = variant {
+                               Callback:
+                                record {
+                                  callback:
+                                   func (HttpStreamingCallbackToken) ->
+                                    (HttpStreamingCallbackResponse) query;
+                                  token: HttpStreamingCallbackToken;
+                                };};
+type HttpStreamingCallbackToken = 
+ record {
+   content_encoding: text;
+   index: nat;
+   key: text;
+   sha256: opt blob;
+ };
+type HttpStreamingCallbackResponse = 
+ record {
+   body: blob;
+   token: opt HttpStreamingCallbackToken;
+ };
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+   streaming_strategy: opt HttpStreamingStrategy;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+type ApiResponse_3 = 
+ variant {
+   Err: ApiError;
+   Ok;
+ };
+type ApiResponse_2 = 
+ variant {
+   Err: ApiError;
+   Ok: RewardInfo;
+ };
+type ApiResponse_1 = 
+ variant {
+   Err: ApiError;
+   Ok: text;
+ };
+type ApiResponse = 
+ variant {
+   Err: ApiError;
+   Ok: vec TokenIndex;
+ };
+type ApiError = 
+ variant {
+   Limit;
+   Other: text;
+   Unauthorized;
+ };
+type AccountIdentifier = text;
+service : () -> ObsidianTearsRpg

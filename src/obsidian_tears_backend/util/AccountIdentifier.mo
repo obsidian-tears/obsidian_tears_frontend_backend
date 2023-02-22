@@ -17,10 +17,9 @@ import Hex "./Hex";
 module {
   public type AccountIdentifier = Text;
   public type SubAccount = [Nat8];
-  
-  
+
   private let ads : [Nat8] = [10, 97, 99, 99, 111, 117, 110, 116, 45, 105, 100]; //b"\x0Aaccount-id"
-  public let SUBACCOUNT_ZERO : [Nat8] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  public let SUBACCOUNT_ZERO : [Nat8] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   //Public functions
   public func fromText(t : Text, sa : ?SubAccount) : AccountIdentifier {
@@ -41,7 +40,7 @@ module {
     var crc : [Nat8] = CRC32.crc32(hash);
     return Hex.encode(Array.append(crc, hash));
   };
-  
+
   public let equal = Text.equal;
   public let hash = Text.hash;
 };

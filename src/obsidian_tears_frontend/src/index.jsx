@@ -6,7 +6,7 @@ import Game from './pages/game'
 
 import '../assets/main.css'
 
-import { network, characterCanisterId, itemCanisterId } from './consts'
+import { network, characterCanisterId, itemCanisterId } from './env'
 import { idlFactory, canisterId as gameCanisterId } from '../../declarations/obsidian_tears_backend'
 import { characterIdlFactory } from '../idl_factories/characterIdlFactory.did'
 import { itemIdlFactory } from '../idl_factories/itemIdlFactory.did'

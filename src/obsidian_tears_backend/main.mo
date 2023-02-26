@@ -25,7 +25,7 @@ import ExtCommon "ext/Common";
 import ExtCore "ext/Core";
 import Ref "./reference";
 import X "./types";
-import Consts "./consts"
+import Env "./env"
 
 actor class ObsidianTearsRpg() = this {
     // Types
@@ -101,11 +101,11 @@ actor class ObsidianTearsRpg() = this {
     private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
     private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
     private stable var _runHeartbeat : Bool = true;
-    private stable var _minter : Principal = Principal.fromText("6ulqo-ikasf-xzltp-ylrhu-qt4gt-nv4rz-gd46e-nagoe-3bo7b-kbm3h-bqe");
-    private let _itemCanister : Text = Consts.itemCanisterId;
-    private let _characterCanister : Text = Consts.characterCanisterId;
-    // TODO: migrate to separate canister under token standard when it comes out: "castar"
-    // private stable var _goldCanister : Text = "gjfoo-oyaaa-aaaao-aaiuq-cai";
+
+    // Env
+    private var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
+    private let _itemCanister : Text = Env.getItemCanisterId();
+    private let _characterCanister : Text = Env.getCharacterCanisterId();
 
     // Actors
     let _itemActor = actor (_itemCanister) : actor {
@@ -118,7 +118,6 @@ actor class ObsidianTearsRpg() = this {
         getRegistry : () -> async [(TokenIndex, AccountIdentifier)];
         tokens : (aid : AccountIdentifier) -> async Result.Result<[TokenIndex], CommonError>;
     };
-    // let _goldActor = actor (_goldCanister) : actor { mint : (to: Principal, value: Nat) -> async TxReceipt};
 
     // State
     private stable var _saveDataState : [(TokenIndex, Text)] = [];

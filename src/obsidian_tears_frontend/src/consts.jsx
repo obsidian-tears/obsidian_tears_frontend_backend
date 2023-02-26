@@ -1,6 +1,6 @@
 
 // update this whenever deploying to ic
-const network = 'local';
+export const network = 'local';
 
 // update this whenever canisters change (especially in local)
 const canisterIds = {

@@ -6,7 +6,7 @@ import Game from './pages/game'
 
 import '../assets/main.css'
 
-import { characterCanisterId, itemCanisterId } from './consts'
+import { network, characterCanisterId, itemCanisterId } from './consts'
 import { idlFactory, canisterId as gameCanisterId } from '../../declarations/obsidian_tears_backend'
 import { characterIdlFactory } from '../idl_factories/characterIdlFactory.did'
 import { itemIdlFactory } from '../idl_factories/itemIdlFactory.did'
@@ -131,6 +131,8 @@ const ObsidianTears = () => {
         p = identity.getPrincipal()
         setPrincipal(p.toText())
         agent = new HttpAgent({ identity, host })
+        if (network === "local")
+          agent.fetchRootKey();
         setStoicHttpAgent(agent)
       }
     } else {
@@ -157,6 +159,8 @@ const ObsidianTears = () => {
       setIdentity(identity)
       setPrincipal(p.toText())
       let agent = new HttpAgent({ identity: identity })
+      if (network === "local")
+        agent.fetchRootKey();
       setStoicHttpAgent(agent)
       setLoggedIn(true)
       let characterActor = await loadActors(false, true, agent)

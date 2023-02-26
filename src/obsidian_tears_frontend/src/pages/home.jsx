@@ -44,22 +44,24 @@ const Home = (props) => {
       ) : (
         <>
           <div className="space50"></div>
-          <div className="centerMe">
-            <PlugConnect
-              whitelist={props.whitelist}
-              onConnectCallback={async () => {
-                props.setUsingPlug(true)
-                props.setUsingStoic(false)
-                props.setLoggedIn(true)
-                let p = await window.ic.plug.agent.getPrincipal()
-                props.setPrincipal(p.toText())
-                let charActor = await props.loadActors(true, false, p.toText())
-                console.log('loaded actors from onconnectcallback')
-                await props.loadCharacters(charActor, p.toText())
-              }}
-            />
-            <br></br>
-          </div>
+          {false &&
+            <div className="centerMe">
+              <PlugConnect
+                whitelist={props.whitelist}
+                onConnectCallback={async () => {
+                  props.setUsingPlug(true)
+                  props.setUsingStoic(false)
+                  props.setLoggedIn(true)
+                  let p = await window.ic.plug.agent.getPrincipal()
+                  props.setPrincipal(p.toText())
+                  let charActor = await props.loadActors(true, false, p.toText())
+                  console.log('loaded actors from onconnectcallback')
+                  await props.loadCharacters(charActor, p.toText())
+                }}
+              />
+              <br></br>
+            </div>
+          }
           <div className="centerMe">
             <button
               className={'buttonWoodGridXL'}

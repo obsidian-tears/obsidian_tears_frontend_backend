@@ -6,7 +6,8 @@ import Game from './pages/game'
 
 import '../assets/main.css'
 
-import { idlFactory } from '../../declarations/obsidian_tears'
+import { characterCanisterId, itemCanisterId } from './consts'
+import { idlFactory, canisterId as gameCanisterId } from '../../declarations/obsidian_tears_backend'
 import { characterIdlFactory } from '../idl_factories/characterIdlFactory.did'
 import { itemIdlFactory } from '../idl_factories/itemIdlFactory.did'
 import principalToAccountIdentifier from './utils'
@@ -50,15 +51,7 @@ const ObsidianTears = () => {
     _setCharActor(data)
   }
 
-  const gameCanister = 'gagfs-yqaaa-aaaao-aaiva-cai'
-  const itemCanister = 'goei2-daaaa-aaaao-aaiua-cai'
-  const characterCanister = 'dhyds-jaaaa-aaaao-aaiia-cai'
-  // const gameCanister = 'r7inp-6aaaa-aaaaa-aaabq-cai'
-  // const itemCanister = 'goei2-daaaa-aaaao-aaiua-cai'
-  // const characterCanister = 'ryjl3-tyaaa-aaaaa-aaaba-cai'
-  const whitelist = [gameCanister, itemCanister, characterCanister]
-  // const host = 'http://127.0.0.1:8000'
-  // const host = 'https://mainnet.dfinity.network'
+  const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId]
 
   const loadActors = async (plug, stoic, a) => {
     console.log('loading actors')
@@ -66,18 +59,18 @@ const ObsidianTears = () => {
     if (plug) {
       setItemActor(
         await window.ic.plug.createActor({
-          canisterId: itemCanister,
+          canisterId: itemCanisterId,
           interfaceFactory: itemIdlFactory,
         }),
       )
       characterActor = await window.ic.plug.createActor({
-        canisterId: characterCanister,
+        canisterId: characterCanisterId,
         interfaceFactory: characterIdlFactory,
       })
       setCharActor(characterActor)
       setGameActor(
         await window.ic.plug.createActor({
-          canisterId: gameCanister,
+          canisterId: gameCanisterId,
           interfaceFactory: idlFactory,
         }),
       )
@@ -85,18 +78,18 @@ const ObsidianTears = () => {
       setGameActor(
         Actor.createActor(idlFactory, {
           agent: a,
-          canisterId: gameCanister,
+          canisterId: gameCanisterId,
         }),
       )
       characterActor = Actor.createActor(characterIdlFactory, {
         agent: a,
-        canisterId: characterCanister,
+        canisterId: characterCanisterId,
       })
       setCharActor(characterActor)
       setItemActor(
         Actor.createActor(itemIdlFactory, {
           agent: a,
-          canisterId: itemCanister,
+          canisterId: itemCanisterId,
         }),
       )
     }

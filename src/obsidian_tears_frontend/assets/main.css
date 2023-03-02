@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   background-color: #0668b9;
@@ -6,22 +7,22 @@ html, body {
 
 /* app includes the header and the body */
 #app {
-width: 1280px;
-height: 100%; 
-margin: 0px auto;
+  width: 1280px;
+  height: 100%;
+  margin: 0px auto;
 }
 
 #header {
-width: 1280px;
-height: 100px;
-position: absolute;
-top: 0px;
-padding-top:10px;
+  width: 1280px;
+  height: 100px;
+  position: absolute;
+  top: 0px;
+  padding-top: 10px;
 }
 
 .leftHeader {
-float: left;
-padding: 10px 10px 10px 20px;
+  float: left;
+  padding: 10px 10px 10px 20px;
 }
 
 .rightHeader {
@@ -30,37 +31,38 @@ padding: 10px 10px 10px 20px;
 }
 
 .rightHeader2 {
-    float: right;
-  }
+  float: right;
+}
 
 #body {
-width: 1280px; min-height: 720px;
-padding-top: 140px;
-padding-bottom:100px;
-margin: 0px auto;
-text-align: center;
-background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/Oblisk-Large_FrontEndBackground.jpg);
-background-position: left;
-background-repeat: repeat;
-text-align: center;
+  width: 1280px;
+  min-height: 720px;
+  padding-top: 140px;
+  padding-bottom: 100px;
+  margin: 0px auto;
+  text-align: center;
+  background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/Oblisk-Large_FrontEndBackground.jpg);
+  background-position: left;
+  background-repeat: repeat;
+  text-align: center;
 }
 
 /* used to center Wallet choices and game */
 .centerMe {
-width: 1000px;
-padding: 10px;
-margin: 0px auto;
-position: relative;
-text-align: center;
+  width: 1000px;
+  padding: 10px;
+  margin: 0px auto;
+  position: relative;
+  text-align: center;
 }
 
 .space50 {
-  width:100%;
+  width: 100%;
   height: 50px;
 }
 
- /* container for nfts using grid display */
- .container {
+/* container for nfts using grid display */
+.container {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -69,26 +71,28 @@ text-align: center;
   height: 100%;
   margin: 0px auto;
   text-align: center;
-  padding-top:30px;
+  padding-top: 30px;
 }
 
 .title {
-  color: #ffffffee; font-family: 'Raleway',sans-serif; 
-  font-size: 62px; 
-  font-weight: 800; 
-  line-height: 72px; 
-  margin: 0 0 24px; 
-  text-align: center; 
-  text-transform: uppercase; 
+  color: #ffffffee;
+  font-family: 'Raleway', sans-serif;
+  font-size: 62px;
+  font-weight: 800;
+  line-height: 72px;
+  margin: 0 0 24px;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .title2 {
-  color: #ffffffee; font-family: 'Raleway',sans-serif; 
-  font-size: 30px; 
-  font-weight: 600; 
-  line-height: 32px; 
-  margin: 0 0 24px; 
-  text-align: center; 
+  color: #ffffffee;
+  font-family: 'Raleway', sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 32px;
+  margin: 0 0 24px;
+  text-align: center;
 }
 
 .myButton {
@@ -123,22 +127,26 @@ text-align: center;
 }
 
 .whiteText {
-  color: #ffffff; font-family: 'Raleway',sans-serif; 
-  font-size: 32px; 
+  color: #ffffff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 32px;
 }
 
 .buttonWood {
   background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/header-nav-button-wood2.png);
-  height: 48px; width: 166px;
+  height: 48px;
+  width: 166px;
   align-items: center;
   appearance: none;
-  color: white; font-size: 24; font-weight: 600;
-  font-family: "JetBrains Mono",monospace;
+  color: white;
+  font-size: 24;
+  font-weight: 600;
+  font-family: "JetBrains Mono", monospace;
   padding-left: 6px;
   padding-right: 6px;
   margin-right: 20px;
   justify-content: center;
-  list-style: none; 
+  list-style: none;
   overflow: hidden;
   border: 0;
   display: inline-flex;
@@ -148,78 +156,90 @@ text-align: center;
 
 .buttonWood:focus {
   box-shadow: #301d27 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
-  }
-  .buttonWood:hover {
+}
+
+.buttonWood:hover {
   box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
   transform: translateY(-2px);
-  }
-  .buttonWood:active {
+}
+
+.buttonWood:active {
   box-shadow: #301d27 0 3px 7px inset;
   transform: translateY(2px);
-  }
+}
 
 
-  .buttonWoodGrid {
-    background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/header-nav-button-wood2.png);
-    height: 48px; width: 166px;
-    align-items: center;
-    appearance: none;
-    color: white; font-size: 24; font-weight: 600;
-    font-family: "JetBrains Mono",monospace;
-    padding-left: 6px;
-    padding-right: 6px;
-    justify-content: center;
-    list-style: none; 
-    overflow: hidden;
-    border: 0;
-    display: inline-flex;
-    line-height: 1;
-    position: relative;
-  }
-  
-  .buttonWoodGrid:focus {
-    box-shadow: #301d27 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
-    }
-    .buttonWoodGrid:hover {
-    box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
-    transform: translateY(-2px);
-    }
-    .buttonWoodGrid:active {
-    box-shadow: #301d27 0 3px 7px inset;
-    transform: translateY(2px);
-    }
+.buttonWoodGrid {
+  background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/header-nav-button-wood2.png);
+  height: 48px;
+  width: 166px;
+  align-items: center;
+  appearance: none;
+  color: white;
+  font-size: 24;
+  font-weight: 600;
+  font-family: "JetBrains Mono", monospace;
+  padding-left: 6px;
+  padding-right: 6px;
+  justify-content: center;
+  list-style: none;
+  overflow: hidden;
+  border: 0;
+  display: inline-flex;
+  line-height: 1;
+  position: relative;
+}
+
+.buttonWoodGrid:focus {
+  box-shadow: #301d27 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
+}
+
+.buttonWoodGrid:hover {
+  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.buttonWoodGrid:active {
+  box-shadow: #301d27 0 3px 7px inset;
+  transform: translateY(2px);
+}
 
 
 /* for connect to stoic on home */
-    .buttonWoodGridXL {
-      background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/header-nav-button-wood3.png);
-      height: 48px; width: 225px;
-      align-items: center;
-      appearance: none;
-      color: white; font-size: 24; font-weight: 600;
-      font-family: "JetBrains Mono",monospace;
-      padding-left: 6px;
-      padding-right: 6px;
-      justify-content: center;
-      list-style: none; 
-      overflow: hidden;
-      border: 0;
-      display: inline-flex;
-      line-height: 1;
-      position: relative;
-    }
-    
-    .buttonWoodGridXL:focus {
-      box-shadow: #301d27 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
-      }
-      .buttonWoodGridXL:hover {
-      box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
-      transform: translateY(-2px);
-      }
-      .buttonWoodGridXL:active {
-      box-shadow: #301d27 0 3px 7px inset;
-      transform: translateY(2px);
-      }
+.buttonWoodGridXL {
+  background-image: url(https://rbmwowza3.s3.amazonaws.com/uofu-vod/header-nav-button-wood3.png);
+  height: 48px;
+  width: 225px;
+  align-items: center;
+  appearance: none;
+  color: white;
+  font-size: 24;
+  font-weight: 600;
+  font-family: "JetBrains Mono", monospace;
+  padding-left: 6px;
+  padding-right: 6px;
+  justify-content: center;
+  list-style: none;
+  overflow: hidden;
+  border: 0;
+  display: inline-flex;
+  line-height: 1;
+  position: relative;
+}
+
+.buttonWoodGridXL:focus {
+  box-shadow: #301d27 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
+}
+
+.buttonWoodGridXL:hover {
+  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #301d27 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.buttonWoodGridXL:active {
+  box-shadow: #301d27 0 3px 7px inset;
+  transform: translateY(2px);
+}
 
 
 button {
@@ -229,60 +249,17 @@ button {
 
 /* White color Button */
 .button-30 {
-align-items: center;
-appearance: none;
-background-color: #FCFCFD;
-border-radius: 4px;
-border-width: 0;
-box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
-box-sizing: border-box;
-color: #36395A;
-cursor: pointer;
-display: inline-flex;
-font-family: "JetBrains Mono",monospace;
-height: 48px;
-justify-content: center;
-line-height: 1;
-list-style: none;
-overflow: hidden;
-padding-left: 16px;
-padding-right: 16px;
-position: relative;
-text-align: left;
-text-decoration: none;
-transition: box-shadow .15s,transform .15s;
-user-select: none;
--webkit-user-select: none;
-touch-action: manipulation;
-white-space: nowrap;
-will-change: box-shadow,transform;
-font-size: 18px;
-}
-.button-30:focus {
-box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
-}
-.button-30:hover {
-box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
-transform: translateY(-2px);
-}
-.button-30:active {
-box-shadow: #D6D6E7 0 3px 7px inset;
-transform: translateY(2px);
-}
-
-/* White color Button with edits specific to nav menu in the header */
-.button-30Nav {
   align-items: center;
   appearance: none;
   background-color: #FCFCFD;
   border-radius: 4px;
   border-width: 0;
-  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
+  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
   box-sizing: border-box;
   color: #36395A;
   cursor: pointer;
   display: inline-flex;
-  font-family: "JetBrains Mono",monospace;
+  font-family: "JetBrains Mono", monospace;
   height: 48px;
   justify-content: center;
   line-height: 1;
@@ -293,55 +270,106 @@ transform: translateY(2px);
   position: relative;
   text-align: left;
   text-decoration: none;
-  transition: box-shadow .15s,transform .15s;
+  transition: box-shadow .15s, transform .15s;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
   white-space: nowrap;
-  will-change: box-shadow,transform;
+  will-change: box-shadow, transform;
   font-size: 18px;
-  margin-right: 20px;
-  }
-  .button-30Nav:focus {
+}
+
+.button-30:focus {
   box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
-  }
-  .button-30Nav:hover {
+}
+
+.button-30:hover {
   box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
   transform: translateY(-2px);
-  }
-  .button-30Nav:active {
+}
+
+.button-30:active {
   box-shadow: #D6D6E7 0 3px 7px inset;
   transform: translateY(2px);
-  }
+}
+
+/* White color Button with edits specific to nav menu in the header */
+.button-30Nav {
+  align-items: center;
+  appearance: none;
+  background-color: #FCFCFD;
+  border-radius: 4px;
+  border-width: 0;
+  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #36395A;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "JetBrains Mono", monospace;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s, transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow, transform;
+  font-size: 18px;
+  margin-right: 20px;
+}
+
+.button-30Nav:focus {
+  box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+}
+
+.button-30Nav:hover {
+  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.button-30Nav:active {
+  box-shadow: #D6D6E7 0 3px 7px inset;
+  transform: translateY(2px);
+}
 
 .unityContainer {
-position: relative;
-/* The container determains the size. */
-width: 800px;
-height: 600px;
+  position: relative;
+  /* The container determains the size. */
+  width: 1000px;
+  height: 750px;
 }
-.unityContainer > .loading-overlay {
-/* We'll render the overlay on top of the Unity Application. */
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: grey;
-/* We'll set the following Flex properties in order to center the text. */
-display: flex;
-justify-content: center;
-align-items: center;
+
+.unityContainer>.loading-overlay {
+  /* We'll render the overlay on top of the Unity Application. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: grey;
+  /* We'll set the following Flex properties in order to center the text. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.unityContainer > .unity {
-/* The Unity Application matches it size to the container. */
-width: 100%;
-height: 100%;
+
+.unityContainer>.unity {
+  /* The Unity Application matches it size to the container. */
+  width: 100%;
+  height: 100%;
 }
 
 /* for the plug contianer to stretch it out the same as stoic */
 
 
-.c-ipvTzC > div {
+.c-ipvTzC>div {
   width: 176px;
 }

@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { useUnityContext } from 'react-unity-webgl'
 import { Unity } from 'react-unity-webgl'
-import '../../assets/main.css'
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0)

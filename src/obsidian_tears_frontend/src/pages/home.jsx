@@ -1,17 +1,20 @@
 import * as React from 'react'
 import PlugConnect from '@psychedelic/plug-connect'
-import '../../assets/main.css'
 
 const Home = (props) => {
+  // asset urls
+  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" }
+  const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" }
+
   return (
-    <div id="body">
-      <img src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/BigLogo2.png"></img>
+    <div id="body" style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}>
+      <img src="menu-big-logo.png" alt="menu logo"></img>
 
       {props.loggedIn ? (
         !props.loading ? (
           <>
             <div className="centerMe">
-              <h2 className="title2">Select a Character to Start the Game</h2>
+              <h2 className="title2">Select a Hero to start the game</h2>
               <br></br>
             </div>
 
@@ -30,6 +33,7 @@ const Home = (props) => {
                   </a>
                   <button
                     className="buttonWoodGrid"
+                    style={backgroundImageWood2}
                     onClick={() => props.selectNft(nft[0])}
                   >
                     Select
@@ -65,6 +69,7 @@ const Home = (props) => {
           <div className="centerMe">
             <button
               className={'buttonWoodGridXL'}
+              style={backgroundImageWood3}
               onClick={async () => {
                 await props.connectToStoic()
               }}
@@ -76,8 +81,8 @@ const Home = (props) => {
           <div className="space50"></div>
           <div className="centerMe">
             <img
-              src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/menu-fighter1a.png"
-              alt="fighter1"
+              src="menu-fighter.png"
+              alt="fighter"
               height="200px"
             ></img>
           </div>

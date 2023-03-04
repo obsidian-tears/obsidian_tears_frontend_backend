@@ -4,8 +4,6 @@ import { createRoot } from 'react-dom/client'
 import Home from './pages/home'
 import Game from './pages/game'
 
-import '../assets/main.css'
-
 import { network, characterCanisterId, itemCanisterId } from './env'
 import { idlFactory, canisterId as gameCanisterId } from '../../declarations/obsidian_tears_backend'
 import { characterIdlFactory } from '../idl_factories/characterIdlFactory.did'
@@ -52,6 +50,9 @@ const ObsidianTears = () => {
   }
 
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId]
+
+  // asset urls
+  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" }
 
   const loadActors = async (plug, stoic, a) => {
     console.log('loading actors')
@@ -216,17 +217,17 @@ const ObsidianTears = () => {
         <div className="leftHeader">
           <img
             alt="logo"
-            src="https://rbmwowza3.s3.amazonaws.com/uofu-vod/icpbadge100d.png"
+            src="icp-badge.png"
             height="50"
           ></img>
         </div>
         <div className="rightHeader">
-          <button className="buttonWood" onClick={() => setRoute('home')}>
+          <button className="buttonWood" style={backgroundImageWood2} onClick={() => setRoute('home')}>
             Home
           </button>
 
           <button
-            className="buttonWood"
+            className="buttonWood" style={backgroundImageWood2}
             onClick={() =>
               window.open('https://entrepot.app/marketplace/obsidian-tears')
             }
@@ -236,9 +237,9 @@ const ObsidianTears = () => {
 
           {loggedIn ? (
             <div className="rightHeader2">
-              <button className="buttonWood">{principal.slice(0, 5)}</button>
+              <button className="buttonWood" style={backgroundImageWood2}>{principal.slice(0, 5)}</button>
 
-              <button className="buttonWood" onClick={() => logout()}>
+              <button className="buttonWood" style={backgroundImageWood2} onClick={() => logout()}>
                 Logout
               </button>
             </div>

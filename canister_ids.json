@@ -1,8 +1,10 @@
 {
   "obsidian_tears_backend": {
-    "ic": "gagfs-yqaaa-aaaao-aaiva-cai"
+    "ic": "gagfs-yqaaa-aaaao-aaiva-cai",
+    "staging": "bjwew-5qaaa-aaaan-qc7aa-cai"
   },
   "obsidian_tears_frontend": {
-    "ic": "ghhdg-viaaa-aaaao-aaivq-cai"
+    "ic": "ghhdg-viaaa-aaaao-aaivq-cai",
+    "staging": "boxcc-qiaaa-aaaan-qc7aq-cai"
   }
 }

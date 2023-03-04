@@ -150,7 +150,7 @@ const Game = (props) => {
 
   return (
     <>
-      <div id="body">
+      <div id="body" style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}>
         <div className="centerMe">
           <div className="unityContainer">
             {isLoaded === false && (

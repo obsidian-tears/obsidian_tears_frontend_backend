@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useUnityContext } from 'react-unity-webgl'
 import { Unity } from 'react-unity-webgl'
+import { unityUrls } from '../env'
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0)
@@ -12,12 +13,7 @@ const Game = (props) => {
     addEventListener,
     removeEventListener,
     sendMessage,
-  } = useUnityContext({
-    loaderUrl: 'unity/Build/Desktop.loader.js',
-    dataUrl: 'unity/Build/Desktop.data',
-    frameworkUrl: 'unity/Build/Desktop.framework.js',
-    codeUrl: 'unity/Build/Desktop.wasm',
-  })
+  } = useUnityContext(unityUrls)
 
   React.useEffect(() => {
     if (isLoaded) {

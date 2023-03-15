@@ -1,4 +1,4 @@
-// update this whenever deploying to ic or staging
+// update this whenever deploying to ic, local, staging or beta
 export const network = 'local';
 
 // update this whenever canisters change in local
@@ -8,15 +8,20 @@ const canisterIds = {
         characterCanister: 'rkp4c-7iaaa-aaaaa-aaaca-cai',
         unityCanister: 'sp3hj-caaaa-aaaaa-aaajq-cai'
     },
-    staging: {
-        itemCanister: 'bavpk-lyaaa-aaaan-qc7bq-cai',
-        characterCanister: 'bhuj6-gaaaa-aaaan-qc7ba-cai',
-        unityCanister: 'dipqp-zyaaa-aaaan-qc7nq-cai'
+    beta: {
+        itemCanister: '7tscg-xaaaa-aaaan-qdasa-cai',
+        characterCanister: '7gvtl-wiaaa-aaaan-qdarq-cai',
+        unityCanister: '7utes-2yaaa-aaaan-qdasq-cai'
     },
     ic: {
         itemCanister: 'goei2-daaaa-aaaao-aaiua-cai',
         characterCanister: 'dhyds-jaaaa-aaaao-aaiia-cai',
         unityCanister: 'wmq2b-baaaa-aaaal-acata-cai'
+    },
+    staging: {
+        itemCanister: 'bavpk-lyaaa-aaaan-qc7bq-cai',
+        characterCanister: 'bhuj6-gaaaa-aaaan-qc7ba-cai',
+        unityCanister: 'dipqp-zyaaa-aaaan-qc7nq-cai'
     }
 }
 

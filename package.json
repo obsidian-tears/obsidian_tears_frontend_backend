@@ -16,7 +16,8 @@
     "prebuild": "npm run copy:types",
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run copy:types",
-    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations"
+    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations",
+    "test": "mo-test --testmode interpreter --verbose"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.1",
@@ -31,6 +32,7 @@
     "events": "3.3.0",
     "html-webpack-plugin": "^5.5.0",
     "ic-stoic-identity": "^2.0.0",
+    "mo-dev": "^0.7.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "style-loader": "^3.3.1",

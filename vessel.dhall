@@ -1,4 +1,4 @@
 {
-  dependencies = [ "base", "array", "encoding", "matchers", "cap"],
-  compiler = Some "0.9.2"
+  dependencies = [ "base", "mospec"],
+  compiler = Some "0.8.8"
 }

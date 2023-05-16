@@ -95,11 +95,11 @@ module.exports = {
       process: require.resolve("process/browser"),
     }),
   ],
-  // proxy /api to port 8000 during development
+  // proxy /api to port 4943 during development
   devServer: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000",
+        target: "http://127.0.0.1:4943",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "/api",

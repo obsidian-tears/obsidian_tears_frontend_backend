@@ -6,10 +6,6 @@ on:
       - master
   pull_request:
 
-# Remember to update me!
-env:
-  moc_version: "0.8.8"
-
 jobs:
   tests:
     runs-on: ubuntu-22.04
@@ -23,20 +19,12 @@ jobs:
         run: npm run prettier:check
       - name: "audit"
         run: npm audit
-      - uses: cachix/install-nix-action@v20
-        with:
-          nix_path: nixpkgs=channel:nixos-22.11
-      - name: "install dependencies"
-        run: |
-          nix-env --install wasmtime --file '<nixpkgs>'
-      - name: "install Motoko binaries"
-        run: |
-          wget https://github.com/dfinity/motoko/releases/download/${{ env.moc_version }}/motoko-linux64-${{ env.moc_version }}.tar.gz
-          mkdir -p /home/runner/bin
-          tar -xzf motoko-linux64-${{ env.moc_version }}.tar.gz -C /home/runner/bin
-          echo "/home/runner/bin" >> $GITHUB_PATH
       - name: "install dfx"
-        run: sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+        # download and setup local moc by starting dfx once
+        run: |
+          sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          dfx start --background
+          dfx stop
       - name: "install mops packages"
         run: npx mops install
       - name: "run tests"

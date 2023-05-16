@@ -37,47 +37,39 @@ actor class ObsidianTearsBackend() = this {
   type Metadata = ExtCommon.Metadata;
 
   // Sessions DB
-  private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  private stable var _runHeartbeat : Bool = true;
+  stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
+  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
+  stable var _runHeartbeat : Bool = true;
 
   // Env
-  private var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
-  private let _itemCanister : Text = Env.getItemCanisterId();
-  private let _characterCanister : Text = Env.getCharacterCanisterId();
+  var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
+  let _itemCanister : Text = Env.getItemCanisterId();
+  let _characterCanister : Text = Env.getCharacterCanisterId();
 
   // Actors
-  let _itemActor = actor (_itemCanister) : actor {
-    mintItem : (data : [Nat8], recipient : AccountIdentifier) -> async ();
-    burnItem : (TokenIndex) -> async ();
-    getRegistry : () -> async [(TokenIndex, AccountIdentifier)];
-    getMetadata : () -> async [(TokenIndex, Metadata)];
-  };
-  let _characterActor = actor (_characterCanister) : actor {
-    getRegistry : () -> async [(TokenIndex, AccountIdentifier)];
-    tokens : (aid : AccountIdentifier) -> async Result.Result<[TokenIndex], CommonError>;
-  };
+  var _characterActor : T.CharacterInterface = actor (_characterCanister);
+  var _itemActor : T.ItemInterface = actor (_itemCanister);
 
   // State
-  private stable var _saveDataState : [(TokenIndex, Text)] = [];
-  private stable var _sessionsState : [(TokenIndex, T.SessionData)] = [];
-  private stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
-  private stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
-  private stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
-  private stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
-  private stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
-  private stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
-  private stable var _playerDataState : [(TokenIndex, T.PlayerData)] = [];
-  private stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+  stable var _saveDataState : [(TokenIndex, Text)] = [];
+  stable var _sessionsState : [(TokenIndex, T.SessionData)] = [];
+  stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
+  stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
+  stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
+  stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
+  stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
+  stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
+  stable var _playerDataState : [(TokenIndex, T.PlayerData)] = [];
+  stable var _goldState : [(AccountIdentifier, Nat32)] = [];
 
   // Dynamic
-  private var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _sessions : HashMap.HashMap<TokenIndex, T.SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _playerData : HashMap.HashMap<TokenIndex, T.PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+  var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _sessions : HashMap.HashMap<TokenIndex, T.SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _playerData : HashMap.HashMap<TokenIndex, T.PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -89,9 +81,9 @@ actor class ObsidianTearsBackend() = this {
   // TODO for each relevent event (eg. opening a chest at the end of a sidequest) have a list of story events that must be completed to open chest.
   // TODO keep track of opened chests for each character
 
-  private var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
 
   // system functions
   system func preupgrade() {
@@ -1140,6 +1132,14 @@ actor class ObsidianTearsBackend() = this {
   // -----------------------------------
   // management
   // -----------------------------------
+  public func setStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
+    _characterActor := actor (characterCanisterId);
+    // _itemActor := actor (itemCanisterId);
+    #ok;
+  };
+
   public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
     Iter.toArray(_itemRegistry.entries());
   }; // heartbeat stuff

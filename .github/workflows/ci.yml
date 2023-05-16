@@ -40,7 +40,4 @@ jobs:
       - name: "install mops packages"
         run: npx mops install
       - name: "run tests"
-        run: |
-          dfx start --background
-          npm test
-          dfx stop
+        run: npm test

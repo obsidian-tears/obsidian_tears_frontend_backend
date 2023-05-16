@@ -1,5 +1,9 @@
 import Blob "mo:base/Blob";
 import Time "mo:base/Time";
+import Result "mo:base/Result";
+
+import ExtCore "ext/Core";
+import ExtCommon "ext/Common";
 
 module {
   //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,
@@ -42,6 +46,19 @@ module {
     goldEarned : Nat32;
     xpEarned : Nat32;
     itemsEarned : Nat8;
+  };
+
+  // Actor Interfaces
+  public type CharacterInterface = actor {
+    getRegistry : query () -> async [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];
+    tokens : query (aid : ExtCore.AccountIdentifier) -> async Result.Result<[ExtCore.TokenIndex], ExtCore.CommonError>;
+  };
+
+  public type ItemInterface = actor {
+    mintItem : (data : [Nat8], recipient : ExtCore.AccountIdentifier) -> async ();
+    burnItem : (ExtCore.TokenIndex) -> async ();
+    getRegistry : query () -> async [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];
+    getMetadata : query () -> async [(ExtCore.TokenIndex, ExtCommon.Metadata)];
   };
 
   // Responses

@@ -36,53 +36,7 @@ actor class ObsidianTearsBackend() = this {
   type CommonError = ExtCore.CommonError;
   type Metadata = ExtCommon.Metadata;
 
-  //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,
-  //   \"pointsRemaining\":0,\"healthBase\":15,\"healthTotal\":15,\"healthMax\":15,\"magicBase\":10,\"magicTotal\":10,
-  //   \"magicMax\":10,\"attackBase\":5,\"attackTotal\":5,\"magicPowerBase\":0,\"magicPowerTotal\":0,\"defenseBase\":5,
-  //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
-  type PlayerData = {
-    characterName : Text;
-    characterClass : Text;
-    level : Nat16;
-    xp : Nat32;
-    xpToLevelUp : Nat32;
-    pointsRemaining : Nat32;
-    healthBase : Nat16;
-    healthTotal : Nat16;
-    healthMax : Nat16;
-    magicBase : Nat16;
-    magicTotal : Nat16;
-    magicMax : Nat16;
-    attackBase : Nat16;
-    attackTotal : Nat16;
-    defenseBase : Nat16;
-    defenseTotal : Nat16;
-    speedBase : Nat16;
-    speedTotal : Nat16;
-    criticalHitProbability : Float;
-    characterEffects : [Text];
-    kills : Nat16;
-    deaths : Nat16;
-  };
-  public type TxReceipt = {
-    #Ok : Nat;
-    #Err : {
-      #InsufficientAllowance;
-      #InsufficientBalance;
-      #ErrorOperationStyle;
-      #Unauthorized;
-      #LedgerTrap;
-      #ErrorTo;
-      #Other : Text;
-      #BlockUsed;
-      #AmountTooSmall;
-    };
-  };
-
-  // Canister Info
-  var _name = "Obsidian Tears RPG";
-
-  // Config
+  // Sessions DB
   private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
   private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
   private stable var _runHeartbeat : Bool = true;
@@ -113,16 +67,18 @@ actor class ObsidianTearsBackend() = this {
   private stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
   private stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
   private stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
-  private stable var _playerDataState : [(TokenIndex, PlayerData)] = [];
+  private stable var _playerDataState : [(TokenIndex, T.PlayerData)] = [];
   private stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+
   // Dynamic
   private var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   private var _sessions : HashMap.HashMap<TokenIndex, T.SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   private var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   private var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   private var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  private var _playerData : HashMap.HashMap<TokenIndex, PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  private var _playerData : HashMap.HashMap<TokenIndex, T.PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
   // TODO create level up function that increases player level and stats
@@ -479,11 +435,12 @@ actor class ObsidianTearsBackend() = this {
   // http
   // -----------------------------------
   public query func http_request(request : T.HttpRequest) : async T.HttpResponse {
+    let name = "Obsidian Tears RPG";
     return {
       status_code = 200;
       headers = [("content-type", "text/plain")];
       body = Text.encodeUtf8(
-        _name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "---\n" # "Current Sessions:                         " # debug_show (_sessions.size()) # "\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
+        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "---\n" # "Current Sessions:                         " # debug_show (_sessions.size()) # "\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
       );
       streaming_strategy = null;
     };
@@ -747,7 +704,7 @@ actor class ObsidianTearsBackend() = this {
         //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
         // }"
         var statsString = "{";
-        let optPlayerData : ?PlayerData = _playerData.get(characterIndex);
+        let optPlayerData : ?T.PlayerData = _playerData.get(characterIndex);
         switch (optPlayerData) {
           case (?playerData) {
             statsString #= "\\\"characterName\\\":\\\"" # playerData.characterName # "\\\",";

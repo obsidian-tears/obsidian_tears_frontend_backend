@@ -4,9 +4,9 @@ export const network = "local";
 // update this whenever canisters change in local
 const canisterIds = {
   local: {
-    itemCanister: "renrk-eyaaa-aaaaa-aaada-cai",
-    characterCanister: "rkp4c-7iaaa-aaaaa-aaaca-cai",
-    unityCanister: "sp3hj-caaaa-aaaaa-aaajq-cai",
+    itemCanister: "by6od-j4aaa-aaaaa-qaadq-cai",
+    characterCanister: "br5f7-7uaaa-aaaaa-qaaca-cai",
+    unityCanister: "avqkn-guaaa-aaaaa-qaaea-cai",
   },
   beta: {
     itemCanister: "7tscg-xaaaa-aaaan-qdasa-cai",

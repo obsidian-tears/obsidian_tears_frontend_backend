@@ -1,27 +1,51 @@
 import Debug "mo:base/Debug";
-import MoSpec "mo:mospec/MoSpec";
+import Principal "mo:base/Principal";
+import Result "mo:base/Result";
+import {
+  assertTrue;
+  describe;
+  context;
+  it;
+  run;
+} "mo:mospec/MoSpec";
 
 import Main "main";
+import T "types";
+import ExtCore "ext/Core";
+import CharacterActor "../../spec/actors/CharacterActor";
 
-let exampleCanister = await Main.ObsidianTearsRpg();
+let backendActor = await Main.ObsidianTearsBackend();
 
-let assertTrue = MoSpec.assertTrue;
-let describe = MoSpec.describe;
-let context = MoSpec.context;
-let before = MoSpec.before;
-let it = MoSpec.it;
-let skip = MoSpec.skip;
-let pending = MoSpec.pending;
-let run = MoSpec.run;
+// setup
+// stubbed actors
+let characterActor = await CharacterActor.CharacterActor();
+let characterId = Principal.toText(Principal.fromActor(characterActor));
+ignore await backendActor.setStubbedCanisterIds(characterId, "");
+
+// set default character nfts
+let defaultTokensResponse : Result.Result<[ExtCore.TokenIndex], ExtCore.CommonError> = #ok([1, 2, 3, 4]);
+await characterActor.setTokensResponse(defaultTokensResponse);
 
 let success = run([
+  describe(
+    "#verify",
+    [
+      it(
+        "should return list of NFTs owned",
+        do {
+          let response = await backendActor.verify();
+          assertTrue(response == #Ok([1, 2, 3, 4]));
+        },
+      ),
+    ],
+  ),
   describe(
     "#checkIn",
     [
       it(
         "should greet me",
         do {
-          let response = await exampleCanister.checkIn();
+          let response = await backendActor.checkIn();
           assertTrue(response == ());
         },
       ),

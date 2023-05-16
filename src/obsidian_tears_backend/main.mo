@@ -23,121 +23,54 @@ import Time "mo:base/Time";
 import AID "util/AccountIdentifier";
 import ExtCommon "ext/Common";
 import ExtCore "ext/Core";
-import Ref "./reference";
-import X "./types";
-import Env "./env"
+import { TokenIndex } "ext/Core";
+import Ref "reference";
+import T "types";
+import C "consts";
+import Env "env";
 
-actor class ObsidianTearsRpg() = this {
+actor class ObsidianTearsBackend() = this {
   // Types
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type TokenIndex = ExtCore.TokenIndex;
   type CommonError = ExtCore.CommonError;
   type Metadata = ExtCommon.Metadata;
 
-  type SessionData = {
-    createdAt : Time.Time;
-    goldEarned : Nat32;
-    xpEarned : Nat32;
-    itemsEarned : Nat8;
-  };
-  type RewardInfo = {
-    itemIds : [Text];
-    gold : Nat32;
-    xp : Nat32;
-  };
-  //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,
-  //   \"pointsRemaining\":0,\"healthBase\":15,\"healthTotal\":15,\"healthMax\":15,\"magicBase\":10,\"magicTotal\":10,
-  //   \"magicMax\":10,\"attackBase\":5,\"attackTotal\":5,\"magicPowerBase\":0,\"magicPowerTotal\":0,\"defenseBase\":5,
-  //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
-  type PlayerData = {
-    characterName : Text;
-    characterClass : Text;
-    level : Nat16;
-    xp : Nat32;
-    xpToLevelUp : Nat32;
-    pointsRemaining : Nat32;
-    healthBase : Nat16;
-    healthTotal : Nat16;
-    healthMax : Nat16;
-    magicBase : Nat16;
-    magicTotal : Nat16;
-    magicMax : Nat16;
-    attackBase : Nat16;
-    attackTotal : Nat16;
-    defenseBase : Nat16;
-    defenseTotal : Nat16;
-    speedBase : Nat16;
-    speedTotal : Nat16;
-    criticalHitProbability : Float;
-    characterEffects : [Text];
-    kills : Nat16;
-    deaths : Nat16;
-  };
-  public type TxReceipt = {
-    #Ok : Nat;
-    #Err : {
-      #InsufficientAllowance;
-      #InsufficientBalance;
-      #ErrorOperationStyle;
-      #Unauthorized;
-      #LedgerTrap;
-      #ErrorTo;
-      #Other : Text;
-      #BlockUsed;
-      #AmountTooSmall;
-    };
-  };
-
-  // Canister Info
-  var _name = "Obsidian Tears RPG";
-
-  // Config
-  private stable var SESSION_LIFE : Time.Time = 24 * 60 * 60 * 1_000_000_000; // remove sessions after 24 hr (clear gain limits)
-  private stable var SESSION_CHECK : Time.Time = 60 * 60 * 1_000_000_000; // check sessions every 1 hr
-  private stable var REGISTRY_CHECK : Time.Time = 10 * 60 * 1_000_000_000; // check sessions every 10 minutes
-  private stable var MAX_GOLD : Nat32 = 5_000; // max amount of gold earned in 1 session
-  private stable var MAX_XP : Nat32 = 5_000; // max amount of gold earned in 1 session
-  private stable var MAX_ITEMS : Nat8 = 100; // max amount of gold earned in 1 session
-  private stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  private stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  private stable var _runHeartbeat : Bool = true;
+  // Sessions DB
+  stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
+  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
+  stable var _runHeartbeat : Bool = true;
 
   // Env
-  private var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
-  private let _itemCanister : Text = Env.getItemCanisterId();
-  private let _characterCanister : Text = Env.getCharacterCanisterId();
+  var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
+  let _itemCanister : Text = Env.getItemCanisterId();
+  let _characterCanister : Text = Env.getCharacterCanisterId();
 
   // Actors
-  let _itemActor = actor (_itemCanister) : actor {
-    mintItem : (data : [Nat8], recipient : AccountIdentifier) -> async ();
-    burnItem : (TokenIndex) -> async ();
-    getRegistry : () -> async [(TokenIndex, AccountIdentifier)];
-    getMetadata : () -> async [(TokenIndex, Metadata)];
-  };
-  let _characterActor = actor (_characterCanister) : actor {
-    getRegistry : () -> async [(TokenIndex, AccountIdentifier)];
-    tokens : (aid : AccountIdentifier) -> async Result.Result<[TokenIndex], CommonError>;
-  };
+  var _characterActor : T.CharacterInterface = actor (_characterCanister);
+  var _itemActor : T.ItemInterface = actor (_itemCanister);
 
   // State
-  private stable var _saveDataState : [(TokenIndex, Text)] = [];
-  private stable var _sessionsState : [(TokenIndex, SessionData)] = [];
-  private stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
-  private stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
-  private stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
-  private stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
-  private stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
-  private stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
-  private stable var _playerDataState : [(TokenIndex, PlayerData)] = [];
-  private stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+  stable var _saveDataState : [(TokenIndex, Text)] = [];
+  stable var _sessionsState : [(TokenIndex, T.SessionData)] = [];
+  stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
+  stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
+  stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
+  stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
+  stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
+  stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
+  stable var _playerDataState : [(TokenIndex, T.PlayerData)] = [];
+  stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+
   // Dynamic
-  private var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _sessions : HashMap.HashMap<TokenIndex, SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _playerData : HashMap.HashMap<TokenIndex, PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+  var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _sessions : HashMap.HashMap<TokenIndex, T.SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _playerData : HashMap.HashMap<TokenIndex, T.PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
   // TODO create level up function that increases player level and stats
@@ -148,9 +81,9 @@ actor class ObsidianTearsRpg() = this {
   // TODO for each relevent event (eg. opening a chest at the end of a sidequest) have a list of story events that must be completed to open chest.
   // TODO keep track of opened chests for each character
 
-  private var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-  private var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+  var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
 
   // system functions
   system func preupgrade() {
@@ -180,7 +113,7 @@ actor class ObsidianTearsRpg() = this {
   };
 
   system func heartbeat() : async () {
-    if (_runHeartbeat and Time.now() >= _lastRegistryUpdate + REGISTRY_CHECK) {
+    if (_runHeartbeat and Time.now() >= _lastRegistryUpdate + C.REGISTRY_CHECK) {
       // every ten minutes, pull the latest character and item registry
       _lastRegistryUpdate := Time.now();
       try {
@@ -191,7 +124,7 @@ actor class ObsidianTearsRpg() = this {
         _runHeartbeat := false;
       };
     };
-    if (_runHeartbeat == true and Time.now() >= _lastCleared + SESSION_CHECK) {
+    if (_runHeartbeat == true and Time.now() >= _lastCleared + C.SESSION_CHECK) {
       // every hour check all the sessions and delete old ones
       _lastCleared := Time.now();
       try {
@@ -207,7 +140,7 @@ actor class ObsidianTearsRpg() = this {
   // -----------------------------------
 
   // check if user owns character NFT and create session for fast lookup. return owned NFT data
-  public shared ({ caller }) func verify() : async (X.ApiResponse<[TokenIndex]>) {
+  public shared ({ caller }) func verify() : async (T.ApiResponse<[TokenIndex]>) {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     let result : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
     switch (result) {
@@ -221,7 +154,7 @@ actor class ObsidianTearsRpg() = this {
   };
 
   // login when user selects
-  public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (X.ApiResponse<Text>) {
+  public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -233,7 +166,7 @@ actor class ObsidianTearsRpg() = this {
   };
 
   // save game data formatted in json so that unity can load correctly
-  public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (X.ApiResponse<Text>) {
+  public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -247,7 +180,7 @@ actor class ObsidianTearsRpg() = this {
   };
 
   // called when opening a treasure chest or receiving
-  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (X.ApiResponse<RewardInfo>) {
+  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -262,7 +195,7 @@ actor class ObsidianTearsRpg() = this {
         );
         switch (optChest) {
           case (?chest) {
-            var rewardInfo : RewardInfo = {
+            var rewardInfo : T.RewardInfo = {
               itemIds = [];
               gold = 0;
               xp = 0;
@@ -274,7 +207,7 @@ actor class ObsidianTearsRpg() = this {
                 xp = rewardInfo.xp;
               };
             };
-            let itemResult : RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
+            let itemResult : T.RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
             rewardInfo := {
               itemIds = itemResult.itemIds;
               gold = rewardInfo.gold;
@@ -290,7 +223,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  public shared ({ caller }) func consumeItem(characterIndex : TokenIndex, itemIndex : Nat16) : async (X.ApiResponse<()>) {
+  public shared ({ caller }) func consumeItem(characterIndex : TokenIndex, itemIndex : Nat16) : async (T.ApiResponse<()>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -305,7 +238,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (X.ApiResponse<()>) {
+  public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -384,7 +317,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (X.ApiResponse<()>) {
+  public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (T.ApiResponse<()>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -445,7 +378,7 @@ actor class ObsidianTearsRpg() = this {
   };
 
   // when you defeat a monster.... can win gold, xp, and items
-  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (X.ApiResponse<RewardInfo>) {
+  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -466,8 +399,8 @@ actor class ObsidianTearsRpg() = this {
               // TODO: give every player player data on start
               // case(?playerData) {}
               case (_) {
-                let itemInfo : RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
-                let rewardInfo : RewardInfo = {
+                let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
+                let rewardInfo : T.RewardInfo = {
                   gold = _giveGold(monster.gold, caller, true);
                   xp = monster.xp;
                   itemIds = itemInfo.itemIds;
@@ -493,12 +426,13 @@ actor class ObsidianTearsRpg() = this {
   // -----------------------------------
   // http
   // -----------------------------------
-  public query func http_request(request : X.HttpRequest) : async X.HttpResponse {
+  public query func http_request(request : T.HttpRequest) : async T.HttpResponse {
+    let name = "Obsidian Tears RPG";
     return {
       status_code = 200;
       headers = [("content-type", "text/plain")];
       body = Text.encodeUtf8(
-        _name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "---\n" # "Current Sessions:                         " # debug_show (_sessions.size()) # "\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
+        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "---\n" # "Current Sessions:                         " # debug_show (_sessions.size()) # "\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
       );
       streaming_strategy = null;
     };
@@ -522,7 +456,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
   // update session when you earn gold, xp, or items
-  func updateSession(characterIndex : TokenIndex, session : SessionData, xp : Nat32, gold : Nat32, items : Nat8) : X.ApiResponse<()> {
+  func updateSession(characterIndex : TokenIndex, session : T.SessionData, xp : Nat32, gold : Nat32, items : Nat8) : T.ApiResponse<()> {
     _sessions.put(
       characterIndex,
       {
@@ -539,8 +473,8 @@ actor class ObsidianTearsRpg() = this {
     let ownedItems : [TokenIndex] = Iter.toArray(
       HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
         _itemRegistry,
-        ExtCore.TokenIndex.equal,
-        ExtCore.TokenIndex.hash,
+        TokenIndex.equal,
+        TokenIndex.hash,
         func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
           if (account == accountIdentifier) {
             return ?index;
@@ -597,8 +531,8 @@ actor class ObsidianTearsRpg() = this {
     let ownedItems : [TokenIndex] = Iter.toArray(
       HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
         _itemRegistry,
-        ExtCore.TokenIndex.equal,
-        ExtCore.TokenIndex.hash,
+        TokenIndex.equal,
+        TokenIndex.hash,
         func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
           if (account == accountIdentifier) {
             return ?index;
@@ -651,7 +585,7 @@ actor class ObsidianTearsRpg() = this {
     gameItems;
   };
   // load game data formatted in json so that unity can load correctly
-  func _load(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : X.ApiResponse<Text> {
+  func _load(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : T.ApiResponse<Text> {
     switch (_saveData.get(characterIndex)) {
       case (?save) {
         // piece together the inventory and player stats
@@ -762,7 +696,7 @@ actor class ObsidianTearsRpg() = this {
         //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
         // }"
         var statsString = "{";
-        let optPlayerData : ?PlayerData = _playerData.get(characterIndex);
+        let optPlayerData : ?T.PlayerData = _playerData.get(characterIndex);
         switch (optPlayerData) {
           case (?playerData) {
             statsString #= "\\\"characterName\\\":\\\"" # playerData.characterName # "\\\",";
@@ -827,13 +761,13 @@ actor class ObsidianTearsRpg() = this {
   func cleanSessions() {
     for ((principal, session) in _sessions.entries()) {
       // if jwt is older than 24 hr, delete the entry
-      if (session.createdAt < Time.now() - SESSION_LIFE) {
+      if (session.createdAt < Time.now() - C.SESSION_LIFE) {
         _sessions.delete(principal);
       };
     };
   };
 
-  func checkSession(caller : Principal, tokenIndex : TokenIndex) : X.ApiResponse<SessionData> {
+  func checkSession(caller : Principal, tokenIndex : TokenIndex) : T.ApiResponse<T.SessionData> {
     // convert principal into wallet
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // make sure the principal owns this tokenIndex
@@ -850,7 +784,7 @@ actor class ObsidianTearsRpg() = this {
     switch (_sessions.get(tokenIndex)) {
       // if their session has been reset, replace it
       case (?session) {
-        if (session.goldEarned >= MAX_GOLD or session.itemsEarned >= MAX_ITEMS or session.xpEarned >= MAX_XP) {
+        if (session.goldEarned >= C.MAX_GOLD or session.itemsEarned >= C.MAX_ITEMS or session.xpEarned >= C.MAX_XP) {
           // return #Err(#Limit);
           return #Ok session;
         } else {
@@ -858,7 +792,7 @@ actor class ObsidianTearsRpg() = this {
         };
       };
       case (_) {
-        let newSession : SessionData = {
+        let newSession : T.SessionData = {
           createdAt = Time.now();
           goldEarned = 0;
           xpEarned = 0;
@@ -937,7 +871,7 @@ actor class ObsidianTearsRpg() = this {
     return t;
   };
 
-  func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async RewardInfo {
+  func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {
     // check probability and mint items
     let optRandomNumber : ?Nat = Random.Finite(Principal.toBlob(caller)).range(8);
     switch (optRandomNumber) {
@@ -962,9 +896,9 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async RewardInfo {
+  func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async T.RewardInfo {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-    var defaultReward : RewardInfo = {
+    var defaultReward : T.RewardInfo = {
       xp = 0;
       gold = 0;
       itemIds = [];
@@ -1061,8 +995,8 @@ actor class ObsidianTearsRpg() = this {
             let optOwnedItems : [TokenIndex] = Iter.toArray(
               HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
                 _itemRegistry,
-                ExtCore.TokenIndex.equal,
-                ExtCore.TokenIndex.hash,
+                TokenIndex.equal,
+                TokenIndex.hash,
                 func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
                   if (account == accountIdentifier) {
                     return ?index;
@@ -1144,7 +1078,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async X.ApiResponse<[Nat8]> {
+  func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async T.ApiResponse<[Nat8]> {
     // get item metadata
     let itemContainer : ?Ref.Item = Array.find(
       Ref.items,
@@ -1160,7 +1094,7 @@ actor class ObsidianTearsRpg() = this {
     };
   };
 
-  func _mintItem(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async X.ApiResponse<[Nat8]> {
+  func _mintItem(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async T.ApiResponse<[Nat8]> {
     try {
       if (metadata == []) {
         let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
@@ -1182,22 +1116,30 @@ actor class ObsidianTearsRpg() = this {
 
   func getItemRegistry() : async () {
     let result = await _itemActor.getRegistry();
-    _itemRegistry := HashMap.fromIter(result.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    _itemRegistry := HashMap.fromIter(result.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   };
 
   func getItemMetadata() : async () {
     let result = await _itemActor.getMetadata();
-    _itemMetadata := HashMap.fromIter(result.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    _itemMetadata := HashMap.fromIter(result.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   };
 
   func getCharacterRegistry() : async () {
     let result = await _characterActor.getRegistry();
-    _characterRegistry := HashMap.fromIter(result.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    _characterRegistry := HashMap.fromIter(result.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   };
 
   // -----------------------------------
   // management
   // -----------------------------------
+  public func setStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
+    _characterActor := actor (characterCanisterId);
+    // _itemActor := actor (itemCanisterId);
+    #ok;
+  };
+
   public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
     Iter.toArray(_itemRegistry.entries());
   }; // heartbeat stuff
@@ -1213,7 +1155,7 @@ actor class ObsidianTearsRpg() = this {
     _runHeartbeat := true;
   };
 
-  public shared ({ caller }) func setMinter(new : Principal) : async Result.Result<(), X.ApiError> {
+  public shared ({ caller }) func setMinter(new : Principal) : async Result.Result<(), T.ApiError> {
     if (caller != _minter) return #err(#Unauthorized);
     _minter := new;
     #ok();

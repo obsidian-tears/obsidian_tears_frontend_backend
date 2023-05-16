@@ -1,18 +1,13 @@
 import Debug "mo:base/Debug";
-import MoSpec "mo:mospec/MoSpec";
-
+import {
+  assertTrue;
+  describe;
+  it;
+  run;
+} "mo:mospec/MoSpec";
 import Main "main";
 
-let exampleCanister = await Main.ObsidianTearsRpg();
-
-let assertTrue = MoSpec.assertTrue;
-let describe = MoSpec.describe;
-let context = MoSpec.context;
-let before = MoSpec.before;
-let it = MoSpec.it;
-let skip = MoSpec.skip;
-let pending = MoSpec.pending;
-let run = MoSpec.run;
+let backendActor = await Main.ObsidianTearsBackend();
 
 let success = run([
   describe(
@@ -21,7 +16,7 @@ let success = run([
       it(
         "should greet me",
         do {
-          let response = await exampleCanister.checkIn();
+          let response = await backendActor.checkIn();
           assertTrue(response == ());
         },
       ),

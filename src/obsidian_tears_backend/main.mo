@@ -27,7 +27,7 @@ import Ref "./reference";
 import X "./types";
 import Env "./env"
 
-actor class ObsidianTearsRpg() = this {
+actor class ObsidianTearsBackend() = this {
   // Types
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type TokenIndex = ExtCore.TokenIndex;

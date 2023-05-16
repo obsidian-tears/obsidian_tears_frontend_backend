@@ -11,7 +11,7 @@
 .dfx/
 src/declarations/
 
-# frontend code
+# packages
 node_modules/
 dist/
-.vessel
+.mops/

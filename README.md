@@ -1,13 +1,13 @@
 # obsidian_tears
 
-Obsidian Tears is an RPG on the Internet Computer. This project contains the game backend and frontend canisters. The game is built in Unity, packaged in WebGL, and displayed via React. 
+Obsidian Tears is an RPG on the Internet Computer. This project contains the game backend and frontend canisters. The game is built in Unity, packaged in WebGL, and displayed via React.
 
 The backend canister contains all game data. Loss of data will result in players losing saved progress, gold, xp, stats, non-nft items, etc. Proceed with caution.
 
-These canisters interact with several other canisters, including the obsidian tears character nft canister and obsidian tears items nft canister. Be aware that if the interface of these nft canisters changes, it may break this canister as a result. 
-
+These canisters interact with several other canisters, including the obsidian tears character nft canister and obsidian tears items nft canister. Be aware that if the interface of these nft canisters changes, it may break this canister as a result.
 
 ## How to update unity build
+
 - 1 - On Unity Hub. File -> Build -> WebGL, double check if options make sense.
 - 2 - Go to obsidian_tears repo (probably by opening VS Code), open terminal and write:
 - 3 - "git status" (ensure no file was added, if so, do "git checkout .")

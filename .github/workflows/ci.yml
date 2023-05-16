@@ -37,6 +37,8 @@ jobs:
           echo "/home/runner/bin" >> $GITHUB_PATH
       - name: "install dfx"
         run: sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+      - name: "install mops packages"
+        run: npx mops install
       - name: "run tests"
         run: |
           dfx start --background

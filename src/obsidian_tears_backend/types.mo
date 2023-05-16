@@ -1,6 +1,20 @@
 import Blob "mo:base/Blob";
+import Time "mo:base/Time";
 
 module {
+  public type RewardInfo = {
+    itemIds : [Text];
+    gold : Nat32;
+    xp : Nat32;
+  };
+
+  public type SessionData = {
+    createdAt : Time.Time;
+    goldEarned : Nat32;
+    xpEarned : Nat32;
+    itemsEarned : Nat8;
+  };
+
   // Responses
   public type ApiResponse<T> = {
     #Ok : T;

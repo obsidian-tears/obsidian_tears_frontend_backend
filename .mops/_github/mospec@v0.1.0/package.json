@@ -1,0 +1,38 @@
+{
+  "name": "mo-spec",
+  "version": "1.0.0",
+  "description": "Motoko specs that are easy to read and learn, allowing you to ship Motoko code with confidence.",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "prettier:check": "npx prettier --check .",
+    "prettier:format": "npx prettier --write .",
+    "test": "npm run test:src && npm run test:example",
+    "test:src": "mo-test -C test --testmode interpreter --verbose",
+    "test:example": "mo-test -C example --testmode interpreter --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MoSpec/mo-spec.git"
+  },
+  "keywords": [
+    "Motoko",
+    "Spec",
+    "Test"
+  ],
+  "author": "tiago89",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/MoSpec/mo-spec/issues"
+  },
+  "homepage": "https://github.com/MoSpec/mo-spec#readme",
+  "devDependencies": {
+    "husky": "^8.0.2",
+    "mo-dev": "^0.7.1",
+    "prettier": "^2.8.1",
+    "prettier-plugin-motoko": "^0.5.2"
+  }
+}

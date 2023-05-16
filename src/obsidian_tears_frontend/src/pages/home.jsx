@@ -1,13 +1,16 @@
-import * as React from 'react'
-import PlugConnect from '@psychedelic/plug-connect'
+import * as React from "react";
+import PlugConnect from "@psychedelic/plug-connect";
 
 const Home = (props) => {
   // asset urls
-  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" }
-  const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" }
+  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
+  const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 
   return (
-    <div id="body" style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}>
+    <div
+      id="body"
+      style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
+    >
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
       {props.loggedIn ? (
@@ -48,30 +51,34 @@ const Home = (props) => {
       ) : (
         <>
           <div className="space50"></div>
-          {false &&
+          {false && (
             <div className="centerMe">
               <PlugConnect
                 whitelist={props.whitelist}
                 onConnectCallback={async () => {
-                  props.setUsingPlug(true)
-                  props.setUsingStoic(false)
-                  props.setLoggedIn(true)
-                  let p = await window.ic.plug.agent.getPrincipal()
-                  props.setPrincipal(p.toText())
-                  let charActor = await props.loadActors(true, false, p.toText())
-                  console.log('loaded actors from onconnectcallback')
-                  await props.loadCharacters(charActor, p.toText())
+                  props.setUsingPlug(true);
+                  props.setUsingStoic(false);
+                  props.setLoggedIn(true);
+                  let p = await window.ic.plug.agent.getPrincipal();
+                  props.setPrincipal(p.toText());
+                  let charActor = await props.loadActors(
+                    true,
+                    false,
+                    p.toText()
+                  );
+                  console.log("loaded actors from onconnectcallback");
+                  await props.loadCharacters(charActor, p.toText());
                 }}
               />
               <br></br>
             </div>
-          }
+          )}
           <div className="centerMe">
             <button
-              className={'buttonWoodGridXL'}
+              className={"buttonWoodGridXL"}
               style={backgroundImageWood3}
               onClick={async () => {
-                await props.connectToStoic()
+                await props.connectToStoic();
               }}
             >
               Connect to Stoic
@@ -80,16 +87,12 @@ const Home = (props) => {
           <br></br>
           <div className="space50"></div>
           <div className="centerMe">
-            <img
-              src="menu-fighter.png"
-              alt="fighter"
-              height="200px"
-            ></img>
+            <img src="menu-fighter.png" alt="fighter" height="200px"></img>
           </div>
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

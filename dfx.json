@@ -7,9 +7,7 @@
       "main": "src/obsidian_tears_backend/main.mo"
     },
     "obsidian_tears_frontend": {
-      "dependencies": [
-        "obsidian_tears_backend"
-      ],
+      "dependencies": ["obsidian_tears_backend"],
       "frontend": {
         "entrypoint": "src/obsidian_tears_frontend/src/index.html"
       },
@@ -28,15 +26,11 @@
   },
   "networks": {
     "staging": {
-      "providers": [
-        "https://ic0.app"
-      ],
+      "providers": ["https://ic0.app"],
       "type": "persistent"
     },
     "beta": {
-      "providers": [
-        "https://ic0.app"
-      ],
+      "providers": ["https://ic0.app"],
       "type": "persistent"
     }
   }

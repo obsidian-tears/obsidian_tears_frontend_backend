@@ -1,0 +1,1 @@
+{"compiler":"0.8.8","dependencies":[{"name":"base","repo":"https://github.com/dfinity/motoko-base#a867420b4c147c0df64e999fb11f0978e82e1d2a","version":""},{"name":"matchers","repo":"https://github.com/kritzcreek/motoko-matchers#3dac8a071b69e4e651b25a7d9683fe831eb7cffd","version":""}]}

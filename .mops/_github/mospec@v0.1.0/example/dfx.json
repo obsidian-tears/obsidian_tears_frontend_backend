@@ -1,0 +1,13 @@
+{
+  "canisters": {
+    "example": {
+      "main": "src/example/main.mo",
+      "type": "motoko"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "vessel sources"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /**
-Generates AccountIdentifier's for the IC (32 bytes). Use with 
+Generates AccountIdentifier's for the IC (32 bytes). Use with
 hex library to generate corresponding hex address.
 Uses custom SHA224 and CRC32 motoko libraries
  */

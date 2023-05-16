@@ -1,0 +1,18 @@
+{
+  "name": "mospec_example",
+  "version": "0.1.0",
+  "description": "MoSpec Example",
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "Canister",
+    "Test",
+    "MoSpec"
+  ],
+  "scripts": {
+    "test": "mo-test --testmode interpreter --verbose"
+  },
+  "devDependencies": {
+    "mo-dev": "^0.7.1"
+  }
+}

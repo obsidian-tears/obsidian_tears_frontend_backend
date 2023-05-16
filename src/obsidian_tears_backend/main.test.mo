@@ -15,20 +15,20 @@ let pending = MoSpec.pending;
 let run = MoSpec.run;
 
 let success = run([
-    describe(
-        "#checkIn",
-        [
-            it(
-                "should greet me",
-                do {
-                    let response = await exampleCanister.checkIn();
-                    assertTrue(response == ());
-                },
-            ),
-        ],
-    ),
+  describe(
+    "#checkIn",
+    [
+      it(
+        "should greet me",
+        do {
+          let response = await exampleCanister.checkIn();
+          assertTrue(response == ());
+        },
+      ),
+    ],
+  ),
 ]);
 
 if (success == false) {
-    Debug.trap("Tests failed");
+  Debug.trap("Tests failed");
 };

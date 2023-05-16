@@ -1,0 +1,7 @@
+{
+  "defaults": {
+    "build": {
+      "packtool": "vessel sources"
+    }
+  }
+}

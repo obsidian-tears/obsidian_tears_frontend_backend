@@ -39,7 +39,6 @@ actor class ObsidianTearsBackend() = this {
   // Sessions DB
   stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
   stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  stable var _runHeartbeat : Bool = true;
 
   // Env
   let _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
@@ -110,29 +109,6 @@ actor class ObsidianTearsBackend() = this {
     _completedEventsState := [];
     _playerDataState := [];
     _goldState := [];
-  };
-
-  system func heartbeat() : async () {
-    if (_runHeartbeat and Time.now() >= _lastRegistryUpdate + C.REGISTRY_CHECK) {
-      // every ten minutes, pull the latest character and item registry
-      _lastRegistryUpdate := Time.now();
-      try {
-        await getCharacterRegistry();
-        await getItemRegistry();
-        await getItemMetadata();
-      } catch (e) {
-        _runHeartbeat := false;
-      };
-    };
-    if (_runHeartbeat == true and Time.now() >= _lastCleared + C.SESSION_CHECK) {
-      // every hour check all the sessions and delete old ones
-      _lastCleared := Time.now();
-      try {
-        cleanSessions();
-      } catch (e) {
-        _runHeartbeat := false;
-      };
-    };
   };
 
   // -----------------------------------
@@ -223,6 +199,7 @@ actor class ObsidianTearsBackend() = this {
     };
   };
 
+  // not yet called
   public shared ({ caller }) func consumeItem(characterIndex : TokenIndex, itemIndex : Nat16) : async (T.ApiResponse<()>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
@@ -757,16 +734,6 @@ actor class ObsidianTearsBackend() = this {
     };
   };
 
-  // manage session memory
-  func cleanSessions() {
-    for ((principal, session) in _sessions.entries()) {
-      // if jwt is older than 24 hr, delete the entry
-      if (session.createdAt < Time.now() - C.SESSION_LIFE) {
-        _sessions.delete(principal);
-      };
-    };
-  };
-
   func checkSession(caller : Principal, tokenIndex : TokenIndex) : T.ApiResponse<T.SessionData> {
     // convert principal into wallet
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
@@ -1132,7 +1099,15 @@ actor class ObsidianTearsBackend() = this {
   // -----------------------------------
   // management
   // -----------------------------------
-  public func setStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
+
+  public func adminUpdateRegistryCache() : async () {
+    await getCharacterRegistry();
+    await getItemRegistry();
+    await getItemMetadata();
+    _lastRegistryUpdate := Time.now();
+  };
+
+  public func adminSetStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
     _characterActor := actor (characterCanisterId);
@@ -1142,17 +1117,6 @@ actor class ObsidianTearsBackend() = this {
 
   public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
     Iter.toArray(_itemRegistry.entries());
-  }; // heartbeat stuff
-  public query func isHeartbeatRunning() : async Bool {
-    _runHeartbeat;
-  };
-  public shared (msg) func adminKillHeartbeat() : async () {
-    assert (msg.caller == _minter);
-    _runHeartbeat := false;
-  };
-  public shared (msg) func adminStartHeartbeat() : async () {
-    assert (msg.caller == _minter);
-    _runHeartbeat := true;
   };
 
   public func acceptCycles() : () {

@@ -20,7 +20,7 @@ let backendActor = await Main.ObsidianTearsBackend();
 // stubbed actors
 let characterActor = await CharacterActor.CharacterActor();
 let characterId = Principal.toText(Principal.fromActor(characterActor));
-ignore await backendActor.setStubbedCanisterIds(characterId, "");
+ignore await backendActor.adminSetStubbedCanisterIds(characterId, "");
 
 // set default character nfts
 let defaultTokensResponse : Result.Result<[ExtCore.TokenIndex], ExtCore.CommonError> = #ok([1, 2, 3, 4]);

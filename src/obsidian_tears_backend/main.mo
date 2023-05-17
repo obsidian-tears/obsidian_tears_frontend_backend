@@ -143,7 +143,6 @@ actor class ObsidianTearsBackend() = this {
 
   // save game data formatted in json so that unity can load correctly
   public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    Debug.print(debug_show (gameData));
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;

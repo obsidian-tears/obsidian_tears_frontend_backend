@@ -143,6 +143,7 @@ actor class ObsidianTearsBackend() = this {
 
   // save game data formatted in json so that unity can load correctly
   public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
+    Debug.print(debug_show (gameData));
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
         return #Err e;
@@ -397,8 +398,6 @@ actor class ObsidianTearsBackend() = this {
       };
     };
   };
-
-  public shared (msg) func checkIn() : async () {};
 
   // -----------------------------------
   // http
@@ -1113,19 +1112,5 @@ actor class ObsidianTearsBackend() = this {
     _characterActor := actor (characterCanisterId);
     // _itemActor := actor (itemCanisterId);
     #ok;
-  };
-
-  public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
-    Iter.toArray(_itemRegistry.entries());
-  };
-
-  public func acceptCycles() : () {
-    let available = Cycles.available();
-    let accepted = Cycles.accept(available);
-    assert (available == accepted);
-  };
-
-  public query func balance() : async Nat {
-    Cycles.balance();
   };
 };

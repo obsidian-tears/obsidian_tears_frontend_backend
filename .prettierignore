@@ -1,2 +1,4 @@
 .mops
 .dfx
+src/declarations/
+dist/

@@ -42,7 +42,7 @@ actor class ObsidianTearsBackend() = this {
   stable var _runHeartbeat : Bool = true;
 
   // Env
-  var _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
+  let _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
   let _itemCanister : Text = Env.getItemCanisterId();
   let _characterCanister : Text = Env.getCharacterCanisterId();
 
@@ -1153,12 +1153,6 @@ actor class ObsidianTearsBackend() = this {
   public shared (msg) func adminStartHeartbeat() : async () {
     assert (msg.caller == _minter);
     _runHeartbeat := true;
-  };
-
-  public shared ({ caller }) func setMinter(new : Principal) : async Result.Result<(), T.ApiError> {
-    if (caller != _minter) return #err(#Unauthorized);
-    _minter := new;
-    #ok();
   };
 
   public func acceptCycles() : () {

@@ -398,8 +398,6 @@ actor class ObsidianTearsBackend() = this {
     };
   };
 
-  public shared (msg) func checkIn() : async () {};
-
   // -----------------------------------
   // http
   // -----------------------------------
@@ -1113,19 +1111,5 @@ actor class ObsidianTearsBackend() = this {
     _characterActor := actor (characterCanisterId);
     // _itemActor := actor (itemCanisterId);
     #ok;
-  };
-
-  public query func getItemRegistryCopy() : async [(TokenIndex, AccountIdentifier)] {
-    Iter.toArray(_itemRegistry.entries());
-  };
-
-  public func acceptCycles() : () {
-    let available = Cycles.available();
-    let accepted = Cycles.accept(available);
-    assert (available == accepted);
-  };
-
-  public query func balance() : async Nat {
-    Cycles.balance();
   };
 };

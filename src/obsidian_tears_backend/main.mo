@@ -492,7 +492,8 @@ actor class ObsidianTearsBackend() = this {
         );
         switch (optTokenToBurn) {
           case (?tokenToBurn) {
-            await _itemActor.burnItem(tokenToBurn);
+            // TODO: implement in items_nft repo
+            // await _itemActor.burnItem(tokenToBurn);
           };
           case _ {};
         };
@@ -1109,7 +1110,7 @@ actor class ObsidianTearsBackend() = this {
     if (Env.network != "local") return #err("Method only allowed in local");
 
     _characterActor := actor (characterCanisterId);
-    // _itemActor := actor (itemCanisterId);
+    _itemActor := actor (itemCanisterId);
     #ok;
   };
 };

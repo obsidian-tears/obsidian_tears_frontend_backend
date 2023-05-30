@@ -23,7 +23,7 @@ actor class ItemActor() {
     return metadataResponse;
   };
 
-  public func setMetadata(response : MetadataResponse) : async () {
+  public func setMetadataResponse(response : MetadataResponse) : async () {
     metadataResponse := response;
   };
 

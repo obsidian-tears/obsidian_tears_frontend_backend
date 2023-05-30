@@ -199,22 +199,6 @@ actor class ObsidianTearsBackend() = this {
     };
   };
 
-  // not yet called
-  public shared ({ caller }) func consumeItem(characterIndex : TokenIndex, itemIndex : Nat16) : async (T.ApiResponse<()>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (#Ok session) {
-        // get item tokenindex by checking metadata or whatever. burn item
-        let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-        _unequipItem(itemIndex, characterIndex);
-        await _burnItem(address, characterIndex, itemIndex);
-        #Ok;
-      };
-    };
-  };
-
   public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
     switch (checkSession(caller, characterIndex)) {
       case (#Err e) {
@@ -304,54 +288,65 @@ actor class ObsidianTearsBackend() = this {
     // make sure that caller owns all items;
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // get player owned game items
-    let gameItems = getOwnedItems(address, characterIndex);
+    let ownedItems = getOwnedItems(address, characterIndex);
     // get player equipped game items
     let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
-    switch (optEquippedItems) {
-      case (?equippedItems) {
-        for (itemIndex in itemIndices.vals()) {
-          // get item details
-          let optItem : ?Ref.Item = Array.find(
-            Ref.items,
-            func(item : Ref.Item) : Bool {
-              return item.id == itemIndex;
+
+    // check all item definitions
+    for (itemIndex in itemIndices.vals()) {
+      let optItem : ?Ref.Item = Array.find(
+        Ref.items,
+        func(item : Ref.Item) : Bool {
+          return item.id == itemIndex;
+        },
+      );
+      if (optItem == null) return #Err(#Other("Server Error: Item Definition Missing"));
+    };
+
+    // equip items
+    let equippedItems : [Nat16] = switch (optEquippedItems) {
+      case (?equippedItems) { equippedItems };
+      case (_) { [] };
+    };
+
+    for (itemIndex in itemIndices.vals()) {
+      // get item details
+      let optItem : ?Ref.Item = Array.find(
+        Ref.items,
+        func(item : Ref.Item) : Bool {
+          return item.id == itemIndex;
+        },
+      );
+      switch (optItem) {
+        case (?itemToEquip) {
+          // make sure item isn't already equipped
+          let equippedMatchingItems : [Nat16] = Array.filter(
+            equippedItems,
+            func(eItem : Nat16) : Bool {
+              eItem == itemToEquip.id;
             },
           );
-          switch (optItem) {
-            case (?itemToEquip) {
-              // make sure item isn't already equipped
-              let equippedMatchingItems : [Nat16] = Array.filter(
-                equippedItems,
-                func(eItem : Nat16) : Bool {
-                  eItem == itemToEquip.id;
-                },
-              );
-              if (equippedMatchingItems.size() > 0) {
-                return #Err(#Other("Cannot equip more than one of the same item"));
-              };
-              // make sure they own unequipped item
-              let unequippedMatchingItem : [Ref.Item] = Array.filter(
-                gameItems,
-                func(item : Ref.Item) : Bool {
-                  item.metadata == item.metadata;
-                },
-              );
-              if (unequippedMatchingItem.size() == 0) {
-                return #Err(#Other("Cannot equip item not owned by user"));
-              };
-            };
-            case _ return #Err(#Other("Server Error: Item Definition Missing"));
+          if (equippedMatchingItems.size() > 0) {
+            return #Err(#Other("Cannot equip more than one of the same item"));
+          };
+          // make sure they own unequipped item
+          let unequippedMatchingItem : [Ref.Item] = Array.filter(
+            ownedItems,
+            func(item : Ref.Item) : Bool {
+              item.id == itemToEquip.id;
+            },
+          );
+          if (unequippedMatchingItem.size() == 0) {
+            return #Err(#Other("Cannot equip item not owned by user"));
           };
         };
-        // equip items
-        _equippedItems.put(characterIndex, _appendAll(equippedItems, itemIndices));
-        #Ok;
-      };
-      case _ {
-        _equippedItems.put(characterIndex, itemIndices);
-        #Ok;
+        case _ {}; // unreacheable
       };
     };
+
+    // equip items
+    _equippedItems.put(characterIndex, _appendAll(equippedItems, itemIndices));
+    #Ok;
   };
 
   // when you defeat a monster.... can win gold, xp, and items
@@ -443,64 +438,6 @@ actor class ObsidianTearsBackend() = this {
     );
     #Ok();
   };
-  func _burnItem(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async () {
-    // filter all item nfts owned by character
-    let ownedItems : [TokenIndex] = Iter.toArray(
-      HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
-        _itemRegistry,
-        TokenIndex.equal,
-        TokenIndex.hash,
-        func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
-          if (account == accountIdentifier) {
-            return ?index;
-          };
-          null;
-        },
-      ).keys()
-    );
-
-    let optItemToDelete : ?Ref.Item = Array.find(
-      Ref.items,
-      func(item : Ref.Item) : Bool {
-        item.id == itemIndex;
-      },
-    );
-    switch (optItemToDelete) {
-      case (?itemToDelete) {
-        // get token to burn
-        let optTokenToBurn : ?TokenIndex = Array.find(
-          ownedItems,
-          func(tokenIndex : TokenIndex) : Bool {
-            let optMetadata : ?Metadata = _itemMetadata.get(tokenIndex);
-            switch (optMetadata) {
-              case (?metadata) {
-                switch (metadata) {
-                  case (#nonfungible nft) {
-                    switch (nft.metadata) {
-                      case (?meta) {
-                        Blob.toArray(meta) == itemToDelete.metadata;
-                      };
-                      case _ false;
-                    };
-                  };
-                  case _ false;
-                };
-              };
-              case _ false;
-            };
-          },
-        );
-        switch (optTokenToBurn) {
-          case (?tokenToBurn) {
-            // TODO: implement in items_nft repo
-            // await _itemActor.burnItem(tokenToBurn);
-          };
-          case _ {};
-        };
-      };
-      case _ {};
-    };
-  };
 
   func getOwnedItems(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex) : [Ref.Item] {
     // filter all item nfts owned by character
@@ -518,14 +455,10 @@ actor class ObsidianTearsBackend() = this {
       ).keys()
     );
     // make sure metadata that identifies what the item is (see item nft canister)
-    let ownedItemsMeta : [Metadata] = Array.map<TokenIndex, Metadata>(
+    let ownedItemsMeta : [Metadata] = Array.mapFilter<TokenIndex, Metadata>(
       ownedItems,
-      func(tokenIndex : TokenIndex) : Metadata {
-        let optMetadata : ?Metadata = _itemMetadata.get(tokenIndex);
-        switch (optMetadata) {
-          case (?metadata) metadata;
-          case _ #nonfungible({ metadata = ?Blob.fromArray([]) });
-        };
+      func(tokenIndex : TokenIndex) : ?Metadata {
+        _itemMetadata.get(tokenIndex);
       },
     );
     // matches corresponding metadata in item list
@@ -540,6 +473,7 @@ actor class ObsidianTearsBackend() = this {
         );
       },
     );
+
     let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
     switch (optNonNftItems) {
       case (?nonNftItems) {
@@ -558,8 +492,10 @@ actor class ObsidianTearsBackend() = this {
       };
       case _ {};
     };
+
     gameItems;
   };
+
   // load game data formatted in json so that unity can load correctly
   func _load(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : T.ApiResponse<Text> {
     switch (_saveData.get(characterIndex)) {

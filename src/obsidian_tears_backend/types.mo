@@ -56,7 +56,6 @@ module {
 
   public type ItemInterface = actor {
     mintItem : (data : [Nat8], recipient : ExtCore.AccountIdentifier) -> async ();
-    burnItem : (ExtCore.TokenIndex) -> async ();
     getRegistry : query () -> async [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];
     getMetadata : query () -> async [(ExtCore.TokenIndex, ExtCommon.Metadata)];
   };

@@ -36,9 +36,7 @@ actor class ObsidianTearsBackend() = this {
   type CommonError = ExtCore.CommonError;
   type Metadata = ExtCommon.Metadata;
 
-  // Sessions DB
-  stable var _lastCleared : Time.Time = Time.now(); // keep track of the last time you cleared sessions
-  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time you cleared sessions
+  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
 
   // Env
   let _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
@@ -51,7 +49,6 @@ actor class ObsidianTearsBackend() = this {
 
   // State
   stable var _saveDataState : [(TokenIndex, Text)] = [];
-  stable var _sessionsState : [(TokenIndex, T.SessionData)] = [];
   stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
   stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
   stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
@@ -63,7 +60,6 @@ actor class ObsidianTearsBackend() = this {
 
   // Dynamic
   var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _sessions : HashMap.HashMap<TokenIndex, T.SessionData> = HashMap.fromIter(_sessionsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
@@ -87,7 +83,6 @@ actor class ObsidianTearsBackend() = this {
   // system functions
   system func preupgrade() {
     _saveDataState := Iter.toArray(_saveData.entries());
-    _sessionsState := Iter.toArray(_sessions.entries());
     _characterRegistryState := Iter.toArray(_characterRegistry.entries());
     _itemRegistryState := Iter.toArray(_itemRegistry.entries());
     _itemMetadataState := Iter.toArray(_itemMetadata.entries());
@@ -100,7 +95,6 @@ actor class ObsidianTearsBackend() = this {
 
   system func postupgrade() {
     _saveDataState := [];
-    _sessionsState := [];
     _characterRegistryState := [];
     _itemRegistryState := [];
     _itemMetadataState := [];
@@ -115,7 +109,7 @@ actor class ObsidianTearsBackend() = this {
   // user interaction with this canister
   // -----------------------------------
 
-  // check if user owns character NFT and create session for fast lookup. return owned NFT data
+  // check if user owns character NFT. return owned NFT data
   public shared ({ caller }) func verify() : async (T.ApiResponse<[TokenIndex]>) {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     let result : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
@@ -131,24 +125,12 @@ actor class ObsidianTearsBackend() = this {
 
   // login when user selects
   public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (_) {};
-    };
     // check if they have a saved game
     return _load(characterIndex, AID.fromPrincipal(caller, null));
   };
 
   // save game data formatted in json so that unity can load correctly
   public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (_) {};
-    };
     // TODO: save the equipped items data into the equipped items stable memory
     // save boring data (everything but items and player stats)
     _saveData.put(characterIndex, gameData);
@@ -157,97 +139,80 @@ actor class ObsidianTearsBackend() = this {
 
   // called when opening a treasure chest or receiving
   public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (#Ok session) {
-        let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-        let optChest : ?Ref.TreasureChest = Array.find(
-          Ref.chests,
-          func(chest : Ref.TreasureChest) : Bool {
-            return chest.id == chestIndex;
-          },
-        );
-        switch (optChest) {
-          case (?chest) {
-            var rewardInfo : T.RewardInfo = {
-              itemIds = [];
-              gold = 0;
-              xp = 0;
-            };
-            if (chest.gold > 0) {
-              rewardInfo := {
-                itemIds = rewardInfo.itemIds;
-                gold = _giveGold(chest.gold, caller, true);
-                xp = rewardInfo.xp;
-              };
-            };
-            let itemResult : T.RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
-            rewardInfo := {
-              itemIds = itemResult.itemIds;
-              gold = rewardInfo.gold;
-              xp = 0;
-            };
-            // return the collected return vals in RewardInfo
-            ignore (updateSession(characterIndex, session, 0, rewardInfo.gold, Nat8.fromNat(rewardInfo.itemIds.size())));
-            #Ok(rewardInfo);
-          };
-          case _ return #Err(#Other("Server Error: Chest Definition Missing"));
+    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+    let optChest : ?Ref.TreasureChest = Array.find(
+      Ref.chests,
+      func(chest : Ref.TreasureChest) : Bool {
+        return chest.id == chestIndex;
+      },
+    );
+    switch (optChest) {
+      case (?chest) {
+        var rewardInfo : T.RewardInfo = {
+          itemIds = [];
+          gold = 0;
+          xp = 0;
         };
+        if (chest.gold > 0) {
+          rewardInfo := {
+            itemIds = rewardInfo.itemIds;
+            gold = _giveGold(chest.gold, caller, true);
+            xp = rewardInfo.xp;
+          };
+        };
+        let itemResult : T.RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
+        rewardInfo := {
+          itemIds = itemResult.itemIds;
+          gold = rewardInfo.gold;
+          xp = 0;
+        };
+        // return the collected return vals in RewardInfo
+        #Ok(rewardInfo);
       };
+      case _ return #Err(#Other("Server Error: Chest Definition Missing"));
     };
   };
 
   public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (#Ok session) {
-        // check that the item exists in a valid shop inventory
-        let shopContainer : ?Ref.Market = Array.find(
-          Ref.markets,
-          func(market : Ref.Market) : Bool {
-            return market.id == shopIndex;
+    // check that the item exists in a valid shop inventory
+    let shopContainer : ?Ref.Market = Array.find(
+      Ref.markets,
+      func(market : Ref.Market) : Bool {
+        return market.id == shopIndex;
+      },
+    );
+    var goldCost : Nat32 = 0;
+    switch (shopContainer) {
+      case (?shop) {
+        let containedItem : ?Ref.ItemListing = Array.find(
+          shop.items,
+          func(item : Ref.ItemListing) : Bool {
+            goldCost := item.cost;
+            return item.id == itemIndex;
           },
         );
-        var goldCost : Nat32 = 0;
-        switch (shopContainer) {
-          case (?shop) {
-            let containedItem : ?Ref.ItemListing = Array.find(
-              shop.items,
-              func(item : Ref.ItemListing) : Bool {
-                goldCost := item.cost;
-                return item.id == itemIndex;
-              },
-            );
-            if (containedItem == null) {
-              return #Err(#Other "item does not exist for shop");
-            };
-          };
-          case _ return #Err(#Other "error retrieving shop data");
+        if (containedItem == null) {
+          return #Err(#Other "item does not exist for shop");
         };
-        // check that player has enough gold
-        let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-        let optCurrGold : ?Nat32 = _gold.get(address);
-        switch (optCurrGold) {
-          case (?currGold) {
-            if (currGold < goldCost) {
-              return #Err(#Other "not enough gold to purchase item");
-            };
-            ignore (_giveGold(goldCost, caller, false));
-          };
-          case _ return #Err(#Other "not enough gold to purchase item");
-        };
-        // update player session (counts as receiving an item)
-        ignore (updateSession(characterIndex, session, 0, 0, 1));
-        for (i in Iter.range(1, qty)) {
-          ignore (await mintItem(itemIndex, address, characterIndex));
-        };
-        return #Ok;
       };
+      case _ return #Err(#Other "error retrieving shop data");
     };
+    // check that player has enough gold
+    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+    let optCurrGold : ?Nat32 = _gold.get(address);
+    switch (optCurrGold) {
+      case (?currGold) {
+        if (currGold < goldCost) {
+          return #Err(#Other "not enough gold to purchase item");
+        };
+        ignore (_giveGold(goldCost, caller, false));
+      };
+      case _ return #Err(#Other "not enough gold to purchase item");
+    };
+    for (i in Iter.range(1, qty)) {
+      ignore (await mintItem(itemIndex, address, characterIndex));
+    };
+    return #Ok;
   };
 
   func _unequipItem(itemIndex : Nat16, characterIndex : TokenIndex) : () {
@@ -279,12 +244,6 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (T.ApiResponse<()>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (_) {};
-    };
     // make sure that caller owns all items;
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // get player owned game items
@@ -351,44 +310,36 @@ actor class ObsidianTearsBackend() = this {
 
   // when you defeat a monster.... can win gold, xp, and items
   public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    switch (checkSession(caller, characterIndex)) {
-      case (#Err e) {
-        return #Err e;
-      };
-      case (#Ok session) {
-        // look up monster by index
-        let optMonster : ?Ref.Monster = Array.find(
-          Ref.monsters,
-          func(monster : Ref.Monster) : Bool {
-            return monster.id == monsterIndex;
-          },
-        );
-        // add monster rewards to character and session
-        switch (optMonster) {
-          case (?monster) {
-            // give player gold
-            switch (_playerData.get(characterIndex)) {
-              // TODO: give every player player data on start
-              // case(?playerData) {}
-              case (_) {
-                let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
-                let rewardInfo : T.RewardInfo = {
-                  gold = _giveGold(monster.gold, caller, true);
-                  xp = monster.xp;
-                  itemIds = itemInfo.itemIds;
-                };
-                ignore (updateSession(characterIndex, session, rewardInfo.xp, rewardInfo.gold, Nat8.fromNat(rewardInfo.itemIds.size())));
-                #Ok rewardInfo;
-              };
-              // case(_) {
-              // #Err(#Other("Server Error. Failed to find player data."));
-              // };
+    // look up monster by index
+    let optMonster : ?Ref.Monster = Array.find(
+      Ref.monsters,
+      func(monster : Ref.Monster) : Bool {
+        return monster.id == monsterIndex;
+      },
+    );
+    // add monster rewards to character
+    switch (optMonster) {
+      case (?monster) {
+        // give player gold
+        switch (_playerData.get(characterIndex)) {
+          // TODO: give every player player data on start
+          // case(?playerData) {}
+          case (_) {
+            let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
+            let rewardInfo : T.RewardInfo = {
+              gold = _giveGold(monster.gold, caller, true);
+              xp = monster.xp;
+              itemIds = itemInfo.itemIds;
             };
+            #Ok rewardInfo;
           };
-          case _ {
-            #Err(#Other("Server Error. Failed to find monster data."));
-          };
+          // case(_) {
+          // #Err(#Other("Server Error. Failed to find player data."));
+          // };
         };
+      };
+      case _ {
+        #Err(#Other("Server Error. Failed to find monster data."));
       };
     };
   };
@@ -402,7 +353,7 @@ actor class ObsidianTearsBackend() = this {
       status_code = 200;
       headers = [("content-type", "text/plain")];
       body = Text.encodeUtf8(
-        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "---\n" # "Current Sessions:                         " # debug_show (_sessions.size()) # "\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
+        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
       );
       streaming_strategy = null;
     };
@@ -424,19 +375,6 @@ actor class ObsidianTearsBackend() = this {
       };
       case _ false;
     };
-  };
-  // update session when you earn gold, xp, or items
-  func updateSession(characterIndex : TokenIndex, session : T.SessionData, xp : Nat32, gold : Nat32, items : Nat8) : T.ApiResponse<()> {
-    _sessions.put(
-      characterIndex,
-      {
-        createdAt = session.createdAt;
-        goldEarned = session.goldEarned + gold;
-        xpEarned = session.xpEarned + xp;
-        itemsEarned = session.itemsEarned + items;
-      },
-    );
-    #Ok();
   };
 
   func getOwnedItems(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex) : [Ref.Item] {
@@ -665,43 +603,6 @@ actor class ObsidianTearsBackend() = this {
       };
       case (_) {
         return #Err(#Other("No save data"));
-      };
-    };
-  };
-
-  func checkSession(caller : Principal, tokenIndex : TokenIndex) : T.ApiResponse<T.SessionData> {
-    // convert principal into wallet
-    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-    // make sure the principal owns this tokenIndex
-    switch (_characterRegistry.get(tokenIndex)) {
-      case (?owner) {
-        if (owner != address and caller != _minter) {
-          return #Err(#Unauthorized);
-        };
-      };
-      case (_) {};
-    };
-
-    // make sure player hasn't exceeded limits for the day
-    switch (_sessions.get(tokenIndex)) {
-      // if their session has been reset, replace it
-      case (?session) {
-        if (session.goldEarned >= C.MAX_GOLD or session.itemsEarned >= C.MAX_ITEMS or session.xpEarned >= C.MAX_XP) {
-          // return #Err(#Limit);
-          return #Ok session;
-        } else {
-          return #Ok session;
-        };
-      };
-      case (_) {
-        let newSession : T.SessionData = {
-          createdAt = Time.now();
-          goldEarned = 0;
-          xpEarned = 0;
-          itemsEarned = 0;
-        };
-        _sessions.put(tokenIndex, newSession);
-        #Ok newSession;
       };
     };
   };

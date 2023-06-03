@@ -41,13 +41,6 @@ module {
     xp : Nat32;
   };
 
-  public type SessionData = {
-    createdAt : Time.Time;
-    goldEarned : Nat32;
-    xpEarned : Nat32;
-    itemsEarned : Nat8;
-  };
-
   // Actor Interfaces
   public type CharacterInterface = actor {
     getRegistry : query () -> async [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];

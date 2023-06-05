@@ -807,6 +807,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public query func specGetCharacterOwner(characterIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
     let ownerId = _characterRegistry.get(characterIndex);
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);
@@ -815,6 +817,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public query func specGetItemOwner(itemIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
     let ownerId = _itemRegistry.get(itemIndex);
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);

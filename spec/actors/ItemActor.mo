@@ -11,6 +11,9 @@ actor class ItemActor() {
   public type MetadataResponse = [(ExtCore.TokenIndex, ExtCommon.Metadata)];
   var metadataResponse : MetadataResponse = [];
 
+  public type TokensResponse = Result.Result<[ExtCore.TokenIndex], ExtCore.CommonError>;
+  var tokensResponse : Result.Result<[ExtCore.TokenIndex], ExtCore.CommonError> = #err(#Other("not set"));
+
   public query func getRegistry() : async RegistryResponse {
     return registryResponse;
   };
@@ -25,6 +28,14 @@ actor class ItemActor() {
 
   public func setMetadataResponse(response : MetadataResponse) : async () {
     metadataResponse := response;
+  };
+
+  public query func tokens(aid : ExtCore.AccountIdentifier) : async TokensResponse {
+    return tokensResponse;
+  };
+
+  public func setTokensResponse(response : TokensResponse) : async () {
+    tokensResponse := response;
   };
 
   // MINTING MOCK CODE

@@ -20,21 +20,10 @@ const Game = (props) => {
       // register unity functions
       addEventListener("SaveGame", async function (gameData, objectName) {
         window.saveData = gameData;
-        // sort through the data
-        var gameDataParsed = JSON.parse(gameData);
-        gameDataParsed["m_list"].find(
-          (val, index) => val["key"] == "player_inv_currInventoryCurrencySaver"
-          // TODO preserve the equipped item data that is erased here ^
-          // TODO save the equipped items in the server
-        )["data"] = "playerInvCurrData";
-        gameDataParsed["m_list"].find(
-          (val, index) => val["key"] == "charStats_SaverCharStatsSaver"
-        )["data"] = "charStatsData";
-        var preppedData = JSON.stringify(gameDataParsed);
         // call the actor function
         let result = await props.gameActorRef.current.saveGame(
           props.selectedNftIndexRef.current,
-          preppedData
+          gameData
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];

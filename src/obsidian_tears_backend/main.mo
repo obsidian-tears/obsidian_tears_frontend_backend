@@ -28,6 +28,7 @@ import Ref "reference";
 import T "types";
 import C "consts";
 import Env "env";
+import M "util/Middleware";
 
 actor class ObsidianTearsBackend() = this {
   // Types
@@ -112,33 +113,54 @@ actor class ObsidianTearsBackend() = this {
   // check if user owns character NFT. return owned NFT data
   public shared ({ caller }) func verify() : async (T.ApiResponse<[TokenIndex]>) {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-    let result : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
-    switch (result) {
-      case (#ok indices) {
-        return #Ok indices;
-      };
-      case (#err e) {
-        return #Err(#Other("Error verifying user"));
-      };
+
+    // get and update character cache registry
+    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
+    let characterIndices = switch (resultCharacter) {
+      case (#ok(characterIndices)) characterIndices;
+      case (#err(_e)) return #Err(#Other("Error verifying user"));
     };
+    for (index in characterIndices.vals()) {
+      _characterRegistry.put(index, address);
+    };
+
+    // get and update item cache registry
+    let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    let itemIndeces = switch (resultItem) {
+      case (#ok(itemIndeces)) itemIndeces;
+      case (#err(_e))[];
+    };
+    for (index in itemIndeces.vals()) {
+      _itemRegistry.put(index, address);
+    };
+
+    // return characterIndices
+    return #Ok(characterIndices);
   };
 
-  // login when user selects
+  // load game data formatted in json so that unity can load correctly
   public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
-    // check if they have a saved game
-    return _load(characterIndex, AID.fromPrincipal(caller, null));
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
+    switch (_saveData.get(characterIndex)) {
+      case (?save) return #Ok(save);
+      case (null) return #Err(#Other("No save data"));
+    };
   };
 
   // save game data formatted in json so that unity can load correctly
   public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    // TODO: save the equipped items data into the equipped items stable memory
-    // save boring data (everything but items and player stats)
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
     _saveData.put(characterIndex, gameData);
-    return _load(characterIndex, AID.fromPrincipal(caller, null));
+
+    return #Ok(gameData);
   };
 
   // called when opening a treasure chest or receiving
   public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     let optChest : ?Ref.TreasureChest = Array.find(
       Ref.chests,
@@ -174,6 +196,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
     // check that the item exists in a valid shop inventory
     let shopContainer : ?Ref.Market = Array.find(
       Ref.markets,
@@ -244,6 +268,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (T.ApiResponse<()>) {
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
     // make sure that caller owns all items;
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // get player owned game items
@@ -310,6 +336,8 @@ actor class ObsidianTearsBackend() = this {
 
   // when you defeat a monster.... can win gold, xp, and items
   public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+
     // look up monster by index
     let optMonster : ?Ref.Monster = Array.find(
       Ref.monsters,
@@ -432,179 +460,6 @@ actor class ObsidianTearsBackend() = this {
     };
 
     gameItems;
-  };
-
-  // load game data formatted in json so that unity can load correctly
-  func _load(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : T.ApiResponse<Text> {
-    switch (_saveData.get(characterIndex)) {
-      case (?save) {
-        // piece together the inventory and player stats
-        // "{\\"items\\":[],\\"equippedItems\\":[\\"2069047119\\"],\\"currency\\":10}"
-        var itemsString = "\\\"items\\\":[";
-        var equippedItemsString = "\\\"equippedItems\\\":[";
-        var goldString = "\\\"currency\\\":";
-        // get user gold
-        let optCurrency : ?Nat32 = _gold.get(accountIdentifier);
-        switch (optCurrency) {
-          case (?currency) {
-            goldString #= Nat32.toText(currency);
-          };
-          case _ goldString #= Nat8.toText(0);
-        };
-        // get the unityId for owned items
-        let ownedItems : [Ref.Item] = getOwnedItems(accountIdentifier, characterIndex);
-        switch (_equippedItems.get(characterIndex)) {
-          case (?items) {
-            // add all equipped items to equipped items string. everything else to items string
-            // loop through items and get equipped item strings
-            let unityIds : Text = Array.foldLeft(
-              items,
-              "",
-              func(prev : Text, itemId : Nat16) : Text {
-                var returnText = "";
-                let itemContainer : ?Ref.Item = Array.find(
-                  Ref.items,
-                  func(item : Ref.Item) : Bool {
-                    return item.id == itemId;
-                  },
-                );
-                switch (itemContainer) {
-                  case (?item) {
-                    if (prev != "") {
-                      returnText #= ",";
-                    };
-                    returnText #= "\\\"" # item.unityId # "\\\"";
-
-                  };
-                  case _ {};
-                };
-                prev # returnText;
-              },
-            );
-            equippedItemsString #= unityIds;
-
-            // add the rest to items string
-            let unequippedOwnedItems : [Ref.Item] = Array.filter(
-              ownedItems,
-              func(item : Ref.Item) : Bool {
-                let returnId : ?Nat16 = Array.find(
-                  items,
-                  func(id : Nat16) : Bool {
-                    id == item.id;
-                  },
-                );
-                switch (returnId) {
-                  case (?id) false;
-                  case _ true;
-                };
-              },
-            );
-            let unequippedUnityIds : Text = Array.foldLeft(
-              unequippedOwnedItems,
-              "",
-              func(prev : Text, item : Ref.Item) : Text {
-                var returnText = "";
-                if (prev != "") {
-                  returnText #= ",";
-                };
-                returnText #= "\\\"" # item.unityId # "\\\"";
-                prev # returnText;
-              },
-            );
-            itemsString #= unequippedUnityIds;
-
-          };
-          case (_) {
-            // don't add anything to equipped items string. add everything to items string
-            let unityIds : Text = Array.foldLeft(
-              ownedItems,
-              "",
-              func(prev : Text, item : Ref.Item) : Text {
-                var returnText = "";
-                if (prev != "") {
-                  returnText #= ",";
-                };
-                returnText #= "\\\"" # item.unityId # "\\\"";
-                return prev # returnText;
-              },
-            );
-            itemsString #= unityIds;
-          };
-        };
-        equippedItemsString #= "]";
-        itemsString #= "]";
-
-        let invCurrData : Text = "{" # itemsString # "," # equippedItemsString # "," # goldString # "}";
-        let invCurrSplit : Iter.Iter<Text> = Text.split(save, #text("playerInvCurrData"));
-        let invCurrStitch : Text = Text.join(invCurrData, invCurrSplit);
-
-        // add stats
-        // "{
-        //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,
-        //   \"pointsRemaining\":0,\"healthBase\":15,\"healthTotal\":15,\"healthMax\":15,\"magicBase\":10,\"magicTotal\":10,
-        //   \"magicMax\":10,\"attackBase\":5,\"attackTotal\":5,\"magicPowerBase\":0,\"magicPowerTotal\":0,\"defenseBase\":5,
-        //   \"defenseTotal\":5,\"speedBase\":5,\"speedTotal\":5,\"criticalHitProbability\":0.0,\"characterEffects\":[]
-        // }"
-        var statsString = "{";
-        let optPlayerData : ?T.PlayerData = _playerData.get(characterIndex);
-        switch (optPlayerData) {
-          case (?playerData) {
-            statsString #= "\\\"characterName\\\":\\\"" # playerData.characterName # "\\\",";
-            statsString #= "\\\"characterClass\\\":\\\"" # playerData.characterClass # "\\\",";
-            statsString #= "\\\"level\\\":" # Nat16.toText(playerData.level) # ",";
-            statsString #= "\\\"xp\\\":" # Nat32.toText(playerData.xp) # ",";
-            statsString #= "\\\"xpToLevelUp\\\":" # Nat32.toText(playerData.xpToLevelUp) # ",";
-            statsString #= "\\\"pointsRemaining\\\":" # Nat32.toText(playerData.pointsRemaining) # ",";
-            statsString #= "\\\"healthBase\\\":" # Nat16.toText(playerData.healthBase) # ",";
-            statsString #= "\\\"healthTotal\\\":" # Nat16.toText(playerData.healthTotal) # ",";
-            statsString #= "\\\"healthMax\\\":" # Nat16.toText(playerData.healthMax) # ",";
-            statsString #= "\\\"magicBase\\\":" # Nat16.toText(playerData.magicBase) # ",";
-            statsString #= "\\\"magicTotal\\\":" # Nat16.toText(playerData.magicTotal) # ",";
-            statsString #= "\\\"magicMax\\\":" # Nat16.toText(playerData.magicMax) # ",";
-            statsString #= "\\\"attackBase\\\":" # Nat16.toText(playerData.attackBase) # ",";
-            statsString #= "\\\"attackTotal\\\":" # Nat16.toText(playerData.attackTotal) # ",";
-            statsString #= "\\\"defenseBase\\\":" # Nat16.toText(playerData.defenseBase) # ",";
-            statsString #= "\\\"defenseTotal\\\":" # Nat16.toText(playerData.defenseTotal) # ",";
-            statsString #= "\\\"speedBase\\\":" # Nat16.toText(playerData.speedBase) # ",";
-            statsString #= "\\\"speedTotal\\\":" # Nat16.toText(playerData.speedTotal) # ",";
-            statsString #= "\\\"criticalHitProbability\\\":" # Float.toText(playerData.criticalHitProbability) # ",";
-            statsString #= "\\\"characterEffects\\\":[]";
-            // TODO: format character effects into json string
-          };
-          case _ {
-            statsString #= "\\\"characterName\\\":\\\"Phendrin\\\",";
-            statsString #= "\\\"characterClass\\\":\\\"\\\",";
-            statsString #= "\\\"level\\\":1,";
-            statsString #= "\\\"xp\\\":0,";
-            statsString #= "\\\"xpToLevelUp\\\":75,";
-            statsString #= "\\\"pointsRemaining\\\":0,";
-            statsString #= "\\\"healthBase\\\":15,";
-            statsString #= "\\\"healthTotal\\\":15,";
-            statsString #= "\\\"healthMax\\\":0,";
-            statsString #= "\\\"magicBase\\\":0,";
-            statsString #= "\\\"magicTotal\\\":0,";
-            statsString #= "\\\"magicMax\\\":0,";
-            statsString #= "\\\"attackBase\\\":0,";
-            statsString #= "\\\"attackTotal\\\":0,";
-            statsString #= "\\\"defenseBase\\\":0,";
-            statsString #= "\\\"defenseTotal\\\":0,";
-            statsString #= "\\\"speedBase\\\":0,";
-            statsString #= "\\\"speedTotal\\\":0,";
-            statsString #= "\\\"criticalHitProbability\\\":0.0,";
-            statsString #= "\\\"characterEffects\\\":[]";
-          };
-        };
-        statsString #= "}";
-        let statsData : Text = statsString;
-        let statsSplit : Iter.Iter<Text> = Text.split(invCurrStitch, #text("charStatsData"));
-        let statsStitch : Text = Text.join(statsData, statsSplit);
-
-        return #Ok statsStitch;
-      };
-      case (_) {
-        return #Err(#Other("No save data"));
-      };
-    };
   };
 
   func _append<T>(array : [T], val : T) : [T] {
@@ -943,11 +798,31 @@ actor class ObsidianTearsBackend() = this {
     _lastRegistryUpdate := Time.now();
   };
 
-  public func adminSetStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
+  public func specSetStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
     _characterActor := actor (characterCanisterId);
     _itemActor := actor (itemCanisterId);
     #ok;
+  };
+
+  public query func specGetCharacterOwner(characterIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
+    let ownerId = _characterRegistry.get(characterIndex);
+    switch (ownerId) {
+      case (?ownerId) return #ok(ownerId);
+      case (null) return #err("Not Found");
+    };
+  };
+
+  public query func specGetItemOwner(itemIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+    if (Env.network != "local") return #err("Method only allowed in local");
+
+    let ownerId = _itemRegistry.get(itemIndex);
+    switch (ownerId) {
+      case (?ownerId) return #ok(ownerId);
+      case (null) return #err("Not Found");
+    };
   };
 };

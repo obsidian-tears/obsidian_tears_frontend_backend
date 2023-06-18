@@ -6,7 +6,7 @@ import Game from "./pages/game";
 
 import { network, characterCanisterId, itemCanisterId } from "./env";
 import {
-  idlFactory,
+  obsidian_tears_backend,
   canisterId as gameCanisterId,
 } from "../../declarations/obsidian_tears_backend";
 import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
@@ -72,19 +72,9 @@ const ObsidianTears = () => {
         interfaceFactory: characterIdlFactory,
       });
       setCharActor(characterActor);
-      setGameActor(
-        await window.ic.plug.createActor({
-          canisterId: gameCanisterId,
-          interfaceFactory: idlFactory,
-        })
-      );
+      setGameActor(obsidian_tears_backend);
     } else if (stoic) {
-      setGameActor(
-        Actor.createActor(idlFactory, {
-          agent: a,
-          canisterId: gameCanisterId,
-        })
-      );
+      setGameActor(obsidian_tears_backend);
       characterActor = Actor.createActor(characterIdlFactory, {
         agent: a,
         canisterId: characterCanisterId,

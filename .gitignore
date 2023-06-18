@@ -15,3 +15,6 @@ src/declarations/
 node_modules/
 dist/
 .mops/
+
+# environment variables
+.env

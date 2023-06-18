@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "dfx": "0.14.0",
+  "dfx": "0.14.1",
   "canisters": {
     "obsidian_tears_backend": {
       "type": "motoko",
@@ -20,8 +20,8 @@
   },
   "defaults": {
     "build": {
-      "packtool": "npx mops sources",
-      "args": ""
+      "args": "",
+      "packtool": "npx mops sources"
     }
   },
   "networks": {
@@ -33,5 +33,6 @@
       "providers": ["https://icp0.io"],
       "type": "persistent"
     }
-  }
+  },
+  "output_env_file": ".env"
 }

@@ -1,4 +1,4 @@
-# obsidian_tears
+# Obsidian Tears Frontend and Backend
 
 Obsidian Tears is an RPG on the Internet Computer. This project contains the game backend and frontend canisters. The game is built in Unity, packaged in WebGL, and displayed via React.
 

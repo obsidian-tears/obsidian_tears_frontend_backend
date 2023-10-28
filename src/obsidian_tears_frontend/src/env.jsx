@@ -4,7 +4,7 @@ export const network = "local";
 // update this whenever canisters change in local
 const canisterIds = {
   local: {
-    itemCanister: "by6od-j4aaa-aaaaa-qaadq-cai",
+    itemCanister: "b77ix-eeaaa-aaaaa-qaada-cai",
     characterCanister: "br5f7-7uaaa-aaaaa-qaaca-cai",
     unityCanister: "avqkn-guaaa-aaaaa-qaaea-cai",
   },
@@ -32,7 +32,7 @@ const buildUnityUrls = () => {
     query = "?canisterId=" + canisterIds[network]["unityCanister"];
   } else {
     // ic or staging
-    host = "https://" + canisterIds[network]["unityCanister"] + ".ic0.app/";
+    host = "https://" + canisterIds[network]["unityCanister"] + ".icp0.io/";
     query = "";
   }
 

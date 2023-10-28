@@ -7,7 +7,7 @@ module {
     if (network == "beta") return "7tscg-xaaaa-aaaan-qdasa-cai";
 
     // else local
-    return "by6od-j4aaa-aaaaa-qaadq-cai";
+    return "b77ix-eeaaa-aaaaa-qaada-cai";
   };
 
   public func getCharacterCanisterId() : Text {

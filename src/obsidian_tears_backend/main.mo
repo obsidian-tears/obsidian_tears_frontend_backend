@@ -140,7 +140,8 @@ actor class ObsidianTearsBackend() = this {
 
   // load game data formatted in json so that unity can load correctly
   public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     switch (_saveData.get(characterIndex)) {
       case (?save) return #Ok(save);
@@ -150,7 +151,8 @@ actor class ObsidianTearsBackend() = this {
 
   // save game data formatted in json so that unity can load correctly
   public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     _saveData.put(characterIndex, gameData);
 
@@ -159,7 +161,8 @@ actor class ObsidianTearsBackend() = this {
 
   // called when opening a treasure chest or receiving
   public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     let optChest : ?Ref.TreasureChest = Array.find(
@@ -196,7 +199,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     // check that the item exists in a valid shop inventory
     let shopContainer : ?Ref.Market = Array.find(
@@ -268,7 +272,8 @@ actor class ObsidianTearsBackend() = this {
   };
 
   public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (T.ApiResponse<()>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     // make sure that caller owns all items;
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
@@ -336,7 +341,8 @@ actor class ObsidianTearsBackend() = this {
 
   // when you defeat a monster.... can win gold, xp, and items
   public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+    // TODO: improve with right caller
+    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
     // look up monster by index
     let optMonster : ?Ref.Monster = Array.find(

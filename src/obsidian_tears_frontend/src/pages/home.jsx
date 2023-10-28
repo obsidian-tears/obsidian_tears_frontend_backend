@@ -25,12 +25,12 @@ const Home = (props) => {
               {props.myNfts.map((nft, i) => (
                 <div key={i}>
                   <a
-                    href={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.ic0.app/?index=${nft[0]}`}
+                    href={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.icp0.io/?index=${nft[0]}`}
                     target="_blank"
                   >
                     <img
                       alt="nft"
-                      src={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.ic0.app/?index=${nft[0]}`}
+                      src={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.icp0.io/?index=${nft[0]}`}
                       height="230px;"
                     ></img>
                   </a>

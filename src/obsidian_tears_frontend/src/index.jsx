@@ -5,10 +5,7 @@ import Home from "./pages/home";
 import Game from "./pages/game";
 
 import { network, characterCanisterId, itemCanisterId } from "./env";
-import {
-  idlFactory,
-  canisterId as gameCanisterId,
-} from "../../declarations/obsidian_tears_backend";
+import { obsidian_tears_backend as backendActor } from "../../declarations/obsidian_tears_backend";
 import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
 import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
 import principalToAccountIdentifier from "./utils";
@@ -26,7 +23,7 @@ const ObsidianTears = () => {
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
   const [identity, setIdentity] = React.useState(null);
-  const [gameActor, _setGameActor] = React.useState(null);
+  const [gameActor, _setGameActor] = React.useState(backendActor);
   const [charActor, _setCharActor] = React.useState(null);
   const [itemActor, _setItemActor] = React.useState(null);
   const [stoicHttpAgent, setStoicHttpAgent] = React.useState(null);
@@ -51,6 +48,7 @@ const ObsidianTears = () => {
     charActorRef.current = data;
     _setCharActor(data);
   };
+  const gameCanisterId = Actor.canisterIdOf(backendActor);
 
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
 
@@ -72,19 +70,7 @@ const ObsidianTears = () => {
         interfaceFactory: characterIdlFactory,
       });
       setCharActor(characterActor);
-      setGameActor(
-        await window.ic.plug.createActor({
-          canisterId: gameCanisterId,
-          interfaceFactory: idlFactory,
-        })
-      );
     } else if (stoic) {
-      setGameActor(
-        Actor.createActor(idlFactory, {
-          agent: a,
-          canisterId: gameCanisterId,
-        })
-      );
       characterActor = Actor.createActor(characterIdlFactory, {
         agent: a,
         canisterId: characterCanisterId,
@@ -157,8 +143,7 @@ const ObsidianTears = () => {
 
   const connectToStoic = async () => {
     StoicIdentity.load().then(async (identity) => {
-      console.log("here");
-      //No existing connection, lets make one!
+      // No existing connection, lets make one!
       identity = await StoicIdentity.connect();
       let p = identity.getPrincipal();
       setIdentity(identity);

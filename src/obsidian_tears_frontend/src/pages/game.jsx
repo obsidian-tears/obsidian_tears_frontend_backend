@@ -47,7 +47,12 @@ const Game = (props) => {
         if (result["Err"]) {
           // TODO send message to display unity error
           window.loadData = result["Err"];
-          console.log("Error in LoadGame");
+          if (result["Err"]["Other"] == "No save data")
+            sendMessage(objectName, "ListenLoadGame", "{}");
+          else {
+            console.log("Error in LoadGame");
+            console.log(result["Err"]);
+          }
         }
       });
       addEventListener(

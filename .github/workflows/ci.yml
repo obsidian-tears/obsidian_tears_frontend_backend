@@ -14,10 +14,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 18
-      - run: npm login --registry=https://npm.pkg.github.com --scope=@Psychedelic --auth-type legacy
-        with:
-          username: "tiagoicp"
-          password: ${{ secrets.WORKFLOW_PERSONAL_TOKEN }}
+      - run: npm login --registry=https://npm.pkg.github.com --scope=@Psychedelic
       - run: npm clean-install
       - name: "check prettier"
         run: npm run prettier:check

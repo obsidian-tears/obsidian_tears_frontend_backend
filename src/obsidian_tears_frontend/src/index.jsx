@@ -203,75 +203,74 @@ const ObsidianTears = () => {
 
   return (
     <>
-      <div id="header">
-        <div className="leftHeader">
-          <img alt="logo" src="icp-badge.png" height="50"></img>
-        </div>
-        <div className="rightHeader">
-          <button
-            className="buttonWood"
-            style={backgroundImageWood2}
-            onClick={() => setRoute("home")}
-          >
-            Home
-          </button>
-
-          <button
-            className="buttonWood"
-            style={backgroundImageWood2}
-            onClick={() =>
-              window.open("https://entrepot.app/marketplace/obsidian-tears")
-            }
-          >
-            Shop NFTs
-          </button>
-
-          {loggedIn ? (
-            <div className="rightHeader2">
-              <button className="buttonWood" style={backgroundImageWood2}>
-                {principal.slice(0, 5)}
+      {route == "game" && (
+        <Game
+          gameActorRef={gameActorRef}
+          selectedNftIndexRef={selectedNftIndexRef}
+        />
+      )}
+      {route == "home" && (
+        <div
+          id="body"
+          style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
+        >
+          <div id="header">
+            <div className="leftHeader">
+              <img alt="logo" src="icp-badge.png" height="50"></img>
+            </div>
+            <div className="rightHeader">
+              <button
+                className="buttonWood"
+                style={backgroundImageWood2}
+                onClick={() => window.open("https://obsidiantears.xyz")}
+              >
+                Website
               </button>
 
               <button
                 className="buttonWood"
                 style={backgroundImageWood2}
-                onClick={() => logout()}
+                onClick={() =>
+                  window.open("https://entrepot.app/marketplace/obsidian-tears")
+                }
               >
-                Logout
+                Shop NFTs
               </button>
+
+              {loggedIn && (
+                <div className="rightHeader2">
+                  <button
+                    className="buttonWood"
+                    style={backgroundImageWood2}
+                    onClick={() => logout()}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <></>
-          )}
+          </div>
+
+          <Home
+            loading={loading}
+            setLoading={setLoading}
+            myNfts={myNfts}
+            setMyNfts={setMyNfts}
+            connectToStoic={connectToStoic}
+            loadActors={loadActors}
+            loadCharacters={loadCharacters}
+            setUsingPlug={setUsingPlug}
+            setUsingStoic={setUsingStoic}
+            usingPlug={usingPlug}
+            usingStoic={usingStoic}
+            setPrincipal={setPrincipal}
+            principal={principal}
+            setRoute={setRoute}
+            loggedIn={loggedIn}
+            setLoggedIn={setLoggedIn}
+            selectNft={selectNft}
+          />
         </div>
-      </div>
-      {route == "home" ? (
-        <Home
-          loading={loading}
-          setLoading={setLoading}
-          myNfts={myNfts}
-          setMyNfts={setMyNfts}
-          connectToStoic={connectToStoic}
-          loadActors={loadActors}
-          loadCharacters={loadCharacters}
-          setUsingPlug={setUsingPlug}
-          setUsingStoic={setUsingStoic}
-          usingPlug={usingPlug}
-          usingStoic={usingStoic}
-          setPrincipal={setPrincipal}
-          principal={principal}
-          setRoute={setRoute}
-          loggedIn={loggedIn}
-          setLoggedIn={setLoggedIn}
-          selectNft={selectNft}
-        />
-      ) : route == "game" ? (
-        <Game
-          gameActorRef={gameActorRef}
-          selectedNftIndexRef={selectedNftIndexRef}
-        />
-      ) : (
-        <></>
       )}
     </>
   );

@@ -7,10 +7,7 @@ const Home = (props) => {
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 
   return (
-    <div
-      id="body"
-      style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
-    >
+    <div>
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
       {props.loggedIn ? (

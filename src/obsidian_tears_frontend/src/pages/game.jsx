@@ -11,7 +11,6 @@ const Game = (props) => {
     isLoaded,
     loadingProgression,
     addEventListener,
-    removeEventListener,
     sendMessage,
   } = useUnityContext(unityUrls);
 
@@ -158,21 +157,16 @@ const Game = (props) => {
 
   return (
     <>
-      <div
-        id="body"
-        style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
-      >
-        <div className="centerMe">
-          <div className="unityContainer">
-            {isLoaded === false && (
-              // We'll conditionally render the loading overlay if the Unity
-              // Application is not loaded.
-              <div className="loading-overlay">
-                <p>Loading... ({loadingPercentage}%)</p>
-              </div>
-            )}
-            <Unity className="unity" unityProvider={unityProvider} />
-          </div>
+      <div>
+        <div className="unityContainer">
+          {isLoaded === false && (
+            // We'll conditionally render the loading overlay if the Unity
+            // Application is not loaded.
+            <div className="loading-overlay">
+              <p>Loading... ({loadingPercentage}%)</p>
+            </div>
+          )}
+          <Unity className="unity" unityProvider={unityProvider} />
         </div>
       </div>
     </>

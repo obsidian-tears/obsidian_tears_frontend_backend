@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { useUnityContext } from "react-unity-webgl";
 import { Unity } from "react-unity-webgl";
 import { unityUrls } from "../env";
@@ -13,6 +13,9 @@ const Game = (props) => {
     addEventListener,
     sendMessage,
   } = useUnityContext(unityUrls);
+
+  const ref = React.useRef();
+  const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
   React.useEffect(() => {
     if (isLoaded) {
@@ -158,6 +161,18 @@ const Game = (props) => {
   return (
     <>
       <div>
+        {!document.fullscreenElement && (
+          // Full Screen
+          <div
+            style={{
+              width: "100vw",
+              height: "100vh",
+              zIndex: 100,
+              position: "absolute",
+            }}
+            onClick={handleRequestFullscreen}
+          ></div>
+        )}
         <div className="unityContainer">
           {isLoaded === false && (
             // We'll conditionally render the loading overlay if the Unity
@@ -166,7 +181,7 @@ const Game = (props) => {
               <p>Loading... ({loadingPercentage}%)</p>
             </div>
           )}
-          <Unity className="unity" unityProvider={unityProvider} />
+          <Unity ref={ref} className="unity" unityProvider={unityProvider} />
         </div>
       </div>
     </>

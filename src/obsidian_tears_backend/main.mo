@@ -19,6 +19,7 @@ import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Canistergeek "mo:canistergeek/canistergeek";
 
 import AID "util/AccountIdentifier";
 import ExtCommon "ext/Common";
@@ -92,6 +93,10 @@ actor class ObsidianTearsBackend() = this {
     _completedEventsState := Iter.toArray(_completedEvents.entries());
     _playerDataState := Iter.toArray(_playerData.entries());
     _goldState := Iter.toArray(_gold.entries());
+
+    // canistergeek
+    _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+    _canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
   };
 
   system func postupgrade() {
@@ -104,6 +109,14 @@ actor class ObsidianTearsBackend() = this {
     _completedEventsState := [];
     _playerDataState := [];
     _goldState := [];
+
+    // canistergeek
+    canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
+    _canistergeekMonitorUD := null;
+    canistergeekLogger.postupgrade(_canistergeekLoggerUD);
+    _canistergeekLoggerUD := null;
+    canistergeekLogger.setMaxMessagesCount(3000);
+    canistergeekLogger.logMessage("postupgrade");
   };
 
   // -----------------------------------
@@ -112,6 +125,7 @@ actor class ObsidianTearsBackend() = this {
 
   // check if user owns character NFT. return owned NFT data
   public shared ({ caller }) func verify() : async (T.ApiResponse<[TokenIndex]>) {
+    canistergeekMonitor.collectMetrics();
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
 
     // get and update character cache registry
@@ -791,6 +805,35 @@ actor class ObsidianTearsBackend() = this {
   func getCharacterRegistry() : async () {
     let result = await _characterActor.getRegistry();
     _characterRegistry := HashMap.fromIter(result.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  };
+
+  // -----------------------------------
+  // canistergeek
+  // -----------------------------------
+
+  stable var _canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
+  private let canistergeekMonitor = Canistergeek.Monitor();
+
+  stable var _canistergeekLoggerUD : ?Canistergeek.LoggerUpgradeData = null;
+  private let canistergeekLogger = Canistergeek.Logger();
+
+  private let adminPrincipal : Text = "csvbe-getzk-3k2vt-boxl5-v2mzn-rzn23-oraa7-gjauz-dvoyn-upjlb-3ae";
+
+  public query ({ caller }) func getCanistergeekInformation(request : Canistergeek.GetInformationRequest) : async Canistergeek.GetInformationResponse {
+    validateCaller(caller);
+    Canistergeek.getInformation(?canistergeekMonitor, ?canistergeekLogger, request);
+  };
+
+  public shared ({ caller }) func updateCanistergeekInformation(request : Canistergeek.UpdateInformationRequest) : async () {
+    validateCaller(caller);
+    canistergeekMonitor.updateInformation(request);
+  };
+
+  private func validateCaller(principal : Principal) : () {
+    // data is available only for specific principal
+    if (not (Principal.toText(principal) == adminPrincipal)) {
+      Debug.trap("Not Authorized");
+    };
   };
 
   // -----------------------------------

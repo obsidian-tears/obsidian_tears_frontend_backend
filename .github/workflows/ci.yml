@@ -27,6 +27,8 @@ jobs:
           dfx start --background
           dfx stop
       - name: "install mops packages"
-        run: npx mops install
+        run: |
+          npm i -g ic-mops
+          mops install
       - name: "run tests"
         run: npm test

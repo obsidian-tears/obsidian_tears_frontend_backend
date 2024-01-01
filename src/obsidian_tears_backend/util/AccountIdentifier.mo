@@ -10,6 +10,7 @@ import Principal "mo:base/Principal";
 import Blob "mo:base/Blob";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
+import Buffer "mo:base/Buffer";
 import SHA224 "./SHA224";
 import CRC32 "./CRC32";
 import Hex "./Hex";
@@ -32,13 +33,18 @@ module {
     return fromBytes(Blob.toArray(b), sa);
   };
   public func fromBytes(data : [Nat8], sa : ?SubAccount) : AccountIdentifier {
-    var _sa : [Nat8] = SUBACCOUNT_ZERO;
-    if (Option.isSome(sa)) {
-      _sa := Option.unwrap(sa);
+    let _sa = switch (sa) {
+      case (?sa) sa;
+      case (null) SUBACCOUNT_ZERO;
     };
-    var hash : [Nat8] = SHA224.sha224(Array.append(Array.append(ads, data), _sa));
+    var tempBuffer = Buffer.fromArray<Nat8>(ads);
+    tempBuffer.append(Buffer.fromArray<Nat8>(data));
+    tempBuffer.append(Buffer.fromArray<Nat8>(_sa));
+    var hash : [Nat8] = SHA224.sha224(Buffer.toArray(tempBuffer));
     var crc : [Nat8] = CRC32.crc32(hash);
-    return Hex.encode(Array.append(crc, hash));
+    tempBuffer := Buffer.fromArray<Nat8>(crc);
+    tempBuffer.append(Buffer.fromArray<Nat8>(hash));
+    return Hex.encode(Buffer.toArray(tempBuffer));
   };
 
   public let equal = Text.equal;

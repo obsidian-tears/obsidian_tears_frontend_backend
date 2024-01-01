@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "dfx": "0.15.1",
+  "dfx": "0.15.2",
   "canisters": {
     "obsidian_tears_backend": {
       "type": "motoko",
@@ -20,7 +20,7 @@
   },
   "defaults": {
     "build": {
-      "packtool": "npx mops sources",
+      "packtool": "mops sources",
       "args": ""
     }
   },

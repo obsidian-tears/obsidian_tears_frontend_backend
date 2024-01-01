@@ -8,6 +8,11 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
+import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
+import Nat64 "mo:base/Nat64";
+import Blob "mo:base/Blob";
+import Prim "mo:⛔";
 
 module {
 
@@ -45,9 +50,17 @@ module {
       },
     );
   };
+  public func hashNat(key : Nat) : Nat32 {
+    var hash = Prim.intToNat64Wrap(key);
+
+    hash := hash >> 30 ^ hash *% 0xbf58476d1ce4e5b9;
+    hash := hash >> 27 ^ hash *% 0x94d049bb133111eb;
+
+    Prim.nat64ToNat32(hash >> 31 ^ hash & 0x3fffffff);
+  };
   /* credit https://github.com/dfinance-tech/motoko-token/blob/ledger/src/Utils.mo */
   public func decode(t : Text) : [Nat8] {
-    var map = HashMap.HashMap<Nat, Nat8>(1, Nat.equal, Hash.hash);
+    var map = HashMap.HashMap<Nat, Nat8>(1, Nat.equal, hashNat);
     // '0': 48 -> 0; '9': 57 -> 9
     for (num in Iter.range(48, 57)) {
       map.put(num, Nat8.fromNat(num -48));
@@ -62,11 +75,22 @@ module {
     };
     let p = Iter.toArray(Iter.map(Text.toIter(t), func(x : Char) : Nat { Nat32.toNat(Char.toNat32(x)) }));
     var res : [var Nat8] = [var];
+    var tempBuffer = Buffer.Buffer<Nat8>(0);
+
     for (i in Iter.range(0, 31)) {
-      let a = Option.unwrap(map.get(p[i * 2]));
-      let b = Option.unwrap(map.get(p[i * 2 + 1]));
+      let a = switch (map.get(p[i * 2])) {
+        case (?a) a;
+        case (null) Debug.trap("Unexpected Error: Hex Lib - a");
+      };
+      let b = switch (map.get(p[i * 2 + 1])) {
+        case (?b) b;
+        case (null) Debug.trap("Unexpected Error: Hex Lib - b");
+      };
       let c = 16 * a + b;
-      res := Array.thaw(Array.append(Array.freeze(res), Array.make(c)));
+
+      tempBuffer := Buffer.fromArray(Array.freeze(res));
+      tempBuffer.add(c);
+      res := Array.thaw(Buffer.toArray(tempBuffer));
     };
     let result = Array.freeze(res);
     return result;

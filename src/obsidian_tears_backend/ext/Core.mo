@@ -1,6 +1,5 @@
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import PrincipalEXT "../util/Principal";
 import Array "mo:base/Array";
 import Hash "mo:base/Hash";
 import Blob "mo:base/Blob";
@@ -8,6 +7,7 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat32 "mo:base/Nat32";
+import Buffer "mo:base/Buffer";
 import AID "../util/AccountIdentifier";
 import Hex "../util/Hex";
 import CRC32 "../util/CRC32";
@@ -74,19 +74,7 @@ module ExtCore = {
     private let tds : [Nat8] = [10, 116, 105, 100]; //b"\x0Atid"
     public let equal = Text.equal;
     public let hash = Text.hash;
-    public func fromText(t : Text, i : TokenIndex) : TokenIdentifier {
-      return fromPrincipal(Principal.fromText(t), i);
-    };
-    public func fromPrincipal(p : Principal, i : TokenIndex) : TokenIdentifier {
-      return fromBlob(Principal.toBlob(p), i);
-    };
-    public func fromBlob(b : Blob, i : TokenIndex) : TokenIdentifier {
-      return fromBytes(Blob.toArray(b), i);
-    };
-    public func fromBytes(c : [Nat8], i : TokenIndex) : TokenIdentifier {
-      let bytes : [Nat8] = Array.append(Array.append(tds, c), nat32tobytes(i));
-      return Principal.toText(PrincipalEXT.fromBlob(Blob.fromArray(bytes)));
-    };
+
     //Coz can't get principal directly, we can compare the bytes
     public func isPrincipal(tid : TokenIdentifier, p : Principal) : Bool {
       let tobj = decode(tid);
@@ -103,10 +91,14 @@ module ExtCore = {
       var _token_index : [Nat8] = [];
       var _tdscheck : [Nat8] = [];
       var length : Nat8 = 0;
+      var tempBuffer = Buffer.Buffer<Nat8>(0);
+
       for (b in bytes.vals()) {
         length += 1;
         if (length <= 4) {
-          _tdscheck := Array.append(_tdscheck, [b]);
+          tempBuffer := Buffer.fromArray(_tdscheck);
+          tempBuffer.add(b);
+          _tdscheck := Buffer.toArray(tempBuffer);
         };
         if (length == 4) {
           if (Array.equal(_tdscheck, tds, Nat8.equal) == false) {
@@ -121,9 +113,13 @@ module ExtCore = {
         index += 1;
         if (index >= 5) {
           if (index <= (length - 4)) {
-            _canister := Array.append(_canister, [b]);
+            tempBuffer := Buffer.fromArray(_canister);
+            tempBuffer.add(b);
+            _canister := Buffer.toArray(tempBuffer);
           } else {
-            _token_index := Array.append(_token_index, [b]);
+            tempBuffer := Buffer.fromArray(_token_index);
+            tempBuffer.add(b);
+            _token_index := Buffer.toArray(tempBuffer);
           };
         };
       };

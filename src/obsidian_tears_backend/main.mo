@@ -21,15 +21,15 @@ import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
 
-import AID "util/AccountIdentifier";
-import ExtCommon "ext/Common";
-import ExtCore "ext/Core";
-import { TokenIndex } "ext/Core";
+import AID "lib/util/AccountIdentifier";
+import ExtCommon "lib/ext/Common";
+import ExtCore "lib/ext/Core";
+import { TokenIndex } "lib/ext/Core";
 import Ref "reference";
 import T "types";
 import C "consts";
 import Env "env";
-import M "util/Middleware";
+import M "middleware";
 
 actor class ObsidianTearsBackend() = this {
   // Types

@@ -1,6 +1,6 @@
 import HashMap "mo:base/HashMap";
-import ExtCore "../ext/Core";
-import AID "AccountIdentifier";
+import ExtCore "lib/ext/Core";
+import AID "lib/util/AccountIdentifier";
 
 module Middleware {
   public func isOwner(caller : Principal, index : ExtCore.TokenIndex, registry : HashMap.HashMap<ExtCore.TokenIndex, ExtCore.AccountIdentifier>) : Bool {

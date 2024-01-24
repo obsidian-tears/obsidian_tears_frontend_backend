@@ -1,6 +1,6 @@
 import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
-import ExtCore "../../src/obsidian_tears_backend/ext/Core";
+import ExtCore "../../src/obsidian_tears_backend/lib/ext/Core";
 
 actor class CharacterActor() {
   public type RegistryResponse = [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];

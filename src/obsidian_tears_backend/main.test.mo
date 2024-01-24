@@ -18,12 +18,12 @@ import {
 
 import Main "main";
 import T "types";
-import ExtCore "ext/Core";
-import ExtCommon "ext/Common";
+import ExtCore "lib/ext/Core";
+import ExtCommon "lib/ext/Common";
 import CharacterActor "../../spec/actors/CharacterActor";
 import ItemActor "../../spec/actors/ItemActor";
 import GameJsonFactory "../../spec/factories/GameJsonFactory";
-import AID "util/AccountIdentifier";
+import AID "lib/util/AccountIdentifier";
 
 let backendActor = await Main.ObsidianTearsBackend();
 

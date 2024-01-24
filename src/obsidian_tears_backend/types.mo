@@ -2,8 +2,8 @@ import Blob "mo:base/Blob";
 import Time "mo:base/Time";
 import Result "mo:base/Result";
 
-import ExtCore "ext/Core";
-import ExtCommon "ext/Common";
+import ExtCore "lib/ext/Core";
+import ExtCommon "lib/ext/Common";
 
 module {
   //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,

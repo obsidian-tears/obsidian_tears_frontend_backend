@@ -1,7 +1,7 @@
 import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
-import ExtCore "../../src/obsidian_tears_backend/ext/Core";
-import ExtCommon "../../src/obsidian_tears_backend/ext/Common";
+import ExtCore "../../src/obsidian_tears_backend/lib/ext/Core";
+import ExtCommon "../../src/obsidian_tears_backend/lib/ext/Common";
 import T "../../src/obsidian_tears_backend/types";
 
 actor class ItemActor() {

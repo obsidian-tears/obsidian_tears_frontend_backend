@@ -1,4 +1,4 @@
 [dependencies]
-base = "0.7.6"
-mospec = "https://github.com/MoSpec/mo-spec#v0.1.0"
-canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#master"
+base = "0.10.4"
+mospec = "https://github.com/MoSpec/mo-spec#v0.1.0@e962a9cb73d9886b7bb6525e2396c5af1c6a2102"
+canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#master@afa4fb40886d9be54e5f6af11318db883aa324a2"

@@ -1,5 +1,6 @@
 import * as React from "react";
 import PlugConnect from "@psychedelic/plug-connect";
+import { characterCanisterId } from "./../env";
 
 const Home = (props) => {
   // asset urls
@@ -22,12 +23,12 @@ const Home = (props) => {
               {props.myNfts.map((nft, i) => (
                 <div key={i}>
                   <a
-                    href={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.icp0.io/?index=${nft[0]}`}
+                    href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
                     target="_blank"
                   >
                     <img
                       alt="nft"
-                      src={`https://dhyds-jaaaa-aaaao-aaiia-cai.raw.icp0.io/?index=${nft[0]}`}
+                      src={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
                       height="230px;"
                     ></img>
                   </a>

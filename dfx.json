@@ -16,6 +16,21 @@
         "dist/obsidian_tears_frontend/"
       ],
       "type": "assets"
+    }, 
+    "test_obsidian_tears_backend": {
+      "type": "motoko",
+      "main": "src/obsidian_tears_backend/main.mo"
+    },
+    "test_obsidian_tears_frontend": {
+      "dependencies": ["obsidian_tears_backend"],
+      "frontend": {
+        "entrypoint": "src/obsidian_tears_frontend/src/index.html"
+      },
+      "source": [
+        "src/obsidian_tears_frontend/assets",
+        "dist/obsidian_tears_frontend/"
+      ],
+      "type": "assets"
     }
   },
   "defaults": {

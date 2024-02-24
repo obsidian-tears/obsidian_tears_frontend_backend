@@ -182,6 +182,8 @@ const Game = (props) => {
             </div>
           )}
           <Unity ref={ref} className="unity" unityProvider={unityProvider} />
+          <ConnectDialog />
+
         </div>
       </div>
     </>

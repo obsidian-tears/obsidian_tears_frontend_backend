@@ -1,7 +1,7 @@
 import * as React from "react";
 import PlugConnect from "@psychedelic/plug-connect";
 import { characterCanisterId } from "./../env";
-
+import "../connect2ic/styles/connect2ic.css";
 const Home = (props) => {
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -12,8 +12,10 @@ const Home = (props) => {
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
       {props.loggedIn ? (
-        !props.loading ? (
+        !props.loading ? (// 
           <>
+          {/* todo esto es por si se puedo logear!!!! */}
+
             <div className="centerMe">
               <h2 className="title2">Select a Hero to start the game</h2>
               <br></br>
@@ -22,6 +24,7 @@ const Home = (props) => {
             <div className="container">
               {props.myNfts.map((nft, i) => (
                 <div key={i}>
+                  {/* //creo que aca estan las imagenes que voy a poder elegir  */}
                   <a
                     href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
                     target="_blank"
@@ -48,6 +51,7 @@ const Home = (props) => {
         )
       ) : (
         <>
+        {/*  si no esta logeadooo  */}
           <div className="space50"></div>
           {false && (
             <div className="centerMe">
@@ -76,10 +80,34 @@ const Home = (props) => {
               className={"buttonWoodGridXL"}
               style={backgroundImageWood3}
               onClick={async () => {
+                console.log("estas apretando el boton connect with mail");
+                props.connect2icNFID()
+              }}
+            >
+              Connect to Email
+            </button>
+          </div>
+          <div className="centerMe">
+            <button
+              className={"buttonWoodGridXL"}
+              style={backgroundImageWood3}
+              onClick={async () => {
                 await props.connectToStoic();
               }}
             >
               Connect to Stoic
+            </button>
+          </div>
+          <div className="centerMe">
+            <button
+              className={"buttonWoodGridXL"}
+              style={backgroundImageWood3}
+              onClick={async () => {
+                console.log("estas apretando el boton connect to ic");
+                props.connect2ic()
+              }}
+            >
+              Connect to Wallet
             </button>
           </div>
           <br></br>

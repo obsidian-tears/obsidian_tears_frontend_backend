@@ -13,6 +13,31 @@ import { Principal } from "@dfinity/principal";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { StoicIdentity } from "ic-stoic-identity";
 
+// connect 2 ic imports
+
+import { ConnectDialog, useCanister, useConnect, useDialog } from "@connect2ic/react";
+import { canisterIds,canisters } from "./connect2ic/utils/canister";
+import { createClient } from "@connect2ic/core";
+import { defaultProviders } from "@connect2ic/core/providers";
+import { Connect2ICProvider } from "@connect2ic/react";
+
+// <----- client CONNECT2IC
+const client = createClient({
+  canisters,
+  providers: defaultProviders,
+  globalProviderConfig: {
+    whitelist: canisterIds,
+    appName: "Obsidian Tears",
+    host: "https://a5x2a-vyaaa-aaaam-ab7qq-cai.icp0.io/",
+    // host: "http://localhost:8080",
+    dev: false,
+    autoConnect: false,
+  },
+});
+// client CONNECT2IC ----->
+
+
+
 const ObsidianTears = () => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [principal, setPrincipal] = React.useState("");
@@ -48,12 +73,72 @@ const ObsidianTears = () => {
     charActorRef.current = data;
     _setCharActor(data);
   };
+ 
+  // <-------- connect2ic 
+  const { isConnected, principal:connect2icPrincipal, disconnect, connect } = useConnect({
+    onConnect: () => {console.log("hi")},
+    onDisconnnect:()=> {console.log("the user has logged out correctly")}
+  });
+  
+  const [initLogin, setInitLogin] = React.useState(false);
+  const { open, isOpen } = useDialog();
+  const [characterActor] = useCanister("character", { mode: "anonymous" }); 
+
+  const handleRequestFullscreen = () => ref.current?.requestFullscreen();
+  const handleExitFullscreen = () => document.fullscreenElement && document.exitFullscreen();
+
+
+  //functions 
+  const LoginIc = async() => {
+    handleExitFullscreen();
+    setInitLogin(true)
+    isConnected && disconnect();
+    open();
+  }
+
+  const LoginNfID = async() => {
+    handleExitFullscreen();
+    setInitLogin(true)
+    isConnected && disconnect();
+    connect("nfid")
+  }
+
+  // obtain the principal
+  React.useEffect(() => {
+    if (isConnected && connect2icPrincipal && initLogin) {
+      console.log("tu principal es: "+ connect2icPrincipal);
+      console.log(characterActor);
+      loadCharacters(characterActor,connect2icPrincipal);
+    }
+  }, [isConnected, connect2icPrincipal]);
+
+
+  // Modify styles when the dialog is open
+  React.useEffect(() => {
+    if (isOpen) {
+      const btnBitfinity = document.querySelector(".infinity-styles");
+      const span = btnBitfinity?.querySelector(".button-label");
+      span && (span.textContent = "Bitfinity Wallet");
+
+      const btnAstrox = document.querySelector(".astrox-styles");
+      const img = btnAstrox.querySelector(".img-styles");
+      if (img) {
+        img.style.backgroundColor = "#545454";
+        img.style.borderRadius = "50px";
+      }
+    }
+  }, [isOpen]);
+
+  // connect2ic ---------->
+
   const gameCanisterId = Actor.canisterIdOf(backendActor);
-
+  
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
-
+  
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
+
+
 
   const loadActors = async (plug, stoic, a) => {
     console.log("loading actors");
@@ -85,6 +170,8 @@ const ObsidianTears = () => {
     }
     return characterActor;
   };
+
+
 
   const loadCharacters = async (characterActor, p) => {
     setLoading(true);
@@ -269,12 +356,21 @@ const ObsidianTears = () => {
             loggedIn={loggedIn}
             setLoggedIn={setLoggedIn}
             selectNft={selectNft}
+            connect2ic = {LoginIc}
+            connect2icNFID = {LoginNfID}
           />
+          <ConnectDialog />
         </div>
       )}
     </>
   );
 };
 
+
 const root = createRoot(document.getElementById("app"));
-root.render(<ObsidianTears />);
+// root.render(<ObsidianTears />);
+root.render(
+  <Connect2ICProvider client={client}>
+    <ObsidianTears />
+  </Connect2ICProvider>
+);

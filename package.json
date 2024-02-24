@@ -51,6 +51,8 @@
     "last 2 edge version"
   ],
   "dependencies": {
+    "@connect2ic/core": "0.2.0-beta.5",
+    "@connect2ic/react": "0.2.0-beta.5",
     "@dfinity/agent": "^0.19.3",
     "@dfinity/candid": "^0.19.3",
     "@dfinity/identity": "^0.19.3",

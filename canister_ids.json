@@ -8,5 +8,11 @@
     "beta": "7pwyx-aaaaa-aaaan-qdaqa-cai",
     "ic": "ghhdg-viaaa-aaaao-aaivq-cai",
     "staging": "boxcc-qiaaa-aaaan-qc7aq-cai"
+  },
+  "test_obsidian_tears_backend": {
+    "ic": "a2w4u-yaaaa-aaaam-ab7qa-cai"
+  },
+  "test_obsidian_tears_frontend": {
+    "ic": "auur4-dqaaa-aaaam-ab7ra-cai"
   }
 }

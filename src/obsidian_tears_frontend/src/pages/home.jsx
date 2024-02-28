@@ -12,9 +12,9 @@ const Home = (props) => {
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
       {props.loggedIn ? (
-        !props.loading ? (// 
+        !props.loading ? ( //
           <>
-          {/* todo esto es por si se puedo logear!!!! */}
+            {/* todo esto es por si se puedo logear!!!! */}
 
             <div className="centerMe">
               <h2 className="title2">Select a Hero to start the game</h2>
@@ -26,7 +26,7 @@ const Home = (props) => {
                 <div key={i}>
                   {/* //creo que aca estan las imagenes que voy a poder elegir  */}
                   <a
-                    href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
+                    href={`http://dhyds-jaaaa-aaaao-aaiia-cai.icp0.io/?canisterId=${characterCanisterId}&index=${nft[0]}`}
                     target="_blank"
                   >
                     <img
@@ -47,11 +47,42 @@ const Home = (props) => {
             </div>
           </>
         ) : (
-          <p className="whiteText">loading...</p>
+          <div>
+            <div className="centerMe">
+              <h2 className="title2">Select a Hero to start the game</h2>
+              <br></br>
+            </div>
+
+            <div className="container">
+              <div key="1">
+                <a
+                  href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${props.myNfts[0]}`}
+                  target="_blank"
+                >
+                  <img
+                    alt="nft"
+                    // src={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=4`}
+                    src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGV_WGXFi48rf0w8QcNTWvJJtEe4iBVtYCFtgVxRSMG5WXZo0CMXEwtWJstn4zeAvAYIc&usqp=CAU`}
+                    height="230px;"
+                  ></img>
+                </a>
+                <button
+                  className="buttonWoodGrid"
+                  style={backgroundImageWood2}
+                  onClick={() => props.selectNft(2)}
+                >
+                  Select
+                </button>
+              </div>
+              {/* //creo que aca estan las imagenes que voy a poder elegir  */}
+            </div>
+          </div>
+
+          /* <p className="whiteText">loading...</p> */
         )
       ) : (
         <>
-        {/*  si no esta logeadooo  */}
+          {/*  si no esta logeadooo  */}
           <div className="space50"></div>
           {false && (
             <div className="centerMe">
@@ -81,7 +112,7 @@ const Home = (props) => {
               style={backgroundImageWood3}
               onClick={async () => {
                 console.log("estas apretando el boton connect with mail");
-                props.connect2icNFID()
+                props.connect2icNFID();
               }}
             >
               Connect to Email
@@ -104,7 +135,7 @@ const Home = (props) => {
               style={backgroundImageWood3}
               onClick={async () => {
                 console.log("estas apretando el boton connect to ic");
-                props.connect2ic()
+                props.connect2ic();
               }}
             >
               Connect to Wallet

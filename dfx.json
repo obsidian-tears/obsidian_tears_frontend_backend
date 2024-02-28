@@ -16,7 +16,7 @@
         "dist/obsidian_tears_frontend/"
       ],
       "type": "assets"
-    }, 
+    },
     "test_obsidian_tears_backend": {
       "type": "motoko",
       "main": "src/obsidian_tears_backend/main.mo"

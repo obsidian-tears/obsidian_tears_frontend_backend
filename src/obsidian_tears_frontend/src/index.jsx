@@ -15,8 +15,13 @@ import { StoicIdentity } from "ic-stoic-identity";
 
 // connect 2 ic imports
 
-import { ConnectDialog, useCanister, useConnect, useDialog } from "@connect2ic/react";
-import { canisterIds,canisters } from "./connect2ic/utils/canister";
+import {
+  ConnectDialog,
+  useCanister,
+  useConnect,
+  useDialog,
+} from "@connect2ic/react";
+import { canisterIds, canisters } from "./connect2ic/utils/canister";
 import { createClient } from "@connect2ic/core";
 import { defaultProviders } from "@connect2ic/core/providers";
 import { Connect2ICProvider } from "@connect2ic/react";
@@ -28,21 +33,20 @@ const client = createClient({
   globalProviderConfig: {
     whitelist: canisterIds,
     appName: "Obsidian Tears",
-    host: "https://a5x2a-vyaaa-aaaam-ab7qq-cai.icp0.io/",
-    // host: "http://localhost:8080",
+    // host: "https://a5x2a-vyaaa-aaaam-ab7qq-cai.icp0.io/",
+    host: "http://localhost:8080",
     dev: false,
     autoConnect: false,
   },
 });
 // client CONNECT2IC ----->
 
-
-
 const ObsidianTears = () => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [principal, setPrincipal] = React.useState("");
   const [expandHeader, setExpandHeader] = React.useState(false);
   const [route, setRoute] = React.useState("home");
+  // const [route, setRoute] = React.useState("game");
   const [usingPlug, setUsingPlug] = React.useState(false);
   const [usingStoic, setUsingStoic] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -73,45 +77,57 @@ const ObsidianTears = () => {
     charActorRef.current = data;
     _setCharActor(data);
   };
- 
-  // <-------- connect2ic 
-  const { isConnected, principal:connect2icPrincipal, disconnect, connect } = useConnect({
-    onConnect: () => {console.log("hi")},
-    onDisconnnect:()=> {console.log("the user has logged out correctly")}
+
+  // <-------- connect2ic
+  const {
+    isConnected,
+    principal: connect2icPrincipal,
+    disconnect,
+    connect,
+  } = useConnect({
+    onConnect: () => {
+      console.log("hi");
+    },
+    onDisconnnect: () => {
+      console.log("the user has logged out correctly");
+    },
   });
-  
+
   const [initLogin, setInitLogin] = React.useState(false);
   const { open, isOpen } = useDialog();
-  const [characterActor] = useCanister("character", { mode: "anonymous" }); 
+  const [characterActor] = useCanister("character", { mode: "anonymous" });
 
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
-  const handleExitFullscreen = () => document.fullscreenElement && document.exitFullscreen();
+  const handleExitFullscreen = () =>
+    document.fullscreenElement && document.exitFullscreen();
 
-
-  //functions 
-  const LoginIc = async() => {
+  //functions
+  const LoginIc = async () => {
     handleExitFullscreen();
-    setInitLogin(true)
+    setInitLogin(true);
     isConnected && disconnect();
     open();
-  }
+  };
 
-  const LoginNfID = async() => {
+  const LoginNfID = async () => {
     handleExitFullscreen();
-    setInitLogin(true)
+    setInitLogin(true);
     isConnected && disconnect();
-    connect("nfid")
-  }
+    connect("nfid");
+  };
 
   // obtain the principal
   React.useEffect(() => {
     if (isConnected && connect2icPrincipal && initLogin) {
-      console.log("tu principal es: "+ connect2icPrincipal);
-      console.log(characterActor);
-      loadCharacters(characterActor,connect2icPrincipal);
+      console.log("tu principal es: " + connect2icPrincipal);
+      console.log({ characterActor });
+
+      const testPrincipal =
+        "awmdx-onrpv-kzwjt-jggtq-t3idz-sbrq2-72c6r-7ajlg-5txoj-4ifwe-dqe";
+      // loadCharacters(characterActor, connect2icPrincipal);
+      loadCharacters(characterActor, testPrincipal);
     }
   }, [isConnected, connect2icPrincipal]);
-
 
   // Modify styles when the dialog is open
   React.useEffect(() => {
@@ -132,13 +148,11 @@ const ObsidianTears = () => {
   // connect2ic ---------->
 
   const gameCanisterId = Actor.canisterIdOf(backendActor);
-  
+
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
-  
+
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
-
-
 
   const loadActors = async (plug, stoic, a) => {
     console.log("loading actors");
@@ -171,14 +185,16 @@ const ObsidianTears = () => {
     return characterActor;
   };
 
-
-
   const loadCharacters = async (characterActor, p) => {
     setLoading(true);
     console.log(`load characters`);
     let registry = await characterActor.getRegistry();
+    let tokens = await characterActor.getTokens();
+    console.log(tokens);
+    console.log(registry);
     const address = principalToAccountIdentifier(p);
     console.log(`address: ${address}`);
+    // const myTestAccount = "eba83bed8769d8323eb3077c2d8b404cdd34da0314fce3f3ecee3225577b5017"
     let nfts = registry.filter((val, i, arr) => val[1] == address);
     console.log(`nfts: ${nfts}`);
     setMyNfts(nfts);
@@ -233,15 +249,20 @@ const ObsidianTears = () => {
       // No existing connection, lets make one!
       identity = await StoicIdentity.connect();
       let p = identity.getPrincipal();
+      console.log("mi principal de stoic es.." + { p });
+      console.log("mi identity de stoic es:.." + { identity });
       setIdentity(identity);
       setPrincipal(p.toText());
       let agent = new HttpAgent({ identity: identity });
+      console.log("mi agente de stoic es:.. " + { agent });
       if (network === "local") {
         agent.fetchRootKey();
       }
+
       setStoicHttpAgent(agent);
       setLoggedIn(true);
       let characterActor = await loadActors(false, true, agent);
+      console.log("11111----" + { haracterActor });
       await loadCharacters(characterActor, p.toText());
       setUsingStoic(true);
       setUsingPlug(false);
@@ -253,6 +274,8 @@ const ObsidianTears = () => {
     // load player save data from game canister
     const verifiedNfts = await gameActor.verify();
     console.log(`verifiedNfts: ${verifiedNfts}`);
+    const nftSelected = myNfts[index].clase;
+    // const nftSelected = myNfts[index].url
     if (!verifiedNfts["Ok"]) {
     }
     const loginData = await gameActor.loadGame(index);
@@ -356,8 +379,8 @@ const ObsidianTears = () => {
             loggedIn={loggedIn}
             setLoggedIn={setLoggedIn}
             selectNft={selectNft}
-            connect2ic = {LoginIc}
-            connect2icNFID = {LoginNfID}
+            connect2ic={LoginIc}
+            connect2icNFID={LoginNfID}
           />
           <ConnectDialog />
         </div>
@@ -365,7 +388,6 @@ const ObsidianTears = () => {
     </>
   );
 };
-
 
 const root = createRoot(document.getElementById("app"));
 // root.render(<ObsidianTears />);

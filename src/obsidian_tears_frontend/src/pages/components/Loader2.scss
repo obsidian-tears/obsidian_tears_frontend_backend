@@ -49,7 +49,8 @@ $loader-direction: normal;
   position: absolute;
   top: 0;
   left: 0;
-  -webkit-animation: rollercoaster $loader-duration $loader-iteration-count linear;
+  -webkit-animation: rollercoaster $loader-duration $loader-iteration-count
+    linear;
   -webkit-transform: rotate(135deg);
   -moz-animation: rollercoaster $loader-duration $loader-iteration-count linear;
   -moz-transform: rotate(135deg);
@@ -60,7 +61,8 @@ $loader-direction: normal;
   left: auto;
   right: 0;
   -webkit-transform: rotate(-45deg);
-  -webkit-animation: rollercoaster2 $loader-duration $loader-iteration-count linear;
+  -webkit-animation: rollercoaster2 $loader-duration $loader-iteration-count
+    linear;
   -moz-transform: rotate(-45deg);
   -moz-animation: rollercoaster2 $loader-duration $loader-iteration-count linear;
   transform: rotate(-45deg);

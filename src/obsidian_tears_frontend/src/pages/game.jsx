@@ -2,6 +2,8 @@ import React from "react";
 import { useUnityContext } from "react-unity-webgl";
 import { Unity } from "react-unity-webgl";
 import { unityUrls } from "../env";
+import { isMobile, isTablet } from "react-device-detect";
+import Loader2 from "./components/Loader2";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
@@ -17,8 +19,26 @@ const Game = (props) => {
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
+  const initDataUnity = () => {
+    const myCharacter = props.characterSelected;
+    const myJsonCharacter = JSON.stringify(myCharacter);
+    sendMessage("IC-Connect", "InitData", myJsonCharacter);
+  };
+  const checkMobile = () => {
+    sendMessage(
+      "IC-Connect",
+      "CheckMobilePlatform",
+      isMobile || isTablet ? 1 : 0
+    );
+  };
+
   React.useEffect(() => {
     if (isLoaded) {
+      //<-- IDS -->
+      checkMobile();
+      initDataUnity();
+      //<-- IDS -->
+
       // register unity functions
       addEventListener("SaveGame", async function (gameData, objectName) {
         window.saveData = gameData;
@@ -175,12 +195,15 @@ const Game = (props) => {
         )}
         <div className="unityContainer">
           {isLoaded === false && (
-            // We'll conditionally render the loading overlay if the Unity
-            // Application is not loaded.
-            <div className="loading-overlay">
-              <p>Loading... ({loadingPercentage}%)</p>
-            </div>
+            <Loader2 loadingProgression={loadingProgression} />
           )}
+          {/* // ( */}
+          // // We'll conditionally render the loading overlay if the Unity //
+          // Application is not loaded.
+          {/* //  ] <div className="loading-overlay"> */}
+          {/* //     <p>Loading... ({loadingPercentage}%)</p> */}
+          {/* //   </div> */}
+          {/* // ) */}
           <Unity ref={ref} className="unity" unityProvider={unityProvider} />
         </div>
       </div>

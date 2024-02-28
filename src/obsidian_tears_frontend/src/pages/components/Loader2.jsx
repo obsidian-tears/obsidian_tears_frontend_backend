@@ -5,7 +5,7 @@ import React from "react";
 import image from "./obsidian2d.jpg";
 import logo_icp from "./icp_white.png";
 
-const selectedImage =image ;
+const selectedImage = image;
 
 console.log(selectedImage);
 
@@ -17,11 +17,12 @@ const Loader2 = ({ loadingProgression }) => {
       style={{
         backgroundImage: `url(${selectedImage})`,
         backgroundSize: "cover",
-        
+
         width: "100%",
         height: "100%",
         zIndex: 10000,
-      }}className="body"
+      }}
+      className="body"
     >
       <article className="loader_container">
         <div className="loader-wrapper">
@@ -43,13 +44,12 @@ const Loader2 = ({ loadingProgression }) => {
         <span className="percent">{percentage()}%</span>
       </article>
       <div className="logos">
-        <div className="tbfz img-container">
-        </div>
+        <div className="tbfz img-container"></div>
       </div>
       <div className="footer">
         <p>POWERED BY</p>
         <img src={logo_icp} alt="" />
-      </div>  
+      </div>
     </div>
   );
 };

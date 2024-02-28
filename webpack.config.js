@@ -48,24 +48,22 @@ module.exports = {
     rules: [
       { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
       { test: /\.css$/, use: ["style-loader", "css-loader"] },
-      { test: /\.(png|jpe?g|gif|svg)$/i,
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
         use: [
           {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
-              name: '[name].[ext]',
-              outputPath: 'images',
+              name: "[name].[ext]",
+              outputPath: "images",
             },
           },
-        ],},
-        {
-          test: /\.scss$/,
-          use: [
-            'style-loader',
-            'css-loader',
-            'sass-loader',
-          ],
-        }
+        ],
+      },
+      {
+        test: /\.scss$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
     ],
   },
   plugins: [

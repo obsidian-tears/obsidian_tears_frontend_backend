@@ -1,5 +1,5 @@
 // update this whenever deploying to ic, local, staging or beta
-export const network = "local";
+export const network = "ic";
 
 // update this whenever canisters change in local
 const canisterIds = {

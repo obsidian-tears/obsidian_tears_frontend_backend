@@ -45,7 +45,7 @@ const ObsidianTears = () => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [principal, setPrincipal] = React.useState("");
   const [expandHeader, setExpandHeader] = React.useState(false);
-  const [route, setRoute] = React.useState("home");
+  const [route, setRoute] = React.useState("game");
   // const [route, setRoute] = React.useState("game");
   const [usingPlug, setUsingPlug] = React.useState(false);
   const [usingStoic, setUsingStoic] = React.useState(false);
@@ -92,7 +92,8 @@ const ObsidianTears = () => {
       console.log("the user has logged out correctly");
     },
   });
-
+  const [characterData, setCharacterData] = React.useState("");
+  const [characterSelected, setCharacterSelected] = React.useState("");
   const [initLogin, setInitLogin] = React.useState(false);
   const { open, isOpen } = useDialog();
   const [characterActor] = useCanister("character", { mode: "anonymous" });
@@ -121,11 +122,11 @@ const ObsidianTears = () => {
     if (isConnected && connect2icPrincipal && initLogin) {
       console.log("tu principal es: " + connect2icPrincipal);
       console.log({ characterActor });
-
+      console.log([charActor.getRegistry]);
       const testPrincipal =
         "awmdx-onrpv-kzwjt-jggtq-t3idz-sbrq2-72c6r-7ajlg-5txoj-4ifwe-dqe";
-      // loadCharacters(characterActor, connect2icPrincipal);
-      loadCharacters(characterActor, testPrincipal);
+      loadCharacters(characterActor, connect2icPrincipal);
+      // loadCharacters(characterActor, testPrincipal);
     }
   }, [isConnected, connect2icPrincipal]);
 
@@ -189,16 +190,76 @@ const ObsidianTears = () => {
     setLoading(true);
     console.log(`load characters`);
     let registry = await characterActor.getRegistry();
-    let tokens = await characterActor.getTokens();
-    console.log(tokens);
-    console.log(registry);
     const address = principalToAccountIdentifier(p);
     console.log(`address: ${address}`);
-    // const myTestAccount = "eba83bed8769d8323eb3077c2d8b404cdd34da0314fce3f3ecee3225577b5017"
     let nfts = registry.filter((val, i, arr) => val[1] == address);
+    // const myTestAccount = "eba83bed8769d8323eb3077c2d8b404cdd34da0314fce3f3ecee3225577b5017" // this is a address with tokens
     console.log(`nfts: ${nfts}`);
     setMyNfts(nfts);
     setLoading(false);
+
+    setCharacterData(getCharacterData(characterActor, nfts));
+  };
+
+  const selectCharacter = (index) => {
+    characterData.forEach((character, arrayIndex) => {
+      if (
+        nft.hasOwnProperty("characterIndex") &&
+        character.characterIndex == index
+      ) {
+        setCharacterSelected(character);
+      }
+    });
+  };
+
+  const getCharacterData = async (characterActor, nfts) => {
+    const metadata = await characterActor.getMetadata();
+
+    const newMetadata = [];
+
+    nfts.forEach(function (elemento, indice) {
+      console.log(`${elemento} es el elemento de ${indice}`);
+      let meta = metadata.filter((val, i, arr) => val[0] == elemento[0]);
+      newMetadata.push(meta);
+    });
+
+    const characterNfts = newMetadata
+      .map((subArray) => {
+        const objeto = subArray[0][1];
+        const index = subArray[0][0];
+        if (objeto.nonfungible) {
+          const metadataArray = objeto.nonfungible.metadata;
+          if (metadataArray.length > 0) {
+            const valor = metadataArray[0][1];
+            let clase;
+
+            switch (valor) {
+              case 0:
+                clase = "archer";
+                break;
+              case 1:
+                clase = "wizard";
+                break;
+              case 2:
+                clase = "warrior";
+                break;
+              default:
+                clase = "unknown";
+                break;
+            }
+
+            return {
+              characterIndex: index,
+              characterClass: clase,
+              characterUrl: `https://dhyds-jaaaa-aaaao-aaiia-cai.raw.icp0.io/?index=${index}`,
+            };
+          }
+        }
+        return null;
+      })
+      .filter((nft) => nft !== null);
+    console.log("this are your nfts : " + characterNfts);
+    return characterNfts;
   };
 
   const verifyConnectionAndAgent = async () => {
@@ -249,20 +310,15 @@ const ObsidianTears = () => {
       // No existing connection, lets make one!
       identity = await StoicIdentity.connect();
       let p = identity.getPrincipal();
-      console.log("mi principal de stoic es.." + { p });
-      console.log("mi identity de stoic es:.." + { identity });
       setIdentity(identity);
       setPrincipal(p.toText());
       let agent = new HttpAgent({ identity: identity });
-      console.log("mi agente de stoic es:.. " + { agent });
       if (network === "local") {
         agent.fetchRootKey();
       }
-
       setStoicHttpAgent(agent);
       setLoggedIn(true);
       let characterActor = await loadActors(false, true, agent);
-      console.log("11111----" + { haracterActor });
       await loadCharacters(characterActor, p.toText());
       setUsingStoic(true);
       setUsingPlug(false);
@@ -270,12 +326,14 @@ const ObsidianTears = () => {
   };
 
   const selectNft = async (index) => {
+    //<-IDS->
+    selectCharacter(index);
+    //<-IDS->
+
     setSelectedNftIndex(index);
     // load player save data from game canister
     const verifiedNfts = await gameActor.verify();
     console.log(`verifiedNfts: ${verifiedNfts}`);
-    const nftSelected = myNfts[index].clase;
-    // const nftSelected = myNfts[index].url
     if (!verifiedNfts["Ok"]) {
     }
     const loginData = await gameActor.loadGame(index);
@@ -381,6 +439,7 @@ const ObsidianTears = () => {
             selectNft={selectNft}
             connect2ic={LoginIc}
             connect2icNFID={LoginNfID}
+            characterSelected={characterSelected}
           />
           <ConnectDialog />
         </div>

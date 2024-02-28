@@ -26,12 +26,12 @@ const Home = (props) => {
                 <div key={i}>
                   {/* //creo que aca estan las imagenes que voy a poder elegir  */}
                   <a
-                    href={`http://dhyds-jaaaa-aaaao-aaiia-cai.icp0.io/?canisterId=${characterCanisterId}&index=${nft[0]}`}
+                    href={`http://${characterCanisterId}/?index=${nft[0]}`}
                     target="_blank"
                   >
                     <img
                       alt="nft"
-                      src={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
+                      src={`http://${characterCanisterId}/?index=${nft[0]}`}
                       height="230px;"
                     ></img>
                   </a>
@@ -47,38 +47,7 @@ const Home = (props) => {
             </div>
           </>
         ) : (
-          <div>
-            <div className="centerMe">
-              <h2 className="title2">Select a Hero to start the game</h2>
-              <br></br>
-            </div>
-
-            <div className="container">
-              <div key="1">
-                <a
-                  href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${props.myNfts[0]}`}
-                  target="_blank"
-                >
-                  <img
-                    alt="nft"
-                    // src={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=4`}
-                    src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGV_WGXFi48rf0w8QcNTWvJJtEe4iBVtYCFtgVxRSMG5WXZo0CMXEwtWJstn4zeAvAYIc&usqp=CAU`}
-                    height="230px;"
-                  ></img>
-                </a>
-                <button
-                  className="buttonWoodGrid"
-                  style={backgroundImageWood2}
-                  onClick={() => props.selectNft(2)}
-                >
-                  Select
-                </button>
-              </div>
-              {/* //creo que aca estan las imagenes que voy a poder elegir  */}
-            </div>
-          </div>
-
-          /* <p className="whiteText">loading...</p> */
+          <p className="whiteText">loading...</p>
         )
       ) : (
         <>

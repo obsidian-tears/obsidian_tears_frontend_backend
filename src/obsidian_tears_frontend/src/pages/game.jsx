@@ -19,6 +19,9 @@ const Game = (props) => {
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
+  const [loadingSimulator, setloadingSimulator] = React.useState(1);
+
+
   const initDataUnity = () => {
     const myCharacter = props.characterSelected;
     const myJsonCharacter = JSON.stringify(myCharacter);
@@ -174,8 +177,18 @@ const Game = (props) => {
     }
   }, [isLoaded]);
 
+
+  
+  const simulatePorcentage = (loadingProgression) =>{
+    while(loadingPercentage < 99){
+      setloadingSimulator(loadingProgression + 1);
+      setTimeout(simulatePorcentage,770);
+    }
+    
+  };
   React.useEffect(() => {
     setLoadingPercentage(Math.round(loadingProgression * 100));
+    // simulatePorcentage(loadingProgression);
   }, [loadingProgression]);
 
   return (
@@ -195,7 +208,7 @@ const Game = (props) => {
         )}
         <div className="unityContainer">
           {isLoaded === false && (
-            <Loader2 loadingProgression={loadingProgression} />
+            <Loader2 loadingProgression={loadingSimulator} />
           )}
           {/* // ( */}
           // // We'll conditionally render the loading overlay if the Unity //

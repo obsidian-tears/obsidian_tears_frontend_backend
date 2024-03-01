@@ -1,23 +1,32 @@
 import "./Loader2.scss";
-
-import React from "react";
-
-import image from "./obsidian2d.jpg";
+import React, { useEffect, useState } from "react";
+import image from "./obsidian_bg.jpg";
 import logo_icp from "./icp_white.png";
 
 const selectedImage = image;
 
-console.log(selectedImage);
-
 const Loader2 = ({ loadingProgression }) => {
-  const percentage = () => Math.round(loadingProgression * 100);
+  const [displayedPercentage, setDisplayedPercentage] = useState(0);
+
+  useEffect(() => {
+    let currentPercentage = 0;
+    const interval = setInterval(() => {
+      if (currentPercentage < loadingProgression * 99) {
+        currentPercentage++;
+        setDisplayedPercentage(currentPercentage);
+      } else {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [loadingProgression]);
 
   return (
     <div
       style={{
         backgroundImage: `url(${selectedImage})`,
         backgroundSize: "cover",
-
         width: "100%",
         height: "100%",
         zIndex: 10000,
@@ -41,7 +50,7 @@ const Loader2 = ({ loadingProgression }) => {
             <div className="roller r6"></div>
           </div>
         </div>
-        <span className="percent">{percentage()}%</span>
+        <span className="percent">{displayedPercentage}%</span>
       </article>
       <div className="logos">
         <div className="tbfz img-container"></div>

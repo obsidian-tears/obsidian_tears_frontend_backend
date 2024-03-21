@@ -15,10 +15,11 @@
     "prepare": "husky install",
     "build": "webpack",
     "prebuild": "dfx generate",
+    "local": "./scripts/deploy-all-local.sh",
     "start": "webpack serve --mode development --env development",
     "generate": "dfx generate obsidian_tears_backend",
     "prettier:check": "npx prettier --check .",
-    "prettier:format": "npx prettier --write .",
+    "format": "npx prettier --write .",
     "test": "mo-test --testmode interpreter --verbose"
   },
   "devDependencies": {

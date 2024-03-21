@@ -23,7 +23,7 @@ jobs:
       - name: "install dfx"
         # download and setup local moc by starting dfx once
         run: |
-          DFX_VERSION=0.18.0 sh -ci "$(curl -fsSL https://raw.githubusercontent.com/dfinity/sdk/dfxvm-install-script/install.sh)"
+          sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
           dfx start --background
           dfx stop
       - name: "install mops packages"

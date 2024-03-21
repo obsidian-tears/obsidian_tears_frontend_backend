@@ -1,11 +1,15 @@
 import * as React from "react";
 import PlugConnect from "@psychedelic/plug-connect";
-import { characterCanisterId } from "./../env";
+import { network, characterCanisterId } from "./../env";
 
 const Home = (props) => {
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
+  const nftBaseUrl =
+    network == "local"
+      ? `http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=`
+      : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
   return (
     <div>
@@ -22,13 +26,10 @@ const Home = (props) => {
             <div className="container">
               {props.myNfts.map((nft, i) => (
                 <div key={i}>
-                  <a
-                    href={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
-                    target="_blank"
-                  >
+                  <a href={nftBaseUrl + nft[0]} target="_blank">
                     <img
                       alt="nft"
-                      src={`http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=${nft[0]}`}
+                      src={nftBaseUrl + nft[0]}
                       height="230px;"
                     ></img>
                   </a>

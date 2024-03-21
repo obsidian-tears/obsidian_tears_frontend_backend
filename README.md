@@ -65,6 +65,8 @@ Which will start a server at `http://localhost:8080`, proxying API requests to t
 
 # Order of creation on local network
 
+NOTE: if you hold all 4 of these repos on a parent folder (like obsidian), you can go to OT Frontend & Backend and run "npm run local" script.
+
 The IC is deterministic, so if the order of canisters created on a network (after `dfx start --clean`) is the same, it will end up with the same canister IDs.
 
 The order is:

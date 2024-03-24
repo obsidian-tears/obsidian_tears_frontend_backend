@@ -141,32 +141,6 @@ module ExtCore = {
         },
       );
     };
-    private func nat32tobytes(n : Nat32) : [Nat8] {
-      if (n < 256) {
-        return [1, Nat8.fromNat(Nat32.toNat(n))];
-      } else if (n < 65536) {
-        return [
-          2,
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
-        ];
-      } else if (n < 16777216) {
-        return [
-          3,
-          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
-        ];
-      } else {
-        return [
-          4,
-          Nat8.fromNat(Nat32.toNat((n >> 24) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n >> 16) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n >> 8) & 0xFF)),
-          Nat8.fromNat(Nat32.toNat((n) & 0xFF)),
-        ];
-      };
-    };
   };
 
   public module User = {

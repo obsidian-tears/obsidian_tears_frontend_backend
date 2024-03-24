@@ -2,7 +2,6 @@ import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Blob "mo:base/Blob";
-import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
@@ -12,7 +11,6 @@ import {
   describe;
   context;
   it;
-  pending;
   run;
 } "mo:mospec/MoSpec";
 
@@ -25,7 +23,7 @@ import ItemActor "../../spec/actors/ItemActor";
 import GameJsonFactory "../../spec/factories/GameJsonFactory";
 import AID "lib/util/AccountIdentifier";
 
-let backendActor = await Main.ObsidianTearsBackend();
+let backendActor = await Main._ObsidianTearsBackend();
 
 // ==================
 // setup

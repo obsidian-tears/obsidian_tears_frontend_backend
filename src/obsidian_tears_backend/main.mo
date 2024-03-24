@@ -1,11 +1,8 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
-import Char "mo:base/Char";
 import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
-import Float "mo:base/Float";
-import Hash "mo:base/Hash";
 import HashMap "mo:base/HashMap";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
@@ -13,7 +10,6 @@ import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
-import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Random "mo:base/Random";
 import Result "mo:base/Result";
@@ -27,11 +23,10 @@ import ExtCore "lib/ext/Core";
 import { TokenIndex } "lib/ext/Core";
 import Ref "reference";
 import T "types";
-import C "consts";
 import Env "env";
-import M "middleware";
+// import M "middleware";
 
-actor class ObsidianTearsBackend() = this {
+actor class _ObsidianTearsBackend() = this {
   // Types
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type TokenIndex = ExtCore.TokenIndex;
@@ -153,7 +148,7 @@ actor class ObsidianTearsBackend() = this {
   };
 
   // load game data formatted in json so that unity can load correctly
-  public shared ({ caller }) func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
+  public shared func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
     // TODO: improve with right caller
     // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
@@ -164,7 +159,7 @@ actor class ObsidianTearsBackend() = this {
   };
 
   // save game data formatted in json so that unity can load correctly
-  public shared ({ caller }) func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
+  public shared func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
     // TODO: improve with right caller
     // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
@@ -178,7 +173,6 @@ actor class ObsidianTearsBackend() = this {
     // TODO: improve with right caller
     // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
 
-    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     let optChest : ?Ref.TreasureChest = Array.find(
       Ref.chests,
       func(chest : Ref.TreasureChest) : Bool {
@@ -395,7 +389,7 @@ actor class ObsidianTearsBackend() = this {
   // -----------------------------------
   // http
   // -----------------------------------
-  public query func http_request(request : T.HttpRequest) : async T.HttpResponse {
+  public query func http_request(_request : T.HttpRequest) : async T.HttpResponse {
     let name = "Obsidian Tears RPG";
     return {
       status_code = 200;
@@ -663,7 +657,7 @@ actor class ObsidianTearsBackend() = this {
   // interaction with other canisters
   // -----------------------------------
   // character nft canister will need to call this when transfering a token and initiate transfers in item canister
-  public shared (msg) func getEquippedItems(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : async [TokenIndex] {
+  public shared func getEquippedItems(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : async [TokenIndex] {
     switch (_equippedItems.get(characterIndex)) {
       case (?equippedItems) {
         // get the item nft token indices for all equipped items
@@ -784,7 +778,7 @@ actor class ObsidianTearsBackend() = this {
           case _ return #Err(#Other "item definition doesn't exist");
         };
       } else {
-        let result = await _itemActor.mintItem(metadata, recipient);
+        await _itemActor.mintItem(metadata, recipient);
         return #Ok(metadata);
       };
     } catch (e) {

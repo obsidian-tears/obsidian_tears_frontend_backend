@@ -1,4 +1,3 @@
-import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import ExtCore "../../src/obsidian_tears_backend/lib/ext/Core";
 
@@ -17,7 +16,7 @@ actor class CharacterActor() {
     registryResponse := response;
   };
 
-  public query func tokens(aid : ExtCore.AccountIdentifier) : async TokensResponse {
+  public query func tokens(_aid : ExtCore.AccountIdentifier) : async TokensResponse {
     return tokensResponse;
   };
 

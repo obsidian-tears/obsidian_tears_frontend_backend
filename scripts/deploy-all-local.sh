@@ -13,8 +13,12 @@ dfx deploy
 cd ..
 cd obsidian_tears_hero_nft
 dfx deploy
-dfx canister call obsidian_tears_nft _mintAndTransferDevHero $(dfx identity get-principal)
-dfx canister call obsidian_tears_nft _mintAndTransferDevHero $(dfx identity get-principal)
+# mint dfx local account
+dfx canister call obsidian_tears_nft _mintAndTransferDevHero $(dfx ledger account-id)
+dfx canister call obsidian_tears_nft _mintAndTransferDevHero $(dfx ledger account-id)
+# mint tiago's stoic account
+dfx canister call obsidian_tears_nft _mintAndTransferDevHero a765d8880dfe17261497cfa6fef5d0a7cdd29272c45277b9ef07f72540d04e82
+dfx canister call obsidian_tears_nft _mintAndTransferDevHero a765d8880dfe17261497cfa6fef5d0a7cdd29272c45277b9ef07f72540d04e82
 cd ..
 cd obsidian_tears_items_nft
 dfx deploy

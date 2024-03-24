@@ -2,7 +2,6 @@ import HashMap "mo:base/HashMap";
 import Result "mo:base/Result";
 import ExtCore "../../src/obsidian_tears_backend/lib/ext/Core";
 import ExtCommon "../../src/obsidian_tears_backend/lib/ext/Common";
-import T "../../src/obsidian_tears_backend/types";
 
 actor class ItemActor() {
   public type RegistryResponse = [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)];
@@ -30,7 +29,7 @@ actor class ItemActor() {
     metadataResponse := response;
   };
 
-  public query func tokens(aid : ExtCore.AccountIdentifier) : async TokensResponse {
+  public query func tokens(_aid : ExtCore.AccountIdentifier) : async TokensResponse {
     return tokensResponse;
   };
 
@@ -43,7 +42,7 @@ actor class ItemActor() {
   let registry = HashMap.HashMap<ExtCore.TokenIndex, ExtCore.AccountIdentifier>(0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
   var nextTokenId : ExtCore.TokenIndex = 0;
 
-  public func mintItem(data : [Nat8], recipient : ExtCore.AccountIdentifier) : async () {
+  public func mintItem(_data : [Nat8], recipient : ExtCore.AccountIdentifier) : async () {
     registry.put(nextTokenId, recipient);
     nextTokenId += 1;
 

@@ -214,3 +214,19 @@ await suite(
     );
   },
 );
+await suite(
+  "#defeatMonster",
+  func() : async () {
+    await test(
+      "returns rewards from defeated monster",
+      func() : async () {
+        let monsterId : Nat16 = 1;
+        let response = await backendActor.defeatMonster(playerNftId, monsterId);
+        switch (response) {
+          case (#Ok(rewardInfo)) assert true;
+          case (#Err(message)) Debug.trap(debug_show (message));
+        };
+      },
+    );
+  },
+);

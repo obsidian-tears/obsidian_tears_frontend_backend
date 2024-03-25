@@ -187,3 +187,30 @@ await suite(
     );
   },
 );
+await suite(
+  "#equipItems",
+  func() : async () {
+    await test(
+      "equips item",
+      func() : async () {
+        // set registry on item actor
+        let potionRefId : Nat16 = 47;
+        let potionTokenIndex : Nat32 = 1;
+        let stubbedResponse : [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)] = [(potionTokenIndex, selfAddress)];
+        await itemActor.setRegistryResponse(stubbedResponse);
+
+        let stubbedMetadataResponse : [(ExtCore.TokenIndex, ExtCommon.Metadata)] = [(potionTokenIndex, #nonfungible({ metadata = ?Blob.fromArray([3, 2, 19, 0]) }))];
+        await itemActor.setMetadataResponse(stubbedMetadataResponse);
+
+        // update cache
+        await backendActor.adminUpdateRegistryCache();
+
+        let response = await backendActor.equipItems(playerNftId, [potionRefId]);
+        switch (response) {
+          case (#Ok()) assert true;
+          case (#Err(message)) Debug.trap(debug_show (message));
+        };
+      },
+    );
+  },
+);

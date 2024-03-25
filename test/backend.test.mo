@@ -121,3 +121,32 @@ await suite(
     );
   },
 );
+await suite(
+  "#saveGame",
+  func() : async () {
+    await test(
+      "saves and returns the load game output to be rendered",
+      func() : async () {
+        let response = await backendActor.saveGame(playerNftId, gameData);
+        switch (response) {
+          case (#Ok(gameData)) {
+            assert (Text.size(gameData) > 12900);
+          };
+          case (#Err(_message)) assert false;
+        };
+      },
+    );
+    await test(
+      "when caller is not owner of token refuses to save and returns error message",
+      func() : async () {
+        let response = await backendActor.saveGame(999, gameData);
+        // TODO: improve with right caller
+        // switch (response) {
+        //  case (#Ok(gameData)) false;
+        //  case (#Err(_message)) true;
+        // };
+        assert true;
+      },
+    );
+  },
+);

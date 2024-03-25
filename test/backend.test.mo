@@ -170,3 +170,20 @@ await suite(
     );
   },
 );
+await suite(
+  "#buyItem",
+  func() : async () {
+    await test(
+      "when item is in a valid shop, and has enough gold mints item",
+      func() : async () {
+        let potionItemId : Nat16 = 38;
+        let qty = 1;
+        let response = await backendActor.buyItem(playerNftId, shopId, qty, potionItemId);
+        switch (response) {
+          case (#Ok()) assert true;
+          case (#Err(message)) Debug.trap(debug_show (message));
+        };
+      },
+    );
+  },
+);

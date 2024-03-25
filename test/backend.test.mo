@@ -91,3 +91,33 @@ await suite(
     );
   },
 );
+await suite(
+  "#loadGame",
+  func() : async () {
+    await test(
+      "when no game saved, returns error with message",
+      func() : async () {
+        let response = await backendActor.loadGame(playerNftId);
+        assert response == #Err(#Other("No save data"));
+      },
+    );
+    await test(
+      "when game saved, returns game successfully",
+      func() : async () {
+        // before
+        ignore await backendActor.saveGame(playerNftId, gameData);
+
+        // assert
+        let response = await backendActor.loadGame(playerNftId);
+
+        // after
+        ignore await backendActor.saveGame(playerNftId, "");
+
+        switch (response) {
+          case (#Ok(gameData)) assert (Text.size(gameData) > 12900);
+          case (#Err(_message)) assert false;
+        };
+      },
+    );
+  },
+);

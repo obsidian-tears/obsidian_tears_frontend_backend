@@ -8,7 +8,10 @@ import Nat32 "mo:base/Nat32";
 
 import {
   test;
-} "mo:test";
+  suite;
+  expect;
+  skip;
+} "mo:test/async";
 
 import Main "../src/obsidian_tears_backend/main";
 import T "../src/obsidian_tears_backend/types";
@@ -51,3 +54,40 @@ var gameData : Text = GameJsonFactory.defaultGameJson;
 var chestId : Nat16 = 35;
 var itemId : Nat16 = 35;
 var shopId : Nat16 = 0;
+
+await suite(
+  "#verify",
+  func() : async () {
+    await test(
+      "should return list of NFTs owned",
+      func() : async () {
+        let response = await backendActor.verify();
+        assert response == #Ok([1, 2, 3, 4]);
+      },
+    );
+    await test(
+      "should update registery cache of Characters owned",
+      func() : async () {
+        let ownerId = await backendActor.specGetCharacterOwner(playerNftId);
+        switch (ownerId) {
+          case (#ok(ownerId)) {
+            assert (ownerId == selfAddress);
+          };
+          case (#err(_message)) assert false;
+        };
+      },
+    );
+    await test(
+      "should update registry cache of Items owned",
+      func() : async () {
+        let ownerId = await backendActor.specGetItemOwner(itemNftIndex);
+        switch (ownerId) {
+          case (#ok(ownerId)) {
+            assert (ownerId == selfAddress);
+          };
+          case (#err(_message)) assert false;
+        };
+      },
+    );
+  },
+);

@@ -150,3 +150,23 @@ await suite(
     );
   },
 );
+await suite(
+  "#openChest",
+  func() : async () {
+    await test(
+      "mints items and adds gold",
+      func() : async () {
+        let expectedRewardInfo : T.RewardInfo = {
+          itemIds = ["4290235510"];
+          gold = 20;
+          xp = 0;
+        };
+        let response = await backendActor.openChest(playerNftId, chestId);
+        switch (response) {
+          case (#Ok(rewardInfo)) assert (rewardInfo == expectedRewardInfo);
+          case (#Err(_message)) assert false;
+        };
+      },
+    );
+  },
+);

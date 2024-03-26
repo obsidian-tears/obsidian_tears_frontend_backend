@@ -19,10 +19,25 @@ These canisters interact with several other canisters, including the obsidian te
 
 Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
 
-# How to solve the Psychadelic Package token issue (on npm install)
+# How to solve the Psychedelic Package token issue (on npm install)
 Go to this section and follow instructions: https://github.com/Psychedelic/plug-connect?tab=readme-ov-file
 
-# generic IC instructions
+# Order of creation on local network
+
+NOTE: if you hold all 4 of these repos on a parent folder (like obsidian), you can go to OT Frontend & Backend and run "npm run local" script.
+
+The IC is deterministic, so if the order of canisters created on a network (after `dfx start --clean`) is the same, it will end up with the same canister IDs.
+
+The order is:
+
+1. OT Frontend & Backend (bd3sg-teaaa-aaaaa-qaaba-cai, bkyz2-fmaaa-aaaaa-qaaaq-cai);
+2. OT Hero NFT (br5f7-7uaaa-aaaaa-qaaca-cai);
+3. OT Items NFT (b77ix-eeaaa-aaaaa-qaada-cai);
+4. OT Game -> Webserver (avqkn-guaaa-aaaaa-qaaea-cai);
+
+-----
+
+# Generic IC instructions
 
 Welcome to your new obsidian_tears project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
 
@@ -65,16 +80,3 @@ npm start
 ```
 
 Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 8000.
-
-# Order of creation on local network
-
-NOTE: if you hold all 4 of these repos on a parent folder (like obsidian), you can go to OT Frontend & Backend and run "npm run local" script.
-
-The IC is deterministic, so if the order of canisters created on a network (after `dfx start --clean`) is the same, it will end up with the same canister IDs.
-
-The order is:
-
-1. OT Frontend & Backend (bd3sg-teaaa-aaaaa-qaaba-cai, bkyz2-fmaaa-aaaaa-qaaaq-cai);
-2. OT Hero NFT (br5f7-7uaaa-aaaaa-qaaca-cai);
-3. OT Items NFT (b77ix-eeaaa-aaaaa-qaada-cai);
-4. OT Game -> Webserver (avqkn-guaaa-aaaaa-qaaea-cai);

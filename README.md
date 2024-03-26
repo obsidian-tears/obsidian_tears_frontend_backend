@@ -19,6 +19,9 @@ These canisters interact with several other canisters, including the obsidian te
 
 Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
 
+# How to solve the Psychadelic Package token issue (on npm install)
+Go to this section and follow instructions: https://github.com/Psychedelic/plug-connect?tab=readme-ov-file
+
 # generic IC instructions
 
 Welcome to your new obsidian_tears project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.

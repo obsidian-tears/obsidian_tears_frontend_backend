@@ -20,7 +20,6 @@
     "generate": "dfx generate obsidian_tears_backend",
     "prettier:check": "npx prettier --check .",
     "format": "npx prettier --write .",
-    "test_old": "mo-test --testmode interpreter --verbose",
     "test": "mops test --mode interpreter --reporter verbose"
   },
   "devDependencies": {

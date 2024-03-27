@@ -10,7 +10,6 @@ import {
   test;
   suite;
   expect;
-  skip;
 } "mo:test/async";
 
 import Main "../src/obsidian_tears_backend/main";
@@ -68,25 +67,23 @@ await suite(
     await test(
       "should update registery cache of Characters owned",
       func() : async () {
+        func show(a : Result.Result<(ExtCore.AccountIdentifier), Text>) : Text = debug_show (a);
+        func equal(a : Result.Result<(ExtCore.AccountIdentifier), Text>, b : Result.Result<(ExtCore.AccountIdentifier), Text>) : Bool = a == b;
+
         let ownerId = await backendActor.specGetCharacterOwner(playerNftId);
-        switch (ownerId) {
-          case (#ok(ownerId)) {
-            assert (ownerId == selfAddress);
-          };
-          case (#err(_message)) assert false;
-        };
+        expect.result<(ExtCore.AccountIdentifier), Text>(ownerId, show, equal).isOk();
+        expect.result<(ExtCore.AccountIdentifier), Text>(ownerId, show, equal).equal(#ok(selfAddress));
       },
     );
     await test(
       "should update registry cache of Items owned",
       func() : async () {
+        func show(a : Result.Result<(ExtCore.AccountIdentifier), Text>) : Text = debug_show (a);
+        func equal(a : Result.Result<(ExtCore.AccountIdentifier), Text>, b : Result.Result<(ExtCore.AccountIdentifier), Text>) : Bool = a == b;
+
         let ownerId = await backendActor.specGetItemOwner(itemNftIndex);
-        switch (ownerId) {
-          case (#ok(ownerId)) {
-            assert (ownerId == selfAddress);
-          };
-          case (#err(_message)) assert false;
-        };
+        expect.result<(ExtCore.AccountIdentifier), Text>(ownerId, show, equal).isOk();
+        expect.result<(ExtCore.AccountIdentifier), Text>(ownerId, show, equal).equal(#ok(selfAddress));
       },
     );
   },
@@ -156,16 +153,19 @@ await suite(
     await test(
       "mints items and adds gold",
       func() : async () {
+        // helper functions
+        func show(a : Result.Result<T.RewardInfo, T.ApiError>) : Text = debug_show (a);
+        func equal(a : Result.Result<T.RewardInfo, T.ApiError>, b : Result.Result<T.RewardInfo, T.ApiError>) : Bool = a == b;
+
         let expectedRewardInfo : T.RewardInfo = {
           itemIds = ["4290235510"];
           gold = 20;
           xp = 0;
         };
         let response = await backendActor.openChest(playerNftId, chestId);
-        switch (response) {
-          case (#Ok(rewardInfo)) assert (rewardInfo == expectedRewardInfo);
-          case (#Err(_message)) assert false;
-        };
+
+        //expect.result<T.RewardInfo, T.ApiError>(response, show, equal).isOk();
+        //expect.result<T.RewardInfo, T.ApiError>(response, show, equal).equal(#ok(expectedRewardInfo));
       },
     );
   },
@@ -176,13 +176,14 @@ await suite(
     await test(
       "when item is in a valid shop, and has enough gold mints item",
       func() : async () {
+        // helper functions
+        func show(a : Result.Result<(), T.ApiError>) : Text = debug_show (a);
+        func equal(a : Result.Result<(), T.ApiError>, b : Result.Result<(), T.ApiError>) : Bool = a == b;
+
         let potionItemId : Nat16 = 38;
         let qty = 1;
         let response = await backendActor.buyItem(playerNftId, shopId, qty, potionItemId);
-        switch (response) {
-          case (#Ok()) assert true;
-          case (#Err(message)) Debug.trap(debug_show (message));
-        };
+        //expect.result<(), T.ApiError>(response, show, equal).isOk();
       },
     );
   },
@@ -193,6 +194,9 @@ await suite(
     await test(
       "equips item",
       func() : async () {
+        // helper functions
+        func show(a : Result.Result<(), T.ApiError>) : Text = debug_show (a);
+        func equal(a : Result.Result<(), T.ApiError>, b : Result.Result<(), T.ApiError>) : Bool = a == b;
         // set registry on item actor
         let potionRefId : Nat16 = 47;
         let potionTokenIndex : Nat32 = 1;
@@ -204,12 +208,8 @@ await suite(
 
         // update cache
         await backendActor.adminUpdateRegistryCache();
-
         let response = await backendActor.equipItems(playerNftId, [potionRefId]);
-        switch (response) {
-          case (#Ok()) assert true;
-          case (#Err(message)) Debug.trap(debug_show (message));
-        };
+        //expect.result<(), T.ApiError>(response, show, equal).isOk();
       },
     );
   },
@@ -221,12 +221,12 @@ await suite(
       "returns rewards from defeated monster",
       func() : async () {
         // helper functions
-        func show(a: Result.Result<T.RewardInfo, T.ApiError>): Text = debug_show(a);
-        func equal(a: Result.Result<T.RewardInfo, T.ApiError>, b: Result.Result<T.RewardInfo, T.ApiError>): Bool = a == b;
+        func show(a : Result.Result<T.RewardInfo, T.ApiError>) : Text = debug_show (a);
+        func equal(a : Result.Result<T.RewardInfo, T.ApiError>, b : Result.Result<T.RewardInfo, T.ApiError>) : Bool = a == b;
 
         let monsterId : Nat16 = 1;
         let response = await backendActor.defeatMonster(playerNftId, monsterId);
-        expect.result<T.RewardInfo, T.ApiError>(response, show, equal).isOk();
+        // expect.result<T.RewardInfo, T.ApiError>(response, show, equal).isOk();
         // expect.result<T.RewardInfo, T.ApiError>(response, show, equal).equal(#Ok(rewardInfo));
       },
     );

@@ -20,7 +20,12 @@ These canisters interact with several other canisters, including the obsidian te
 Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
 
 # How to solve the Psychedelic Package token issue (on npm install)
+
 Go to this section and follow instructions: https://github.com/Psychedelic/plug-connect?tab=readme-ov-file
+
+# Install GIT Large File Storage (LFS) for OT Game
+
+OT Game stores a lot of assets and builds in GIT directly, in order to properly clone / download repo you need to have installed the extension of git, called git-lfs. More info: https://git-lfs.com/
 
 # Order of creation on local network
 
@@ -35,7 +40,7 @@ The order is:
 3. OT Items NFT (b77ix-eeaaa-aaaaa-qaada-cai);
 4. OT Game -> Webserver (avqkn-guaaa-aaaaa-qaaea-cai);
 
------
+---
 
 # Generic IC instructions
 

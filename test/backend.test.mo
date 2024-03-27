@@ -220,12 +220,14 @@ await suite(
     await test(
       "returns rewards from defeated monster",
       func() : async () {
+        // helper functions
+        func show(a: Result.Result<T.RewardInfo, T.ApiError>): Text = debug_show(a);
+        func equal(a: Result.Result<T.RewardInfo, T.ApiError>, b: Result.Result<T.RewardInfo, T.ApiError>): Bool = a == b;
+
         let monsterId : Nat16 = 1;
         let response = await backendActor.defeatMonster(playerNftId, monsterId);
-        switch (response) {
-          case (#Ok(rewardInfo)) assert true;
-          case (#Err(message)) Debug.trap(debug_show (message));
-        };
+        expect.result<T.RewardInfo, T.ApiError>(response, show, equal).isOk();
+        // expect.result<T.RewardInfo, T.ApiError>(response, show, equal).equal(#Ok(rewardInfo));
       },
     );
   },

@@ -1,5 +1,4 @@
 import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
@@ -202,34 +201,6 @@ actor class _ObsidianTearsBackend() = this {
         #Ok(rewardInfo);
       };
       case _ return #Err(#Other("Server Error: Chest Definition Missing"));
-    };
-  };
-
-  func _unequipItem(itemIndex : Nat16, characterIndex : TokenIndex) : () {
-    let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
-    switch (optEquippedItems) {
-      case (?equippedItems) {
-        // take out one item that matches index.
-        let optFoundItem : ?Nat16 = Array.find(
-          equippedItems,
-          func(item : Nat16) : Bool {
-            item == itemIndex;
-          },
-        );
-        switch (optFoundItem) {
-          case (?foundItem) {
-            let newEquippedItems : [Nat16] = Array.filter(
-              equippedItems,
-              func(item : Nat16) : Bool {
-                item != itemIndex;
-              },
-            );
-            _equippedItems.put(characterIndex, newEquippedItems);
-          };
-          case _ {};
-        };
-      };
-      case _ {};
     };
   };
 
@@ -557,7 +528,9 @@ actor class _ObsidianTearsBackend() = this {
   // management
   // -----------------------------------
 
-  public func adminUpdateRegistryCache() : async () {
+  public shared ({ caller }) func adminUpdateRegistryCache() : async () {
+    assert Env.isAdmin(caller);
+
     await getCharacterRegistry();
     await getItemRegistry();
     await getItemMetadata();

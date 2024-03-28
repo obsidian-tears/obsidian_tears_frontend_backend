@@ -118,6 +118,7 @@ actor class _ObsidianTearsBackend() = this {
   // user interaction with this canister
   // -----------------------------------
 
+  // TODO: remove once frontend is updated
   // check if user owns character NFT. return owned NFT data
   public shared ({ caller }) func verify() : async (T.ApiResponse<[TokenIndex]>) {
     canistergeekMonitor.collectMetrics();
@@ -656,99 +657,6 @@ actor class _ObsidianTearsBackend() = this {
   // -----------------------------------
   // interaction with other canisters
   // -----------------------------------
-  // character nft canister will need to call this when transfering a token and initiate transfers in item canister
-  public shared func getEquippedItems(characterIndex : TokenIndex, accountIdentifier : AccountIdentifier) : async [TokenIndex] {
-    switch (_equippedItems.get(characterIndex)) {
-      case (?equippedItems) {
-        // get the item nft token indices for all equipped items
-        let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
-        switch (optEquippedItems) {
-          case (?equippedItems) {
-            let optOwnedItems : [TokenIndex] = Iter.toArray(
-              HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
-                _itemRegistry,
-                TokenIndex.equal,
-                TokenIndex.hash,
-                func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
-                  if (account == accountIdentifier) {
-                    return ?index;
-                  };
-                  return null;
-                },
-              ).keys()
-            );
-            switch (optOwnedItems) {
-              case (ownedItems) {
-                // make sure metadata that identifies what the item is (see item nft canister)
-                let ownedItemsMeta : [{
-                  index : TokenIndex;
-                  data : Metadata;
-                }] = Array.map<TokenIndex, { index : TokenIndex; data : Metadata }>(
-                  ownedItems,
-                  func(tokenIndex : TokenIndex) : {
-                    index : TokenIndex;
-                    data : Metadata;
-                  } {
-                    let optMetadata : ?Metadata = _itemMetadata.get(tokenIndex);
-                    switch (optMetadata) {
-                      case (?metadata) return {
-                        index = tokenIndex;
-                        data = metadata;
-                      };
-                      case _ return {
-                        index = 0;
-                        data = #nonfungible({
-                          metadata = ?Blob.fromArray([]);
-                        });
-                      };
-                    };
-                  },
-                );
-                let ownedItemObjs : [Ref.Item] = getOwnedItems(accountIdentifier, characterIndex);
-                let equippedIndices : [TokenIndex] = Array.mapFilter<Nat16, TokenIndex>(
-                  equippedItems,
-                  func(id : Nat16) : ?TokenIndex {
-                    // get the owned item object corresponding to the equipped item id
-                    let optOwnedItemObj : ?Ref.Item = Array.find(
-                      ownedItemObjs,
-                      func(item : Ref.Item) : Bool {
-                        item.id == id;
-                      },
-                    );
-                    switch (optOwnedItemObj) {
-                      case (?ownedItemObj) {
-                        // compare ownedItem object to the owned item meta mapping. return tokenindex
-                        let optFoundItemMeta : ?{
-                          index : TokenIndex;
-                          data : Metadata;
-                        } = Array.find(
-                          ownedItemsMeta,
-                          func(ownedItemMeta : { index : TokenIndex; data : Metadata }) : Bool {
-                            compareMetadata(ownedItemObj.metadata, ownedItemMeta.data);
-                          },
-                        );
-                        switch (optFoundItemMeta) {
-                          case (?foundItemMeta) {
-                            // reeturn the tokenidnex
-                            ?foundItemMeta.index;
-                          };
-                          case _ null;
-                        };
-                      };
-                      case _ null;
-                    };
-                  },
-                );
-                equippedIndices;
-              };
-            };
-          };
-          case _ [];
-        };
-      };
-      case _ [];
-    };
-  };
 
   func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async T.ApiResponse<[Nat8]> {
     // get item metadata

@@ -20,7 +20,7 @@
     "generate": "dfx generate obsidian_tears_backend",
     "prettier:check": "npx prettier --check .",
     "format": "npx prettier --write .",
-    "test": "mops test --mode interpreter --reporter verbose"
+    "test": "mops test"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
@@ -33,7 +33,6 @@
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.3",
     "ic-stoic-identity": "^2.0.0",
-    "mo-dev": "^0.7.1",
     "prettier": "^2.8.1",
     "prettier-plugin-motoko": "^0.5.2",
     "process": "^0.11.10",

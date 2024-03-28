@@ -19,12 +19,26 @@ These canisters interact with several other canisters, including the obsidian te
 
 Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
 
-# How to solve the Psychedelic Package token issue (on npm install)
-Go to this section and follow instructions: https://github.com/Psychedelic/plug-connect?tab=readme-ov-file
+# Local Setup
 
-# Order of creation on local network
+- create a "parent" folder (like "obsidian")
+- install git-lfs (see section below)
+- git clone all 4 repos (see list below)
+- on this repo, solve the Psychadelic Package issue (see section below)
+- npm install & mops install on all that need
+- on all env.mo files, add your dfx principal to the Admins array
+- on this repo, scripts/deploy-all-local.sh file, add your account to the hero nft mint
+- on this repo, do "npm run local"
 
-NOTE: if you hold all 4 of these repos on a parent folder (like obsidian), you can go to OT Frontend & Backend and run "npm run local" script.
+## Install GIT Large File Storage (LFS) for OT Game
+
+OT Game stores a lot of assets and builds in GIT directly, in order to properly clone / download repo you need to have installed the extension of git, called git-lfs. More info: https://git-lfs.com/
+
+## How to solve the Psychedelic Package token issue
+
+`npm install` won't work until you generate an access token to github. Go to this section and follow instructions: https://github.com/Psychedelic/plug-connect?tab=readme-ov-file
+
+## Order of creation on local network
 
 The IC is deterministic, so if the order of canisters created on a network (after `dfx start --clean`) is the same, it will end up with the same canister IDs.
 
@@ -35,7 +49,7 @@ The order is:
 3. OT Items NFT (b77ix-eeaaa-aaaaa-qaada-cai);
 4. OT Game -> Webserver (avqkn-guaaa-aaaaa-qaaea-cai);
 
------
+---
 
 # Generic IC instructions
 
@@ -65,13 +79,13 @@ If you want to test your project locally, you can use the following commands:
 
 ```bash
 # Starts the replica, running in the background
-dfx start --background
+dfx start
 
 # Deploys your canisters to the replica and generates your candid interface
 dfx deploy
 ```
 
-Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
+Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
 
 Additionally, if you are making frontend changes, you can start a development server with
 
@@ -79,4 +93,4 @@ Additionally, if you are making frontend changes, you can start a development se
 npm start
 ```
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 8000.
+Which will start a server at `http://localhost:4943`, proxying API requests to the replica at port 4943.

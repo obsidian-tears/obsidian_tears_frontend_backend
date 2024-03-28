@@ -51,7 +51,6 @@ var playerNftId : Nat32 = 2;
 var itemNftIndex : Nat32 = 5;
 var gameData : Text = GameJsonFactory.defaultGameJson;
 var chestId : Nat16 = 35;
-var shopId : Nat16 = 0;
 
 await suite(
   "#verify",
@@ -159,49 +158,6 @@ await suite(
         switch (response) {
           case (#Ok(rewardInfo)) assert (rewardInfo == expectedRewardInfo);
           case (#Err(_message)) assert false;
-        };
-      },
-    );
-  },
-);
-await suite(
-  "#buyItem",
-  func() : async () {
-    await test(
-      "when item is in a valid shop, and has enough gold mints item",
-      func() : async () {
-        let potionItemId : Nat16 = 38;
-        let qty = 1;
-        let response = await backendActor.buyItem(playerNftId, shopId, qty, potionItemId);
-        switch (response) {
-          case (#Ok()) assert true;
-          case (#Err(message)) Debug.trap(debug_show (message));
-        };
-      },
-    );
-  },
-);
-await suite(
-  "#equipItems",
-  func() : async () {
-    await test(
-      "equips item",
-      func() : async () {
-        // set registry on item actor
-        let potionRefId : Nat16 = 47;
-        let potionTokenIndex : Nat32 = 1;
-        let stubbedResponse : [(ExtCore.TokenIndex, ExtCore.AccountIdentifier)] = [(potionTokenIndex, selfAddress)];
-        await itemActor.setRegistryResponse(stubbedResponse);
-
-        let stubbedMetadataResponse : [(ExtCore.TokenIndex, ExtCommon.Metadata)] = [(potionTokenIndex, #nonfungible({ metadata = ?Blob.fromArray([3, 2, 19, 0]) }))];
-        await itemActor.setMetadataResponse(stubbedMetadataResponse);
-
-        // update cache
-        await backendActor.adminUpdateRegistryCache();
-        let response = await backendActor.equipItems(playerNftId, [potionRefId]);
-        switch (response) {
-          case (#Ok()) assert true;
-          case (#Err(message)) Debug.trap(debug_show (message));
         };
       },
     );

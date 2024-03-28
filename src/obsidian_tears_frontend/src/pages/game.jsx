@@ -60,27 +60,8 @@ const Game = (props) => {
       addEventListener(
         "BuyItem",
         async function (shopIndex, itemIndex, qty, objectName) {
-          let result = await props.gameActorRef.current.buyItem(
-            props.selectedNftIndexRef.current,
-            shopIndex,
-            qty,
-            itemIndex
-          );
-          //todo: check result, take action on error
-          if (result["Ok"]) {
-            window.buyItemData = result["Ok"];
-            // bought items are given in game
-          }
-          if (result["Err"]) {
-            // TODO send message to display unity error
-            window.buyItemData = result["Err"];
-            sendMessage(
-              objectName,
-              "DisplayError",
-              JSON.stringify(result["Err"])
-            );
-            console.log("Error in LoadGame");
-          }
+          // TODO: please remove once Unity has removed it
+          console.log("Frontend - Event BuyItem deprecated");
         }
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
@@ -109,20 +90,8 @@ const Game = (props) => {
         //todo: check result, take action on error, put the item in the game on success
       });
       addEventListener("EquipItems", async function (itemIndices, objectName) {
-        let result = await props.gameActorRef.current.equipItems(
-          props.selectedNftIndexRef.current,
-          itemIndices
-        );
-        //todo: check result, take action on error
-        if (result["Ok"]) {
-          window.equipdata = result["Ok"];
-        }
-        if (result["Err"]) {
-          // TODO send message to display unity error
-          window.equipData = result["Err"];
-          sendMessage(objectName, "DisplayError", result["Err"]);
-          console.log("Error in LoadGame");
-        }
+        // TODO: please remove once Unity has removed it
+        console.log("Frontend - Event EquipItems deprecated");
       });
       addEventListener(
         "DefeatMonster",

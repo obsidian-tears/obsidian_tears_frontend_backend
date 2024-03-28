@@ -1,10 +1,8 @@
 import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
 import HashMap "mo:base/HashMap";
-import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
@@ -206,147 +204,6 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  public shared ({ caller }) func buyItem(characterIndex : TokenIndex, shopIndex : Nat16, qty : Int, itemIndex : Nat16) : async (T.ApiResponse<()>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
-
-    // check that the item exists in a valid shop inventory
-    let shopContainer : ?Ref.Market = Array.find(
-      Ref.markets,
-      func(market : Ref.Market) : Bool {
-        return market.id == shopIndex;
-      },
-    );
-    var goldCost : Nat32 = 0;
-    switch (shopContainer) {
-      case (?shop) {
-        let containedItem : ?Ref.ItemListing = Array.find(
-          shop.items,
-          func(item : Ref.ItemListing) : Bool {
-            goldCost := item.cost;
-            return item.id == itemIndex;
-          },
-        );
-        if (containedItem == null) {
-          return #Err(#Other "item does not exist for shop");
-        };
-      };
-      case _ return #Err(#Other "error retrieving shop data");
-    };
-    // check that player has enough gold
-    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-    let optCurrGold : ?Nat32 = _gold.get(address);
-    switch (optCurrGold) {
-      case (?currGold) {
-        if (currGold < goldCost) {
-          return #Err(#Other "not enough gold to purchase item");
-        };
-        ignore (_giveGold(goldCost, caller, false));
-      };
-      case _ return #Err(#Other "not enough gold to purchase item");
-    };
-    for (i in Iter.range(1, qty)) {
-      ignore (await mintItem(itemIndex, address, characterIndex));
-    };
-    return #Ok;
-  };
-
-  func _unequipItem(itemIndex : Nat16, characterIndex : TokenIndex) : () {
-    let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
-    switch (optEquippedItems) {
-      case (?equippedItems) {
-        // take out one item that matches index.
-        let optFoundItem : ?Nat16 = Array.find(
-          equippedItems,
-          func(item : Nat16) : Bool {
-            item == itemIndex;
-          },
-        );
-        switch (optFoundItem) {
-          case (?foundItem) {
-            let newEquippedItems : [Nat16] = Array.filter(
-              equippedItems,
-              func(item : Nat16) : Bool {
-                item != itemIndex;
-              },
-            );
-            _equippedItems.put(characterIndex, newEquippedItems);
-          };
-          case _ {};
-        };
-      };
-      case _ {};
-    };
-  };
-
-  public shared ({ caller }) func equipItems(characterIndex : TokenIndex, itemIndices : [Nat16]) : async (T.ApiResponse<()>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
-
-    // make sure that caller owns all items;
-    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
-    // get player owned game items
-    let ownedItems = getOwnedItems(address, characterIndex);
-    // get player equipped game items
-    let optEquippedItems : ?[Nat16] = _equippedItems.get(characterIndex);
-
-    // check all item definitions
-    for (itemIndex in itemIndices.vals()) {
-      let optItem : ?Ref.Item = Array.find(
-        Ref.items,
-        func(item : Ref.Item) : Bool {
-          return item.id == itemIndex;
-        },
-      );
-      if (optItem == null) return #Err(#Other("Server Error: Item Definition Missing"));
-    };
-
-    // equip items
-    let equippedItems : [Nat16] = switch (optEquippedItems) {
-      case (?equippedItems) { equippedItems };
-      case (_) { [] };
-    };
-
-    for (itemIndex in itemIndices.vals()) {
-      // get item details
-      let optItem : ?Ref.Item = Array.find(
-        Ref.items,
-        func(item : Ref.Item) : Bool {
-          return item.id == itemIndex;
-        },
-      );
-      switch (optItem) {
-        case (?itemToEquip) {
-          // make sure item isn't already equipped
-          let equippedMatchingItems : [Nat16] = Array.filter(
-            equippedItems,
-            func(eItem : Nat16) : Bool {
-              eItem == itemToEquip.id;
-            },
-          );
-          if (equippedMatchingItems.size() > 0) {
-            return #Err(#Other("Cannot equip more than one of the same item"));
-          };
-          // make sure they own unequipped item
-          let unequippedMatchingItem : [Ref.Item] = Array.filter(
-            ownedItems,
-            func(item : Ref.Item) : Bool {
-              item.id == itemToEquip.id;
-            },
-          );
-          if (unequippedMatchingItem.size() == 0) {
-            return #Err(#Other("Cannot equip item not owned by user"));
-          };
-        };
-        case _ {}; // unreacheable
-      };
-    };
-
-    // equip items
-    _equippedItems.put(characterIndex, _appendAll(equippedItems, itemIndices));
-    #Ok;
-  };
-
   // when you defeat a monster.... can win gold, xp, and items
   public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
     // TODO: improve with right caller
@@ -404,77 +261,6 @@ actor class _ObsidianTearsBackend() = this {
   // -----------------------------------
   // helper functions
   // -----------------------------------
-  // compare metadata and a [Nat8]
-  func compareMetadata(arrData : [Nat8], metadata : Metadata) : Bool {
-    switch (metadata) {
-      case (#nonfungible r) {
-        switch (r.metadata) {
-          case (?data) {
-            data == Blob.fromArray(arrData);
-          };
-          case _ false;
-        };
-      };
-      case _ false;
-    };
-  };
-
-  func getOwnedItems(accountIdentifier : AccountIdentifier, characterIndex : TokenIndex) : [Ref.Item] {
-    // filter all item nfts owned by character
-    let ownedItems : [TokenIndex] = Iter.toArray(
-      HashMap.mapFilter<TokenIndex, AccountIdentifier, TokenIndex>(
-        _itemRegistry,
-        TokenIndex.equal,
-        TokenIndex.hash,
-        func(index : TokenIndex, account : AccountIdentifier) : ?TokenIndex {
-          if (account == accountIdentifier) {
-            return ?index;
-          };
-          null;
-        },
-      ).keys()
-    );
-    // make sure metadata that identifies what the item is (see item nft canister)
-    let ownedItemsMeta : [Metadata] = Array.mapFilter<TokenIndex, Metadata>(
-      ownedItems,
-      func(tokenIndex : TokenIndex) : ?Metadata {
-        _itemMetadata.get(tokenIndex);
-      },
-    );
-    // matches corresponding metadata in item list
-    var gameItems : [Ref.Item] = Array.mapFilter<Metadata, Ref.Item>(
-      ownedItemsMeta,
-      func(metadata : Metadata) : ?Ref.Item {
-        Array.find(
-          Ref.items,
-          func(i : Ref.Item) : Bool {
-            compareMetadata(i.metadata, metadata);
-          },
-        );
-      },
-    );
-
-    let optNonNftItems : ?[Nat16] = _ownedNonNftItems.get(characterIndex);
-    switch (optNonNftItems) {
-      case (?nonNftItems) {
-        let newItems : [Ref.Item] = Array.mapFilter<Nat16, Ref.Item>(
-          nonNftItems,
-          func(index : Nat16) : ?Ref.Item {
-            Array.find(
-              Ref.items,
-              func(i : Ref.Item) : Bool {
-                i.id == index;
-              },
-            );
-          },
-        );
-        gameItems := _appendAll(gameItems, newItems);
-      };
-      case _ {};
-    };
-
-    gameItems;
-  };
 
   func _append<T>(array : [T], val : T) : [T] {
     let new = Array.tabulate<T>(
@@ -657,7 +443,8 @@ actor class _ObsidianTearsBackend() = this {
   // interaction with other canisters
   // -----------------------------------
 
-  func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async T.ApiResponse<[Nat8]> {
+  // TODO: refactor call
+  public func mintItem(itemId : Nat16, recipient : AccountIdentifier, characterIndex : TokenIndex) : async T.ApiResponse<[Nat8]> {
     // get item metadata
     let itemContainer : ?Ref.Item = Array.find(
       Ref.items,
@@ -741,7 +528,9 @@ actor class _ObsidianTearsBackend() = this {
   // management
   // -----------------------------------
 
-  public func adminUpdateRegistryCache() : async () {
+  public shared ({ caller }) func adminUpdateRegistryCache() : async () {
+    assert Env.isAdmin(caller);
+
     await getCharacterRegistry();
     await getItemRegistry();
     await getItemMetadata();

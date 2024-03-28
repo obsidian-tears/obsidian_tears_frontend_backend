@@ -16,8 +16,8 @@ import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
 
 import Env "env";
-import ExtCommon "lib/ext/Common";
-import ExtCore "lib/ext/Core";
+import EC "lib/ext/Common";
+import ER "lib/ext/Core";
 import { TokenIndex } "lib/ext/Core";
 import AID "lib/util/AccountIdentifier";
 import Ref "reference";
@@ -26,10 +26,10 @@ import T "types";
 
 actor class _ObsidianTearsBackend() = this {
   // Types
-  type AccountIdentifier = ExtCore.AccountIdentifier;
-  type TokenIndex = ExtCore.TokenIndex;
-  type CommonError = ExtCore.CommonError;
-  type Metadata = ExtCommon.Metadata;
+  type AccountIdentifier = ER.AccountIdentifier;
+  type TokenIndex = ER.TokenIndex;
+  type CommonError = ER.CommonError;
+  type Metadata = EC.Metadata;
 
   stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
 
@@ -545,7 +545,7 @@ actor class _ObsidianTearsBackend() = this {
     #ok;
   };
 
-  public query func specGetCharacterOwner(characterIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+  public query func specGetCharacterOwner(characterIndex : ER.TokenIndex) : async Result.Result<(ER.AccountIdentifier), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
     let ownerId = _characterRegistry.get(characterIndex);
@@ -555,7 +555,7 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  public query func specGetItemOwner(itemIndex : ExtCore.TokenIndex) : async Result.Result<(ExtCore.AccountIdentifier), Text> {
+  public query func specGetItemOwner(itemIndex : ER.TokenIndex) : async Result.Result<(ER.AccountIdentifier), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
     let ownerId = _itemRegistry.get(itemIndex);

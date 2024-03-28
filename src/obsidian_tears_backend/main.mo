@@ -46,19 +46,16 @@ actor class _ObsidianTearsBackend() = this {
   stable var _characterRegistryState : [(TokenIndex, AccountIdentifier)] = [];
   stable var _itemMetadataState : [(TokenIndex, Metadata)] = [];
   stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
-  stable var _equippedItemsState : [(TokenIndex, [Nat16])] = [];
   stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
-  stable var _completedEventsState : [(TokenIndex, [Nat16])] = []; // which plot events and chests have been completed
-  stable var _playerDataState : [(TokenIndex, T.PlayerData)] = [];
   stable var _goldState : [(AccountIdentifier, Nat32)] = [];
 
   // Dynamic
   var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _equippedItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_equippedItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _ownedNonNftItems : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_ownedNonNftItemsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _completedEvents : HashMap.HashMap<TokenIndex, [Nat16]> = HashMap.fromIter(_completedEventsState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _playerData : HashMap.HashMap<TokenIndex, T.PlayerData> = HashMap.fromIter(_playerDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _gold : HashMap.HashMap<AccountIdentifier, Nat32> = HashMap.fromIter(_goldState.vals(), 0, AID.equal, AID.hash);
+  var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+  var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -70,38 +67,14 @@ actor class _ObsidianTearsBackend() = this {
   // TODO for each relevent event (eg. opening a chest at the end of a sidequest) have a list of story events that must be completed to open chest.
   // TODO keep track of opened chests for each character
 
-  var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-  var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-
   // system functions
   system func preupgrade() {
-    _saveDataState := Iter.toArray(_saveData.entries());
-    _characterRegistryState := Iter.toArray(_characterRegistry.entries());
-    _itemRegistryState := Iter.toArray(_itemRegistry.entries());
-    _itemMetadataState := Iter.toArray(_itemMetadata.entries());
-    _equippedItemsState := Iter.toArray(_equippedItems.entries());
-    _ownedNonNftItemsState := Iter.toArray(_ownedNonNftItems.entries());
-    _completedEventsState := Iter.toArray(_completedEvents.entries());
-    _playerDataState := Iter.toArray(_playerData.entries());
-    _goldState := Iter.toArray(_gold.entries());
-
     // canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
     _canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
   };
 
   system func postupgrade() {
-    _saveDataState := [];
-    _characterRegistryState := [];
-    _itemRegistryState := [];
-    _itemMetadataState := [];
-    _equippedItemsState := [];
-    _ownedNonNftItemsState := [];
-    _completedEventsState := [];
-    _playerDataState := [];
-    _goldState := [];
-
     // canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
@@ -220,24 +193,15 @@ actor class _ObsidianTearsBackend() = this {
     switch (optMonster) {
       case (?monster) {
         // give player gold
-        switch (_playerData.get(characterIndex)) {
-          // TODO: give every player player data on start
-          // case(?playerData) {}
-          case (_) {
-            let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
-            let rewardInfo : T.RewardInfo = {
-              gold = _giveGold(monster.gold, caller, true);
-              xp = monster.xp;
-              itemIds = itemInfo.itemIds;
-            };
-            #Ok rewardInfo;
-          };
-          // case(_) {
-          // #Err(#Other("Server Error. Failed to find player data."));
-          // };
+        let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
+        let rewardInfo : T.RewardInfo = {
+          gold = _giveGold(monster.gold, caller, true);
+          xp = monster.xp;
+          itemIds = itemInfo.itemIds;
         };
+        #Ok rewardInfo;
       };
-      case _ {
+      case (_) {
         #Err(#Other("Server Error. Failed to find monster data."));
       };
     };

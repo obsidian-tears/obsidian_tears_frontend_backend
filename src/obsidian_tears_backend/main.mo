@@ -69,12 +69,26 @@ actor class _ObsidianTearsBackend() = this {
 
   // system functions
   system func preupgrade() {
+    _saveDataState := Iter.toArray(_saveData.entries());
+    _characterRegistryState := Iter.toArray(_characterRegistry.entries());
+    _itemRegistryState := Iter.toArray(_itemRegistry.entries());
+    _itemMetadataState := Iter.toArray(_itemMetadata.entries());
+    _ownedNonNftItemsState := Iter.toArray(_ownedNonNftItems.entries());
+    _goldState := Iter.toArray(_gold.entries());
+
     // canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
     _canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
   };
 
   system func postupgrade() {
+    _saveDataState := [];
+    _characterRegistryState := [];
+    _itemRegistryState := [];
+    _itemMetadataState := [];
+    _ownedNonNftItemsState := [];
+    _goldState := [];
+
     // canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;

@@ -1,8 +1,8 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
-import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
+import Cycles "mo:base/ExperimentalCycles";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
@@ -16,13 +16,13 @@ import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
 
-import AID "lib/util/AccountIdentifier";
+import Env "env";
 import ExtCommon "lib/ext/Common";
 import ExtCore "lib/ext/Core";
 import { TokenIndex } "lib/ext/Core";
+import AID "lib/util/AccountIdentifier";
 import Ref "reference";
 import T "types";
-import Env "env";
 // import M "middleware";
 
 actor class _ObsidianTearsBackend() = this {
@@ -35,7 +35,6 @@ actor class _ObsidianTearsBackend() = this {
   stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
 
   // Env
-  let _minter : Principal = Principal.fromText(Env.getAdminPrincipal());
   let _itemCanister : Text = Env.getItemCanisterId();
   let _characterCanister : Text = Env.getCharacterCanisterId();
 
@@ -282,7 +281,7 @@ actor class _ObsidianTearsBackend() = this {
       status_code = 200;
       headers = [("content-type", "text/plain")];
       body = Text.encodeUtf8(
-        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admin:                                    " # debug_show (_minter) # "\n"
+        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admins:                                    " # debug_show (Env.getAdminPrincipals()) # "\n"
       );
       streaming_strategy = null;
     };

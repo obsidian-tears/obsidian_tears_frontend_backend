@@ -20,6 +20,12 @@ jobs:
         run: npm run prettier:check
       - name: "audit"
         run: npm audit
+      - name: "install dfx"
+        # download and setup local moc by starting dfx once
+        run: |
+          sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          dfx start --background
+          dfx stop
       - name: "install mops packages"
         run: |
           npm i -g ic-mops

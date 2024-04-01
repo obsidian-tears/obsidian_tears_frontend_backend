@@ -151,6 +151,16 @@ await suite(
         };
       },
     );
+    await test(
+      "when caller does not own NFT, it is not allowed to save",
+      func() : async () {
+        let response = await backendActor.saveGame(999, gameData, authToken);
+        switch (response) {
+          case (#Ok(gameData)) assert false;
+          case (#Err(_message)) assert true;
+        };
+      },
+    );
   },
 );
 await suite(

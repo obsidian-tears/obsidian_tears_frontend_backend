@@ -14,9 +14,7 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
-import Fuzz "mo:fuzz";
 import Map "mo:map/Map";
-import { thash } "mo:map/Map";
 
 import Env "env";
 import EC "lib/ext/Common";
@@ -127,7 +125,7 @@ actor class _ObsidianTearsBackend() = this {
     let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
     let itemIndeces = switch (resultItem) {
       case (#ok(itemIndeces)) itemIndeces;
-      case (#err(_e)) [];
+      case (#err(_e))[];
     };
     for (index in itemIndeces.vals()) {
       _itemRegistry.put(index, address);
@@ -141,30 +139,33 @@ actor class _ObsidianTearsBackend() = this {
     canistergeekMonitor.collectMetrics();
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
 
-    // get and update character cache registry
+    // check ownership of hero NFT and update character cache registry
     let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
     let characterIndices = switch (resultCharacter) {
       case (#ok(characterIndices)) characterIndices;
       case (#err(_e)) return #err("Error verifying user");
     };
+    var found = false;
     for (index in characterIndices.vals()) {
       _characterRegistry.put(index, address);
+      if (characterIndex == index) found := true;
     };
+    if (not found) return #err("Caller is not owner of NFT " # debug_show characterIndex);
 
     // get and update item cache registry
     let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
     let itemIndeces = switch (resultItem) {
       case (#ok(itemIndeces)) itemIndeces;
-      case (#err(_e)) [];
+      case (#err(_e))[];
     };
     for (index in itemIndeces.vals()) {
       _itemRegistry.put(index, address);
     };
 
+    // generate new authtoken
     let newAuthToken : Text = await M.generateAuthToken();
-    let currentTime : Time.Time = Time.now();
-    let tokenWithTimestamp : T.TokenWithTimestamp = (characterIndex, currentTime);
-    Map.set<Text, T.TokenWithTimestamp>(authTokenRegistry, thash, newAuthToken, tokenWithTimestamp);
+    let tokenWithTimestamp : T.TokenWithTimestamp = (characterIndex, Time.now());
+    Map.set<Text, T.TokenWithTimestamp>(authTokenRegistry, Map.thash, newAuthToken, tokenWithTimestamp);
 
     return #ok(newAuthToken);
   };

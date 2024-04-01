@@ -84,7 +84,7 @@ await suite(
   "#getAuthToken",
   func() : async () {
     await test(
-      "authToken should not be an empty string",
+      "if character is owned, should return an authToken",
       func() : async () {
         let result = await backendActor.getAuthToken(playerNftId);
         authToken := switch (result) {
@@ -92,6 +92,13 @@ await suite(
           case (#err e) Debug.trap("Did not retrieve token. Error: " # e);
         };
         expect.nat(Text.size(authToken)).equal(40);
+      },
+    );
+    await test(
+      "if character is NOT owned, should return error",
+      func() : async () {
+        let result = await backendActor.getAuthToken(9876);
+        expect.bool(Result.isErr(result)).equal(true);
       },
     );
     await test(

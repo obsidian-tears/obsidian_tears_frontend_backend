@@ -49,6 +49,7 @@ actor class _ObsidianTearsBackend() = this {
   stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
   stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
   stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+  stable var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
 
   // Dynamic
   var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
@@ -57,8 +58,6 @@ actor class _ObsidianTearsBackend() = this {
   var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
-
-  var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -580,7 +579,7 @@ actor class _ObsidianTearsBackend() = this {
     if (Env.network != "local") return Debug.trap("Method only allowed in local");
 
     switch (key) {
-      case ("authTokenSize") return debug_show authTokenRegistry.size();
+      case ("authTokenSize") return debug_show Map.size(authTokenRegistry);
       case _ return Debug.trap("key not found");
     };
   };

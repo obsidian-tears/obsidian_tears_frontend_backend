@@ -84,7 +84,7 @@ await suite(
   "#getAuthToken",
   func() : async () {
     await test(
-      "if character is owned, should return an authToken",
+      "if character is owned, should return an authToken and store in registry",
       func() : async () {
         let result = await backendActor.getAuthToken(playerNftId);
         authToken := switch (result) {
@@ -92,6 +92,9 @@ await suite(
           case (#err e) Debug.trap("Did not retrieve token. Error: " # e);
         };
         expect.nat(Text.size(authToken)).equal(40);
+
+        let authTokenSize = await backendActor.specGetState("authTokenSize");
+        expect.text(authTokenSize).equal("1");
       },
     );
     await test(
@@ -99,13 +102,6 @@ await suite(
       func() : async () {
         let result = await backendActor.getAuthToken(9876);
         expect.bool(Result.isErr(result)).equal(true);
-      },
-    );
-    await test(
-      "should update registry of authorization tokens",
-      func() : async () {
-        let authTokenSize = await backendActor.specGetState("authTokenSize");
-        expect.text(authTokenSize).equal("1");
       },
     );
   },

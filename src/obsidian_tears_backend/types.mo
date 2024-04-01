@@ -1,9 +1,9 @@
 import Blob "mo:base/Blob";
-import Time "mo:base/Time";
 import Result "mo:base/Result";
+import Time "mo:base/Time";
 
-import ExtCore "lib/ext/Core";
 import ExtCommon "lib/ext/Common";
+import ExtCore "lib/ext/Core";
 
 module {
   //   \"characterName\":\"Phendrin\",\"characterClass\":\"\",\"level\":1,\"xp\":0,\"xpToLevelUp\":75,
@@ -34,6 +34,8 @@ module {
     kills : Nat16;
     deaths : Nat16;
   };
+
+  public type TokenWithTimestamp = (ExtCore.TokenIndex, Time.Time);
 
   public type RewardInfo = {
     itemIds : [Text];

@@ -1,25 +1,20 @@
-import Debug "mo:base/Debug";
-import Principal "mo:base/Principal";
-import Result "mo:base/Result";
 import Blob "mo:base/Blob";
-import Text "mo:base/Text";
+import Debug "mo:base/Debug";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
+import Principal "mo:base/Principal";
+import Result "mo:base/Result";
+import Text "mo:base/Text";
+import { expect; suite; test } "mo:test/async";
 
-import {
-  test;
-  suite;
-  expect;
-} "mo:test/async";
-
-import Main "../src/obsidian_tears_backend/main";
-import T "../src/obsidian_tears_backend/types";
-import ExtCore "../src/obsidian_tears_backend/lib/ext/Core";
-import ExtCommon "../src/obsidian_tears_backend/lib/ext/Common";
 import CharacterActor "../spec/actors/CharacterActor";
 import ItemActor "../spec/actors/ItemActor";
 import GameJsonFactory "../spec/factories/GameJsonFactory";
+import ExtCommon "../src/obsidian_tears_backend/lib/ext/Common";
+import ExtCore "../src/obsidian_tears_backend/lib/ext/Core";
 import AID "../src/obsidian_tears_backend/lib/util/AccountIdentifier";
+import Main "../src/obsidian_tears_backend/main";
+import T "../src/obsidian_tears_backend/types";
 
 let backendActor = await Main._ObsidianTearsBackend();
 
@@ -51,6 +46,7 @@ var playerNftId : Nat32 = 2;
 var itemNftIndex : Nat32 = 5;
 var gameData : Text = GameJsonFactory.defaultGameJson;
 var chestId : Nat16 = 35;
+var authToken : Text = "";
 
 await suite(
   "#verify",
@@ -85,12 +81,38 @@ await suite(
   },
 );
 await suite(
+  "#getAuthToken",
+  func() : async () {
+    await test(
+      "if character is owned, should return an authToken and store in registry",
+      func() : async () {
+        let result = await backendActor.getAuthToken(playerNftId);
+        authToken := switch (result) {
+          case (#ok authToken) authToken;
+          case (#err e) Debug.trap("Did not retrieve token. Error: " # e);
+        };
+        expect.nat(Text.size(authToken)).equal(40);
+
+        let authTokenSize = await backendActor.specGetState("authTokenSize");
+        expect.text(authTokenSize).equal("1");
+      },
+    );
+    await test(
+      "if character is NOT owned, should return error",
+      func() : async () {
+        let result = await backendActor.getAuthToken(9876);
+        expect.bool(Result.isErr(result)).equal(true);
+      },
+    );
+  },
+);
+await suite(
   "#loadGame",
   func() : async () {
     await test(
       "when no game saved, returns error with message",
       func() : async () {
-        let response = await backendActor.loadGame(playerNftId);
+        let response = await backendActor.loadGame(playerNftId, authToken);
         assert response == #Err(#Other("No save data"));
       },
     );
@@ -98,13 +120,13 @@ await suite(
       "when game saved, returns game successfully",
       func() : async () {
         // before
-        ignore await backendActor.saveGame(playerNftId, gameData);
+        ignore await backendActor.saveGame(playerNftId, gameData, authToken);
 
         // assert
-        let response = await backendActor.loadGame(playerNftId);
+        let response = await backendActor.loadGame(playerNftId, authToken);
 
         // after
-        ignore await backendActor.saveGame(playerNftId, "");
+        ignore await backendActor.saveGame(playerNftId, "", authToken);
 
         switch (response) {
           case (#Ok(gameData)) assert (Text.size(gameData) > 12900);
@@ -120,7 +142,7 @@ await suite(
     await test(
       "saves and returns the load game output to be rendered",
       func() : async () {
-        let response = await backendActor.saveGame(playerNftId, gameData);
+        let response = await backendActor.saveGame(playerNftId, gameData, authToken);
         switch (response) {
           case (#Ok(gameData)) {
             assert (Text.size(gameData) > 12900);
@@ -130,15 +152,13 @@ await suite(
       },
     );
     await test(
-      "when caller is not owner of token refuses to save and returns error message",
+      "when caller does not own NFT, it is not allowed to save",
       func() : async () {
-        let response = await backendActor.saveGame(999, gameData);
-        // TODO: improve with right caller
-        // switch (response) {
-        //  case (#Ok(gameData)) false;
-        //  case (#Err(_message)) true;
-        // };
-        assert true;
+        let response = await backendActor.saveGame(999, gameData, authToken);
+        switch (response) {
+          case (#Ok(gameData)) assert false;
+          case (#Err(_message)) assert true;
+        };
       },
     );
   },
@@ -154,7 +174,7 @@ await suite(
           gold = 20;
           xp = 0;
         };
-        let response = await backendActor.openChest(playerNftId, chestId);
+        let response = await backendActor.openChest(playerNftId, chestId, authToken);
         switch (response) {
           case (#Ok(rewardInfo)) assert (rewardInfo == expectedRewardInfo);
           case (#Err(_message)) assert false;
@@ -170,7 +190,7 @@ await suite(
       "returns rewards from defeated monster",
       func() : async () {
         let monsterId : Nat16 = 1;
-        let response = await backendActor.defeatMonster(playerNftId, monsterId);
+        let response = await backendActor.defeatMonster(playerNftId, monsterId, authToken);
         switch (response) {
           case (#Ok(rewardInfo)) assert true;
           case (#Err(message)) Debug.trap(debug_show (message));

@@ -14,15 +14,16 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
+import Map "mo:map/Map";
 
 import Env "env";
 import EC "lib/ext/Common";
 import ER "lib/ext/Core";
 import { TokenIndex } "lib/ext/Core";
 import AID "lib/util/AccountIdentifier";
+import M "middleware";
 import Ref "reference";
 import T "types";
-// import M "middleware";
 
 actor class _ObsidianTearsBackend() = this {
   // Types
@@ -48,6 +49,7 @@ actor class _ObsidianTearsBackend() = this {
   stable var _itemRegistryState : [(TokenIndex, AccountIdentifier)] = [];
   stable var _ownedNonNftItemsState : [(TokenIndex, [Nat16])] = [];
   stable var _goldState : [(AccountIdentifier, Nat32)] = [];
+  stable var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
 
   // Dynamic
   var _saveData : HashMap.HashMap<TokenIndex, Text> = HashMap.fromIter(_saveDataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
@@ -132,10 +134,44 @@ actor class _ObsidianTearsBackend() = this {
     return #Ok(characterIndices);
   };
 
+  public shared ({ caller }) func getAuthToken(characterIndex : TokenIndex) : async Result.Result<Text, Text> {
+    canistergeekMonitor.collectMetrics();
+    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
+
+    // check ownership of hero NFT and update character cache registry
+    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
+    let characterIndices = switch (resultCharacter) {
+      case (#ok(characterIndices)) characterIndices;
+      case (#err(_e)) return #err("Error verifying user");
+    };
+    var found = false;
+    for (index in characterIndices.vals()) {
+      _characterRegistry.put(index, address);
+      if (characterIndex == index) found := true;
+    };
+    if (not found) return #err("Caller is not owner of NFT " # debug_show characterIndex);
+
+    // get and update item cache registry
+    let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    let itemIndeces = switch (resultItem) {
+      case (#ok(itemIndeces)) itemIndeces;
+      case (#err(_e))[];
+    };
+    for (index in itemIndeces.vals()) {
+      _itemRegistry.put(index, address);
+    };
+
+    // generate new authtoken
+    let newAuthToken : Text = await M.generateAuthToken();
+    let tokenWithTimestamp : T.TokenWithTimestamp = (characterIndex, Time.now());
+    Map.set<Text, T.TokenWithTimestamp>(authTokenRegistry, Map.thash, newAuthToken, tokenWithTimestamp);
+
+    return #ok(newAuthToken);
+  };
+
   // load game data formatted in json so that unity can load correctly
-  public shared func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared func loadGame(characterIndex : TokenIndex, authToken : Text) : async (T.ApiResponse<Text>) {
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     switch (_saveData.get(characterIndex)) {
       case (?save) return #Ok(save);
@@ -144,19 +180,16 @@ actor class _ObsidianTearsBackend() = this {
   };
 
   // save game data formatted in json so that unity can load correctly
-  public shared func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared func saveGame(characterIndex : TokenIndex, gameData : Text, authToken : Text) : async (T.ApiResponse<Text>) {
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     _saveData.put(characterIndex, gameData);
-
     return #Ok(gameData);
   };
 
   // called when opening a treasure chest or receiving
-  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     let optChest : ?Ref.TreasureChest = Array.find(
       Ref.chests,
@@ -192,9 +225,8 @@ actor class _ObsidianTearsBackend() = this {
   };
 
   // when you defeat a monster.... can win gold, xp, and items
-  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     // look up monster by index
     let optMonster : ?Ref.Monster = Array.find(
@@ -540,6 +572,15 @@ actor class _ObsidianTearsBackend() = this {
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);
       case (null) return #err("Not Found");
+    };
+  };
+
+  public query func specGetState(key : Text) : async Text {
+    if (Env.network != "local") return Debug.trap("Method only allowed in local");
+
+    switch (key) {
+      case ("authTokenSize") return debug_show Map.size(authTokenRegistry);
+      case _ return Debug.trap("key not found");
     };
   };
 };

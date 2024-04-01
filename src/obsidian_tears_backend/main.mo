@@ -33,10 +33,8 @@ actor class _ObsidianTearsBackend() = this {
   type TokenIndex = ER.TokenIndex;
   type CommonError = ER.CommonError;
   type Metadata = EC.Metadata;
-  type Time = ER.Time;
-  type TokenWithTimestamp = ER.TokenWithTimestamp;
 
-  stable var _lastRegistryUpdate : Time = Time.now(); // keep track of the last time registries were updated
+  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
 
   // Env
   let _itemCanister : Text = Env.getItemCanisterId();
@@ -62,7 +60,7 @@ actor class _ObsidianTearsBackend() = this {
   var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
 
-  var _authTokenRegistry : Map.Map<Text, TokenWithTimestamp> = Map.new<Text, TokenWithTimestamp>();
+  var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -129,7 +127,7 @@ actor class _ObsidianTearsBackend() = this {
     let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
     let itemIndeces = switch (resultItem) {
       case (#ok(itemIndeces)) itemIndeces;
-      case (#err(_e))[];
+      case (#err(_e)) [];
     };
     for (index in itemIndeces.vals()) {
       _itemRegistry.put(index, address);
@@ -139,21 +137,41 @@ actor class _ObsidianTearsBackend() = this {
     return #Ok(characterIndices);
   };
 
-  public func getAuthToken(characterIndex : TokenIndex) : async Text {
-    let blob = await Random.blob();
-    let fuzz = Fuzz.fromBlob(blob);
-    let newAuthToken : Text = fuzz.text.randomAlphanumeric(30);
-    let currentTime : Time = Time.now();
-    let tokenIndex : TokenIndex = characterIndex;
-    let tokenWithTimestamp : TokenWithTimestamp = (tokenIndex, currentTime);
-    Map.set<Text, TokenWithTimestamp>(_authTokenRegistry, thash, newAuthToken, tokenWithTimestamp);
+  public shared ({ caller }) func getAuthToken(characterIndex : TokenIndex) : async Result.Result<Text, Text> {
+    canistergeekMonitor.collectMetrics();
+    let address : AccountIdentifier = AID.fromPrincipal(caller, null);
 
-    return newAuthToken;
+    // get and update character cache registry
+    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
+    let characterIndices = switch (resultCharacter) {
+      case (#ok(characterIndices)) characterIndices;
+      case (#err(_e)) return #err("Error verifying user");
+    };
+    for (index in characterIndices.vals()) {
+      _characterRegistry.put(index, address);
+    };
+
+    // get and update item cache registry
+    let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    let itemIndeces = switch (resultItem) {
+      case (#ok(itemIndeces)) itemIndeces;
+      case (#err(_e)) [];
+    };
+    for (index in itemIndeces.vals()) {
+      _itemRegistry.put(index, address);
+    };
+
+    let newAuthToken : Text = await M.generateAuthToken();
+    let currentTime : Time.Time = Time.now();
+    let tokenWithTimestamp : T.TokenWithTimestamp = (characterIndex, currentTime);
+    Map.set<Text, T.TokenWithTimestamp>(authTokenRegistry, thash, newAuthToken, tokenWithTimestamp);
+
+    return #ok(newAuthToken);
   };
 
   // load game data formatted in json so that unity can load correctly
   public shared func loadGame(characterIndex : TokenIndex, authToken : Text) : async (T.ApiResponse<Text>) {
-    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     switch (_saveData.get(characterIndex)) {
       case (?save) return #Ok(save);
@@ -163,7 +181,7 @@ actor class _ObsidianTearsBackend() = this {
 
   // save game data formatted in json so that unity can load correctly
   public shared func saveGame(characterIndex : TokenIndex, gameData : Text, authToken : Text) : async (T.ApiResponse<Text>) {
-    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     _saveData.put(characterIndex, gameData);
     return #Ok(gameData);
@@ -171,7 +189,7 @@ actor class _ObsidianTearsBackend() = this {
 
   // called when opening a treasure chest or receiving
   public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
-    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     let optChest : ?Ref.TreasureChest = Array.find(
       Ref.chests,
@@ -208,7 +226,7 @@ actor class _ObsidianTearsBackend() = this {
 
   // when you defeat a monster.... can win gold, xp, and items
   public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
-    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
+    if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
     // look up monster by index
     let optMonster : ?Ref.Monster = Array.find(
@@ -561,7 +579,7 @@ actor class _ObsidianTearsBackend() = this {
     if (Env.network != "local") return Debug.trap("Method only allowed in local");
 
     switch (key) {
-      case ("authTokenSize") return debug_show _authTokenRegistry.size();
+      case ("authTokenSize") return debug_show authTokenRegistry.size();
       case _ return Debug.trap("key not found");
     };
   };

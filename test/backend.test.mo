@@ -86,8 +86,12 @@ await suite(
     await test(
       "authToken should not be an empty string",
       func() : async () {
-        authToken := await backendActor.getAuthToken(playerNftId);
-        expect.text(authToken).notEqual("");
+        let result = await backendActor.getAuthToken(playerNftId);
+        authToken := switch (result) {
+          case (#ok authToken) authToken;
+          case (#err e) Debug.trap("Did not retrieve token. Error: " # e);
+        };
+        expect.nat(Text.size(authToken)).equal(40);
       },
     );
     await test(

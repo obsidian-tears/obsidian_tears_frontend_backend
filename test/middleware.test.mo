@@ -3,18 +3,15 @@ import Map "mo:map/Map";
 import { thash } "mo:map/Map";
 import { expect; suite; test } "mo:test/async";
 
-import ExtCore "../src/obsidian_tears_backend/lib/ext/Core";
 import Middleware "../src/obsidian_tears_backend/middleware";
+import T "../src/obsidian_tears_backend/types";
 
 // create registry with one element
-type TokenWithTimestamp = ExtCore.TokenWithTimestamp;
-type Time = ExtCore.Time;
-
 let authToken : Text = "abc123";
 let playerNftId : Nat32 = 2;
-let currentTime : Time = Time.now();
-var authTokenRegistry : Map.Map<Text, TokenWithTimestamp> = Map.new<Text, TokenWithTimestamp>();
-Map.set<Text, TokenWithTimestamp>(authTokenRegistry, thash, authToken, (playerNftId, currentTime));
+let currentTime : Time.Time = Time.now();
+var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
+Map.set<Text, T.TokenWithTimestamp>(authTokenRegistry, thash, authToken, (playerNftId, currentTime));
 
 await suite(
   "#hasValidToken",

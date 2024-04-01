@@ -8,7 +8,6 @@ import Nat8 "mo:base/Nat8";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Time "mo:base/Time";
 
 import AID "../util/AccountIdentifier";
 import CRC32 "../util/CRC32";
@@ -24,8 +23,6 @@ module ExtCore = {
   public type Balance = Nat;
   public type TokenIdentifier = Text;
   public type TokenIndex = Nat32;
-  public type Time = Time.Time;
-  public type TokenWithTimestamp = (TokenIndex, Time);
   public type TokenObj = {
     index : TokenIndex;
     canister : [Nat8];

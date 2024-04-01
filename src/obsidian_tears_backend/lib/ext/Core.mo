@@ -1,16 +1,18 @@
-import Result "mo:base/Result";
-import Principal "mo:base/Principal";
 import Array "mo:base/Array";
-import Hash "mo:base/Hash";
 import Blob "mo:base/Blob";
-import Text "mo:base/Text";
-import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
 import Buffer "mo:base/Buffer";
+import Hash "mo:base/Hash";
+import Nat "mo:base/Nat";
+import Nat32 "mo:base/Nat32";
+import Nat8 "mo:base/Nat8";
+import Principal "mo:base/Principal";
+import Result "mo:base/Result";
+import Text "mo:base/Text";
+import Time "mo:base/Time";
+
 import AID "../util/AccountIdentifier";
-import Hex "../util/Hex";
 import CRC32 "../util/CRC32";
+import Hex "../util/Hex";
 
 module ExtCore = {
   public type AccountIdentifier = AID.AccountIdentifier;
@@ -22,6 +24,8 @@ module ExtCore = {
   public type Balance = Nat;
   public type TokenIdentifier = Text;
   public type TokenIndex = Nat32;
+  public type Time = Time.Time;
+  public type TokenWithTimestamp = (TokenIndex, Time);
   public type TokenObj = {
     index : TokenIndex;
     canister : [Nat8];

@@ -14,15 +14,18 @@ import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
 import Canistergeek "mo:canistergeek/canistergeek";
+import Fuzz "mo:fuzz";
+import Map "mo:map/Map";
+import { thash } "mo:map/Map";
 
 import Env "env";
 import EC "lib/ext/Common";
 import ER "lib/ext/Core";
 import { TokenIndex } "lib/ext/Core";
 import AID "lib/util/AccountIdentifier";
+import M "middleware";
 import Ref "reference";
 import T "types";
-// import M "middleware";
 
 actor class _ObsidianTearsBackend() = this {
   // Types
@@ -30,8 +33,10 @@ actor class _ObsidianTearsBackend() = this {
   type TokenIndex = ER.TokenIndex;
   type CommonError = ER.CommonError;
   type Metadata = EC.Metadata;
+  type Time = ER.Time;
+  type TokenWithTimestamp = ER.TokenWithTimestamp;
 
-  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
+  stable var _lastRegistryUpdate : Time = Time.now(); // keep track of the last time registries were updated
 
   // Env
   let _itemCanister : Text = Env.getItemCanisterId();
@@ -56,6 +61,8 @@ actor class _ObsidianTearsBackend() = this {
   var _characterRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_characterRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _itemRegistry : HashMap.HashMap<TokenIndex, AccountIdentifier> = HashMap.fromIter(_itemRegistryState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
   var _itemMetadata : HashMap.HashMap<TokenIndex, Metadata> = HashMap.fromIter(_itemMetadataState.vals(), 0, TokenIndex.equal, TokenIndex.hash);
+
+  var _authTokenRegistry : Map.Map<Text, TokenWithTimestamp> = Map.new<Text, TokenWithTimestamp>();
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -132,10 +139,21 @@ actor class _ObsidianTearsBackend() = this {
     return #Ok(characterIndices);
   };
 
+  public func getAuthToken(characterIndex : TokenIndex) : async Text {
+    let blob = await Random.blob();
+    let fuzz = Fuzz.fromBlob(blob);
+    let newAuthToken : Text = fuzz.text.randomAlphanumeric(30);
+    let currentTime : Time = Time.now();
+    let tokenIndex : TokenIndex = characterIndex;
+    let tokenWithTimestamp : TokenWithTimestamp = (tokenIndex, currentTime);
+    Map.set<Text, TokenWithTimestamp>(_authTokenRegistry, thash, newAuthToken, tokenWithTimestamp);
+
+    return newAuthToken;
+  };
+
   // load game data formatted in json so that unity can load correctly
-  public shared func loadGame(characterIndex : TokenIndex) : async (T.ApiResponse<Text>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared func loadGame(characterIndex : TokenIndex, authToken : Text) : async (T.ApiResponse<Text>) {
+    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
 
     switch (_saveData.get(characterIndex)) {
       case (?save) return #Ok(save);
@@ -144,19 +162,16 @@ actor class _ObsidianTearsBackend() = this {
   };
 
   // save game data formatted in json so that unity can load correctly
-  public shared func saveGame(characterIndex : TokenIndex, gameData : Text) : async (T.ApiResponse<Text>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared func saveGame(characterIndex : TokenIndex, gameData : Text, authToken : Text) : async (T.ApiResponse<Text>) {
+    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
 
     _saveData.put(characterIndex, gameData);
-
     return #Ok(gameData);
   };
 
   // called when opening a treasure chest or receiving
-  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared ({ caller }) func openChest(characterIndex : TokenIndex, chestIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
 
     let optChest : ?Ref.TreasureChest = Array.find(
       Ref.chests,
@@ -192,9 +207,8 @@ actor class _ObsidianTearsBackend() = this {
   };
 
   // when you defeat a monster.... can win gold, xp, and items
-  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16) : async (T.ApiResponse<T.RewardInfo>) {
-    // TODO: improve with right caller
-    // if (not M.isOwner(caller, characterIndex, _characterRegistry)) return #Err(#Unauthorized);
+  public shared ({ caller }) func defeatMonster(characterIndex : TokenIndex, monsterIndex : Nat16, authToken : Text) : async (T.ApiResponse<T.RewardInfo>) {
+    if (not M.hasValidToken(characterIndex, authToken, _authTokenRegistry)) return #Err(#Unauthorized);
 
     // look up monster by index
     let optMonster : ?Ref.Monster = Array.find(
@@ -540,6 +554,15 @@ actor class _ObsidianTearsBackend() = this {
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);
       case (null) return #err("Not Found");
+    };
+  };
+
+  public query func specGetState(key : Text) : async Text {
+    if (Env.network != "local") return Debug.trap("Method only allowed in local");
+
+    switch (key) {
+      case ("authTokenSize") return debug_show _authTokenRegistry.size();
+      case _ return Debug.trap("key not found");
     };
   };
 };

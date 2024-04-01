@@ -2,7 +2,6 @@ import Random "mo:base/Random";
 import Time "mo:base/Time";
 import Fuzz "mo:fuzz";
 import Map "mo:map/Map";
-import { thash } "mo:map/Map";
 
 import ER "lib/ext/Core";
 import T "types";
@@ -17,16 +16,14 @@ module Middleware {
   };
 
   public func hasValidToken(index : ER.TokenIndex, authToken : Text, registry : Map.Map<Text, T.TokenWithTimestamp>) : Bool {
-    let optTokenWithTimestamp : ?T.TokenWithTimestamp = Map.get<Text, T.TokenWithTimestamp>(registry, thash, authToken);
-    switch (optTokenWithTimestamp) {
-      case (?tokenWithTimestamp) {
-        let tokenIndex : ER.TokenIndex = tokenWithTimestamp.0;
-        let timestamp : Time.Time = tokenWithTimestamp.1;
-        let currentTime : Time.Time = Time.now();
-
-        return (tokenIndex == index) and ((timestamp + fullDay) > currentTime);
-      };
+    let tokenWithTimestamp = switch (Map.get<Text, T.TokenWithTimestamp>(registry, Map.thash, authToken)) {
       case (null) return false;
+      case (?t) t;
     };
+
+    let tokenIndex : ER.TokenIndex = tokenWithTimestamp.0;
+    let timestamp : Time.Time = tokenWithTimestamp.1;
+
+    return (tokenIndex == index) and ((timestamp + fullDay) > Time.now());
   };
 };

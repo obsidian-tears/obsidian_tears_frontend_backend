@@ -199,6 +199,17 @@ body {
   transform: translateY(2px);
 }
 
+.buttonWoodGrid:disabled {
+  color: #777;
+}
+
+.buttonWoodGrid:disabled:focus,
+.buttonWoodGrid:disabled:hover,
+.buttonWoodGrid:disabled:active {
+  box-shadow: none;
+  transform: none;
+}
+
 /* for connect to stoic on home */
 .buttonWoodGridXL {
   height: 48px;
@@ -371,4 +382,8 @@ button {
 /* for the plug contianer to stretch it out the same as stoic */
 .c-ipvTzC > div {
   width: 176px;
+}
+
+.spinner {
+  margin-left: 8px;
 }

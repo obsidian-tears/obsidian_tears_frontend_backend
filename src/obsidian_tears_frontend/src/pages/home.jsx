@@ -1,8 +1,12 @@
-import * as React from "react";
 import PlugConnect from "@psychedelic/plug-connect";
-import { network, characterCanisterId } from "./../env";
+import * as React from "react";
+import ClipLoader from "react-spinners/ClipLoader";
+import { characterCanisterId, network } from "./../env";
 
 const Home = (props) => {
+  const [loading, setLoading] = React.useState(false);
+  const [clickIndex, setClickIndex] = React.useState(-1);
+
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
@@ -36,9 +40,22 @@ const Home = (props) => {
                   <button
                     className="buttonWoodGrid"
                     style={backgroundImageWood2}
-                    onClick={() => props.selectNft(nft[0])}
+                    onClick={async () => {
+                      setLoading(true);
+                      setClickIndex(i);
+                      await props.selectNft(nft[0]);
+                      setLoading(false);
+                      setClickIndex(-1);
+                    }}
+                    disabled={loading}
                   >
                     Select
+                    <ClipLoader
+                      className="spinner"
+                      size={20}
+                      loading={loading && i == clickIndex}
+                      color="gray"
+                    />
                   </button>
                 </div>
               ))}

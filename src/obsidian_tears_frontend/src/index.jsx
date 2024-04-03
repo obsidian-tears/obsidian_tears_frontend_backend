@@ -1,17 +1,20 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-import Home from "./pages/home";
 import Game from "./pages/game";
+import Home from "./pages/home";
 
-import { network, characterCanisterId, itemCanisterId } from "./env";
-import { obsidian_tears_backend as backendActor } from "../../declarations/obsidian_tears_backend";
-import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
-import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
-import principalToAccountIdentifier from "./utils";
-import { Principal } from "@dfinity/principal";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { StoicIdentity } from "ic-stoic-identity";
+import {
+  obsidian_tears_backend as backendActor,
+  canisterId as backendCanisterId,
+  createActor as backendCreateActor,
+} from "../../declarations/obsidian_tears_backend";
+import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
+import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
+import { characterCanisterId, itemCanisterId, network } from "./env";
+import principalToAccountIdentifier from "./utils";
 
 const ObsidianTears = () => {
   const [loggedIn, setLoggedIn] = React.useState(false);
@@ -23,7 +26,7 @@ const ObsidianTears = () => {
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
   const [identity, setIdentity] = React.useState(null);
-  const [gameActor, _setGameActor] = React.useState(backendActor);
+  const [gameActor, _setGameActor] = React.useState(null);
   const [charActor, _setCharActor] = React.useState(null);
   const [itemActor, _setItemActor] = React.useState(null);
   const [stoicHttpAgent, setStoicHttpAgent] = React.useState(null);
@@ -75,6 +78,7 @@ const ObsidianTears = () => {
         agent: a,
         canisterId: characterCanisterId,
       });
+      setGameActor(backendCreateActor(backendCanisterId, { agent: a }));
       setCharActor(characterActor);
       setItemActor(
         Actor.createActor(itemIdlFactory, {
@@ -145,9 +149,9 @@ const ObsidianTears = () => {
     StoicIdentity.load().then(async (identity) => {
       // No existing connection, lets make one!
       identity = await StoicIdentity.connect();
-      let p = identity.getPrincipal();
+      let p = identity.getPrincipal().toText();
       setIdentity(identity);
-      setPrincipal(p.toText());
+      setPrincipal(p);
       let agent = new HttpAgent({ identity: identity });
       if (network === "local") {
         agent.fetchRootKey();
@@ -155,7 +159,7 @@ const ObsidianTears = () => {
       setStoicHttpAgent(agent);
       setLoggedIn(true);
       let characterActor = await loadActors(false, true, agent);
-      await loadCharacters(characterActor, p.toText());
+      await loadCharacters(characterActor, p);
       setUsingStoic(true);
       setUsingPlug(false);
     });
@@ -163,13 +167,17 @@ const ObsidianTears = () => {
 
   const selectNft = async (index) => {
     setSelectedNftIndex(index);
-    // load player save data from game canister
-    const verifiedNfts = await gameActor.verify();
-    console.log(`verifiedNfts: ${verifiedNfts}`);
-    if (!verifiedNfts["Ok"]) {
+    const authToken = await gameActor.getAuthToken(index);
+    if (authToken.Err) {
+      console.log(authToken.Err);
+      return;
     }
-    const loginData = await gameActor.loadGame(index);
-    console.log(`loginData ${loginData + ", index: " + index}`);
+    const loginData = await gameActor.loadGame(index, authToken.ok);
+    if (loginData.Err) {
+      console.log(authToken.Err);
+      return;
+    }
+    console.log(`loginData ${loginData.ok + ", index: " + index}`);
     setRoute("game");
   };
 

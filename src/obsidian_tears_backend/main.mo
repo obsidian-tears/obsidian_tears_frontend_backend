@@ -151,15 +151,15 @@ actor class _ObsidianTearsBackend() = this {
     };
     if (not found) return #err("Caller is not owner of NFT " # debug_show characterIndex);
 
-    // get and update item cache registry
-    let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
-    let itemIndeces = switch (resultItem) {
-      case (#ok(itemIndeces)) itemIndeces;
-      case (#err(_e))[];
-    };
-    for (index in itemIndeces.vals()) {
-      _itemRegistry.put(index, address);
-    };
+    // // get and update item cache registry
+    // let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    // let itemIndeces = switch (resultItem) {
+    //   case (#ok(itemIndeces)) itemIndeces;
+    //   case (#err(_e)) [];
+    // };
+    // for (index in itemIndeces.vals()) {
+    //   _itemRegistry.put(index, address);
+    // };
 
     // generate new authtoken
     let newAuthToken : Text = await M.generateAuthToken();

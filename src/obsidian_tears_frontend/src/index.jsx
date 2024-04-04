@@ -26,6 +26,7 @@ const ObsidianTears = () => {
   const [charActor, _setCharActor] = React.useState(null);
   const [itemActor, _setItemActor] = React.useState(null);
   const [selectedNftIndex, _setSelectedNftIndex] = React.useState(null);
+  const [authToken, setAuthToken] = React.useState("");
   const gameActorRef = React.useRef(gameActor);
   const itemActorRef = React.useRef(itemActor);
   const charActorRef = React.useRef(charActor);
@@ -157,10 +158,13 @@ const ObsidianTears = () => {
   const selectNft = async (index) => {
     setSelectedNftIndex(index);
     const authToken = await gameActor.getAuthToken(index);
+
     if (authToken.Err) {
       console.log(authToken.Err);
       return;
     }
+
+    setAuthToken(authToken.ok);
     console.log("Selected NFT index: " + index);
     setRoute("game");
   };
@@ -202,6 +206,7 @@ const ObsidianTears = () => {
     <>
       {route == "game" && (
         <Game
+          authToken={authToken}
           gameActorRef={gameActorRef}
           selectedNftIndexRef={selectedNftIndexRef}
         />

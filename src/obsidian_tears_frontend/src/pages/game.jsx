@@ -1,7 +1,6 @@
 import React from "react";
-import { useUnityContext } from "react-unity-webgl";
-import { Unity } from "react-unity-webgl";
 import { isMobile, isTablet } from "react-device-detect";
+import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 
 const Game = (props) => {
@@ -46,7 +45,8 @@ const Game = (props) => {
         // call the actor function
         let result = await props.gameActorRef.current.saveGame(
           props.selectedNftIndexRef.current,
-          gameData
+          gameData,
+          props.authToken
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -61,7 +61,8 @@ const Game = (props) => {
       });
       addEventListener("LoadGame", async function (objectName) {
         let result = await props.gameActorRef.current.loadGame(
-          props.selectedNftIndexRef.current
+          props.selectedNftIndexRef.current,
+          props.authToken
         );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
@@ -88,7 +89,8 @@ const Game = (props) => {
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActorRef.current.openChest(
           props.selectedNftIndexRef.current,
-          chestId
+          chestId,
+          props.authToken
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
@@ -119,7 +121,8 @@ const Game = (props) => {
         async function (monsterIndex, objectName) {
           let result = await props.gameActorRef.current.defeatMonster(
             props.selectedNftIndexRef.current,
-            monsterIndex
+            monsterIndex,
+            props.authToken
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];

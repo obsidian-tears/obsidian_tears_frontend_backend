@@ -23,30 +23,11 @@ const ObsidianTears = () => {
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
   const [identity, setIdentity] = React.useState(null);
-  const [gameActor, _setGameActor] = React.useState(null);
-  const [charActor, _setCharActor] = React.useState(null);
-  const [itemActor, _setItemActor] = React.useState(null);
-  const [selectedNftIndex, _setSelectedNftIndex] = React.useState(null);
-  const gameActorRef = React.useRef(gameActor);
-  const itemActorRef = React.useRef(itemActor);
-  const charActorRef = React.useRef(charActor);
-  const selectedNftIndexRef = React.useRef(selectedNftIndex);
-  const setSelectedNftIndex = (data) => {
-    selectedNftIndexRef.current = data;
-    _setSelectedNftIndex(data);
-  };
-  const setItemActor = (data) => {
-    itemActorRef.current = data;
-    _setItemActor(data);
-  };
-  const setGameActor = (data) => {
-    gameActorRef.current = data;
-    _setGameActor(data);
-  };
-  const setCharActor = (data) => {
-    charActorRef.current = data;
-    _setCharActor(data);
-  };
+  const [gameActor, setGameActor] = React.useState(null);
+  const [charActor, setCharActor] = React.useState(null);
+  const [itemActor, setItemActor] = React.useState(null);
+  const [selectedNftIndex, setSelectedNftIndex] = React.useState(null);
+
   const gameCanisterId = Actor.canisterIdOf(backendActor);
 
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
@@ -201,10 +182,7 @@ const ObsidianTears = () => {
   return (
     <>
       {route === "game" ? (
-        <Game
-          gameActorRef={gameActorRef}
-          selectedNftIndexRef={selectedNftIndexRef}
-        />
+        <Game gameActor={gameActor} selectedNftIndex={selectedNftIndex} />
       ) : (
         <div
           id="body"

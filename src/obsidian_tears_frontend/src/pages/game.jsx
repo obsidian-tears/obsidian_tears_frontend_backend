@@ -19,7 +19,7 @@ const Game = (props) => {
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
   const initDataUnity = () => {
-    const myCharacter = props.selectedNftIndexRef;
+    const myCharacter = props.selectedNftIndex;
     sendMessage(
       "ReactController(Clone)",
       "InitData",
@@ -44,8 +44,8 @@ const Game = (props) => {
       addEventListener("SaveGame", async function (gameData, objectName) {
         window.saveData = gameData;
         // call the actor function
-        let result = await props.gameActorRef.current.saveGame(
-          props.selectedNftIndexRef.current,
+        let result = await props.gameActor.saveGame(
+          props.selectedNftIndex,
           gameData
         );
         if (result["Ok"]) {
@@ -60,9 +60,7 @@ const Game = (props) => {
         }
       });
       addEventListener("LoadGame", async function (objectName) {
-        let result = await props.gameActorRef.current.loadGame(
-          props.selectedNftIndexRef.current
-        );
+        let result = await props.gameActor.loadGame(props.selectedNftIndex);
         if (result["Ok"]) {
           window.loadData = result["Ok"];
           sendMessage(objectName, "ListenLoadGame", result["Ok"]);
@@ -86,8 +84,8 @@ const Game = (props) => {
         }
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
-        let result = await props.gameActorRef.current.openChest(
-          props.selectedNftIndexRef.current,
+        let result = await props.gameActor.openChest(
+          props.selectedNftIndex,
           chestId
         );
         if (result["Ok"]) {
@@ -117,8 +115,8 @@ const Game = (props) => {
       addEventListener(
         "DefeatMonster",
         async function (monsterIndex, objectName) {
-          let result = await props.gameActorRef.current.defeatMonster(
-            props.selectedNftIndexRef.current,
+          let result = await props.gameActor.defeatMonster(
+            props.selectedNftIndex,
             monsterIndex
           );
           if (result["Ok"]) {

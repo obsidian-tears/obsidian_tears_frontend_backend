@@ -200,69 +200,31 @@ const ObsidianTears = () => {
 
   return (
     <>
-      {route === "game" ? (
+      {route === "login" && (
+        <Login
+          whitelist={whitelist}
+          connectToStoic={connectToStoic}
+          loadActors={loadActors}
+          loadCharacters={loadCharacters}
+          setLoggedInWith={setLoggedInWith}
+          loggedInWith={loggedInWith}
+          logout={logout}
+        />
+      )}
+      {route === "nftSelector" && (
+        <NftSelector
+          selectNft={selectNft}
+          loading={loading}
+          myNfts={myNfts}
+          loggedInWith={loggedInWith}
+          logout={logout}
+        />
+      )}
+      {route === "game" && (
         <Game
           gameActorRef={gameActorRef}
           selectedNftIndexRef={selectedNftIndexRef}
         />
-      ) : (
-        <div
-          id="body"
-          style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
-        >
-          <div id="header">
-            <div className="leftHeader">
-              <img alt="logo" src="icp-badge.png" height="50"></img>
-            </div>
-            <div className="rightHeader">
-              <button
-                className="buttonWood"
-                style={backgroundImageWood2}
-                onClick={() => window.open("https://obsidiantears.xyz")}
-              >
-                Website
-              </button>
-
-              <button
-                className="buttonWood"
-                style={backgroundImageWood2}
-                onClick={() =>
-                  window.open("https://entrepot.app/marketplace/obsidian-tears")
-                }
-              >
-                Shop NFTs
-              </button>
-
-              {loggedInWith !== "" && (
-                <div className="rightHeader2">
-                  <button
-                    className="buttonWood"
-                    style={backgroundImageWood2}
-                    onClick={() => logout()}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {route === "login" ? (
-            <Login
-              whitelist={whitelist}
-              connectToStoic={connectToStoic}
-              loadActors={loadActors}
-              loadCharacters={loadCharacters}
-              setLoggedInWith={setLoggedInWith}
-            />
-          ) : (
-            <NftSelector
-              selectNft={selectNft}
-              loading={loading}
-              myNfts={myNfts}
-            />
-          )}
-        </div>
       )}
     </>
   );

@@ -2,7 +2,8 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 
 import Game from "./pages/game";
-import Home from "./pages/home";
+import Login from "./pages/login";
+import NftSelector from "./pages/nftSelector";
 
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { StoicIdentity } from "ic-stoic-identity";
@@ -18,7 +19,7 @@ import principalToAccountIdentifier from "./utils";
 
 const ObsidianTears = () => {
   const [loggedInWith, setLoggedInWith] = React.useState(""); // "plug", "stoic" or "" if not logged
-  const [route, setRoute] = React.useState("home");
+  const [route, setRoute] = React.useState("login"); // "login" -> "nftSelector" -> "game"
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
   const [identity, setIdentity] = React.useState(null);
@@ -112,13 +113,11 @@ const ObsidianTears = () => {
     if (connected) {
       if (loggedInWith === "plug") {
         p = await window.ic.plug.getPrincipal().toText();
-        setPrincipal(p);
         if (!window.ic.plug.agent) {
           window.ic.plug.createAgent({ whitelist, host });
         }
       } else if (loggedInWith === "stoic") {
         p = identity.getPrincipal();
-        setPrincipal(p.toText());
         agent = new HttpAgent({ identity, host });
         if (network === "local") {
           agent.fetchRootKey();
@@ -151,6 +150,7 @@ const ObsidianTears = () => {
       setLoggedInWith("stoic");
       let characterActor = await loadActors("stoic", agent);
       await loadCharacters(characterActor, p);
+      setRoute("nftSelector");
     });
   };
 
@@ -185,7 +185,7 @@ const ObsidianTears = () => {
       StoicIdentity.disconnect();
     }
 
-    setRoute("home");
+    setRoute("login");
     setLoggedInWith("");
   };
 
@@ -200,13 +200,12 @@ const ObsidianTears = () => {
 
   return (
     <>
-      {route == "game" && (
+      {route === "game" ? (
         <Game
           gameActorRef={gameActorRef}
           selectedNftIndexRef={selectedNftIndexRef}
         />
-      )}
-      {route == "home" && (
+      ) : (
         <div
           id="body"
           style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
@@ -248,16 +247,21 @@ const ObsidianTears = () => {
             </div>
           </div>
 
-          <Home
-            loading={loading}
-            myNfts={myNfts}
-            connectToStoic={connectToStoic}
-            loadActors={loadActors}
-            loadCharacters={loadCharacters}
-            loggedInWith={loggedInWith}
-            setLoggedInWith={setLoggedInWith}
-            selectNft={selectNft}
-          />
+          {route === "login" ? (
+            <Login
+              whitelist={whitelist}
+              connectToStoic={connectToStoic}
+              loadActors={loadActors}
+              loadCharacters={loadCharacters}
+              setLoggedInWith={setLoggedInWith}
+            />
+          ) : (
+            <NftSelector
+              selectNft={selectNft}
+              loading={loading}
+              myNfts={myNfts}
+            />
+          )}
         </div>
       )}
     </>

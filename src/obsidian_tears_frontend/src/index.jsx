@@ -17,8 +17,7 @@ import { characterCanisterId, itemCanisterId, network } from "./env";
 import principalToAccountIdentifier from "./utils";
 
 const ObsidianTears = () => {
-  // "" if not loggedIn, "plug" if using plug, "stoic" if using stoic
-  const [loggedIn, setLoggedIn] = React.useState("");
+  const [loggedInWith, setLoggedInWith] = React.useState(""); // "plug", "stoic" or "" if not logged
   const [route, setRoute] = React.useState("home");
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
@@ -54,10 +53,10 @@ const ObsidianTears = () => {
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
 
-  const loadActors = async (loggedIn, a) => {
+  const loadActors = async (loggedInWith, a) => {
     console.log("loading actors");
     let characterActor;
-    if (loggedIn === "plug") {
+    if (loggedInWith === "plug") {
       setItemActor(
         await window.ic.plug.createActor({
           canisterId: itemCanisterId,
@@ -69,7 +68,7 @@ const ObsidianTears = () => {
         interfaceFactory: characterIdlFactory,
       });
       setCharActor(characterActor);
-    } else if (loggedIn === "stoic") {
+    } else if (loggedInWith === "stoic") {
       characterActor = Actor.createActor(characterIdlFactory, {
         agent: a,
         canisterId: characterCanisterId,
@@ -100,9 +99,9 @@ const ObsidianTears = () => {
 
   const verifyConnectionAndAgent = async () => {
     var connected;
-    if (loggedIn === "plug") {
+    if (loggedInWith === "plug") {
       connected = await window.ic.plug.isConnected();
-    } else if (loggedIn === "stoic") {
+    } else if (loggedInWith === "stoic") {
       StoicIdentity.load().then(async (id) => {
         connected = id !== false;
       });
@@ -111,13 +110,13 @@ const ObsidianTears = () => {
     let agent;
     let p;
     if (connected) {
-      if (loggedIn === "plug") {
+      if (loggedInWith === "plug") {
         p = await window.ic.plug.getPrincipal().toText();
         setPrincipal(p);
         if (!window.ic.plug.agent) {
           window.ic.plug.createAgent({ whitelist, host });
         }
-      } else if (loggedIn === "stoic") {
+      } else if (loggedInWith === "stoic") {
         p = identity.getPrincipal();
         setPrincipal(p.toText());
         agent = new HttpAgent({ identity, host });
@@ -130,7 +129,7 @@ const ObsidianTears = () => {
     }
     if (connected) {
       console.log("about to load actors");
-      let characterActor = await loadActors(loggedIn, agent);
+      let characterActor = await loadActors(loggedInWith, agent);
       console.log("finished loading actors. now load characters");
       await loadCharacters(characterActor, p.toText());
       console.log(
@@ -149,7 +148,7 @@ const ObsidianTears = () => {
       if (network === "local") {
         agent.fetchRootKey();
       }
-      setLoggedIn("stoic");
+      setLoggedInWith("stoic");
       let characterActor = await loadActors("stoic", agent);
       await loadCharacters(characterActor, p);
     });
@@ -162,21 +161,16 @@ const ObsidianTears = () => {
       console.log(authToken.Err);
       return;
     }
-    const loginData = await gameActor.loadGame(index, authToken.ok);
-    if (loginData.Err) {
-      console.log(authToken.Err);
-      return;
-    }
-    console.log(`loginData ${loginData.ok + ", index: " + index}`);
+    console.log("Selected NFT index: " + index);
     setRoute("game");
   };
 
   const tryToConnect = async () => {
     var connected = false;
-    if (loggedIn === "plug") {
+    if (loggedInWith === "plug") {
       await window.ic.plug.requestConnect({ whitelist, host });
       connected = await window.ic.plug.isConnected();
-    } else if (loggedIn === "stoic") {
+    } else if (loggedInWith === "stoic") {
       let id = await StoicIdentity.connect();
       setIdentity(id);
       connected = id !== false;
@@ -185,15 +179,14 @@ const ObsidianTears = () => {
   };
 
   const logout = () => {
-    if (loggedIn === "plug") {
+    if (loggedInWith === "plug") {
       window.ic.plug.disconnect();
-    } else if (loggedIn === "stoic") {
-      console.log("here");
+    } else if (loggedInWith === "stoic") {
       StoicIdentity.disconnect();
     }
 
     setRoute("home");
-    setLoggedIn("");
+    setLoggedInWith("");
   };
 
   React.useEffect(() => {
@@ -241,7 +234,7 @@ const ObsidianTears = () => {
                 Shop NFTs
               </button>
 
-              {loggedIn !== "" && (
+              {loggedInWith !== "" && (
                 <div className="rightHeader2">
                   <button
                     className="buttonWood"
@@ -261,8 +254,8 @@ const ObsidianTears = () => {
             connectToStoic={connectToStoic}
             loadActors={loadActors}
             loadCharacters={loadCharacters}
-            loggedIn={loggedIn}
-            setLoggedIn={setLoggedIn}
+            loggedInWith={loggedInWith}
+            setLoggedInWith={setLoggedInWith}
             selectNft={selectNft}
           />
         </div>

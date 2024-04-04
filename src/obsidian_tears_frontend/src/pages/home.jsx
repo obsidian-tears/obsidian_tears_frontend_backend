@@ -15,11 +15,19 @@ const Home = (props) => {
       ? `http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=`
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
+  const handleNftSelect = async (nft, i) => {
+    setLoadingNft(true);
+    setClickIndex(i);
+    await props.selectNft(nft[0]);
+    setLoadingNft(false);
+    setClickIndex(-1);
+  };
+
   return (
     <div>
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
-      {props.loggedIn !== "" ? (
+      {props.loggedInWith !== "" ? (
         !props.loading ? (
           <>
             <div className="centerMe">
@@ -40,13 +48,7 @@ const Home = (props) => {
                   <button
                     className="buttonWoodGrid"
                     style={backgroundImageWood2}
-                    onClick={async () => {
-                      setLoadingNft(true);
-                      setClickIndex(i);
-                      await props.selectNft(nft[0]);
-                      setLoadingNft(false);
-                      setClickIndex(-1);
-                    }}
+                    onClick={() => handleNftSelect(nft, i)}
                     disabled={loadingNft}
                   >
                     Select
@@ -72,7 +74,7 @@ const Home = (props) => {
               <PlugConnect
                 whitelist={props.whitelist}
                 onConnectCallback={async () => {
-                  props.setLoggedIn("plug");
+                  props.setLoggedInWith("plug");
                   let p = await window.ic.plug.agent.getPrincipal();
                   props.setPrincipal(p.toText());
                   let charActor = await props.loadActors("plug", p.toText());

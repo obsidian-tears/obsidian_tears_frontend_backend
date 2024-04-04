@@ -172,6 +172,7 @@ body {
   font-size: 24;
   font-weight: 600;
   font-family: "JetBrains Mono", monospace;
+  margin-top: 10px;
   padding-left: 6px;
   padding-right: 6px;
   justify-content: center;
@@ -200,7 +201,7 @@ body {
 }
 
 .buttonWoodGrid:disabled {
-  color: #777;
+  opacity: 0.8;
 }
 
 .buttonWoodGrid:disabled:focus,

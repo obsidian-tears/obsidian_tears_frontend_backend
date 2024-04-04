@@ -195,7 +195,12 @@ const ObsidianTears = () => {
   };
 
   const logout = () => {
-    window.ic.plug.disconnect();
+    if (usingPlug) {
+      window.ic.plug.disconnect();
+    } else if (usingStoic) {
+      StoicIdentity.disconnect();
+    }
+
     setRoute("home");
     setLoggedIn(false);
   };

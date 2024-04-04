@@ -27,6 +27,7 @@ const ObsidianTears = () => {
   const [charActor, setCharActor] = React.useState(null);
   const [itemActor, setItemActor] = React.useState(null);
   const [selectedNftIndex, setSelectedNftIndex] = React.useState(null);
+  const [authToken, setAuthToken] = React.useState("");
 
   const gameCanisterId = Actor.canisterIdOf(backendActor);
 
@@ -138,10 +139,13 @@ const ObsidianTears = () => {
   const selectNft = async (index) => {
     setSelectedNftIndex(index);
     const authToken = await gameActor.getAuthToken(index);
+
     if (authToken.Err) {
       console.log(authToken.Err);
       return;
     }
+
+    setAuthToken(authToken.ok);
     console.log("Selected NFT index: " + index);
     setRoute("game");
   };
@@ -181,9 +185,14 @@ const ObsidianTears = () => {
 
   return (
     <>
-      {route === "game" ? (
-        <Game gameActor={gameActor} selectedNftIndex={selectedNftIndex} />
-      ) : (
+      {route == "game" && (
+        <Game
+          authToken={authToken}
+          gameActorRef={gameActorRef}
+          selectedNftIndex={selectedNftIndex}
+        />
+      )}
+      {route == "home" && (
         <div
           id="body"
           style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}

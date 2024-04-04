@@ -1,19 +1,13 @@
 import React from "react";
-import { useUnityContext } from "react-unity-webgl";
-import { Unity } from "react-unity-webgl";
 import { isMobile, isTablet } from "react-device-detect";
+import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
 
-  const {
-    unityProvider,
-    isLoaded,
-    loadingProgression,
-    addEventListener,
-    sendMessage,
-  } = useUnityContext(unityUrls);
+  const { unityProvider, isLoaded, addEventListener, sendMessage } =
+    useUnityContext(unityUrls);
 
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
@@ -46,7 +40,8 @@ const Game = (props) => {
         // call the actor function
         let result = await props.gameActor.saveGame(
           props.selectedNftIndex,
-          gameData
+          gameData,
+          props.authToken
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -60,7 +55,10 @@ const Game = (props) => {
         }
       });
       addEventListener("LoadGame", async function (objectName) {
-        let result = await props.gameActor.loadGame(props.selectedNftIndex);
+        let result = await props.gameActor.loadGame(
+          props.selectedNftIndex,
+          props.authToken
+        );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
           sendMessage(objectName, "ListenLoadGame", result["Ok"]);
@@ -86,7 +84,8 @@ const Game = (props) => {
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActor.openChest(
           props.selectedNftIndex,
-          chestId
+          chestId,
+          props.authToken
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
@@ -117,7 +116,8 @@ const Game = (props) => {
         async function (monsterIndex, objectName) {
           let result = await props.gameActor.defeatMonster(
             props.selectedNftIndex,
-            monsterIndex
+            monsterIndex,
+            props.authToken
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];

@@ -1,8 +1,12 @@
-import * as React from "react";
 import PlugConnect from "@psychedelic/plug-connect";
-import { network, characterCanisterId } from "./../env";
+import * as React from "react";
+import ClipLoader from "react-spinners/ClipLoader";
+import { characterCanisterId, network } from "./../env";
 
 const Home = (props) => {
+  const [loadingNft, setLoadingNft] = React.useState(false);
+  const [clickIndex, setClickIndex] = React.useState(-1);
+
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
@@ -11,11 +15,19 @@ const Home = (props) => {
       ? `http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=`
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
+  const handleNftSelect = async (nft, i) => {
+    setLoadingNft(true);
+    setClickIndex(i);
+    await props.selectNft(nft[0]);
+    setLoadingNft(false);
+    setClickIndex(-1);
+  };
+
   return (
     <div>
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
-      {props.loggedIn ? (
+      {props.loggedInWith !== "" ? (
         !props.loading ? (
           <>
             <div className="centerMe">
@@ -36,9 +48,16 @@ const Home = (props) => {
                   <button
                     className="buttonWoodGrid"
                     style={backgroundImageWood2}
-                    onClick={() => props.selectNft(nft[0])}
+                    onClick={() => handleNftSelect(nft, i)}
+                    disabled={loadingNft}
                   >
                     Select
+                    <ClipLoader
+                      className="spinner"
+                      size={20}
+                      loading={loadingNft && i == clickIndex}
+                      color="gray"
+                    />
                   </button>
                 </div>
               ))}
@@ -55,16 +74,10 @@ const Home = (props) => {
               <PlugConnect
                 whitelist={props.whitelist}
                 onConnectCallback={async () => {
-                  props.setUsingPlug(true);
-                  props.setUsingStoic(false);
-                  props.setLoggedIn(true);
+                  props.setLoggedInWith("plug");
                   let p = await window.ic.plug.agent.getPrincipal();
                   props.setPrincipal(p.toText());
-                  let charActor = await props.loadActors(
-                    true,
-                    false,
-                    p.toText()
-                  );
+                  let charActor = await props.loadActors("plug", p.toText());
                   console.log("loaded actors from onconnectcallback");
                   await props.loadCharacters(charActor, p.toText());
                 }}

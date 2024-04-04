@@ -172,6 +172,7 @@ body {
   font-size: 24;
   font-weight: 600;
   font-family: "JetBrains Mono", monospace;
+  margin-top: 10px;
   padding-left: 6px;
   padding-right: 6px;
   justify-content: center;
@@ -197,6 +198,17 @@ body {
 .buttonWoodGrid:active {
   box-shadow: #301d27 0 3px 7px inset;
   transform: translateY(2px);
+}
+
+.buttonWoodGrid:disabled {
+  opacity: 0.8;
+}
+
+.buttonWoodGrid:disabled:focus,
+.buttonWoodGrid:disabled:hover,
+.buttonWoodGrid:disabled:active {
+  box-shadow: none;
+  transform: none;
 }
 
 /* for connect to stoic on home */
@@ -371,4 +383,8 @@ button {
 /* for the plug contianer to stretch it out the same as stoic */
 .c-ipvTzC > div {
   width: 176px;
+}
+
+.spinner {
+  margin-left: 8px;
 }

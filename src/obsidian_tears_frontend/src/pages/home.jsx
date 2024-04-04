@@ -4,7 +4,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { characterCanisterId, network } from "./../env";
 
 const Home = (props) => {
-  const [loading, setLoading] = React.useState(false);
+  const [loadingNft, setLoadingNft] = React.useState(false);
   const [clickIndex, setClickIndex] = React.useState(-1);
 
   // asset urls
@@ -19,7 +19,7 @@ const Home = (props) => {
     <div>
       <img src="menu-big-logo.png" alt="menu logo"></img>
 
-      {props.loggedIn ? (
+      {props.loggedIn !== "" ? (
         !props.loading ? (
           <>
             <div className="centerMe">
@@ -41,19 +41,19 @@ const Home = (props) => {
                     className="buttonWoodGrid"
                     style={backgroundImageWood2}
                     onClick={async () => {
-                      setLoading(true);
+                      setLoadingNft(true);
                       setClickIndex(i);
                       await props.selectNft(nft[0]);
-                      setLoading(false);
+                      setLoadingNft(false);
                       setClickIndex(-1);
                     }}
-                    disabled={loading}
+                    disabled={loadingNft}
                   >
                     Select
                     <ClipLoader
                       className="spinner"
                       size={20}
-                      loading={loading && i == clickIndex}
+                      loading={loadingNft && i == clickIndex}
                       color="gray"
                     />
                   </button>
@@ -72,16 +72,10 @@ const Home = (props) => {
               <PlugConnect
                 whitelist={props.whitelist}
                 onConnectCallback={async () => {
-                  props.setUsingPlug(true);
-                  props.setUsingStoic(false);
-                  props.setLoggedIn(true);
+                  props.setLoggedIn("plug");
                   let p = await window.ic.plug.agent.getPrincipal();
                   props.setPrincipal(p.toText());
-                  let charActor = await props.loadActors(
-                    true,
-                    false,
-                    p.toText()
-                  );
+                  let charActor = await props.loadActors("plug", p.toText());
                   console.log("loaded actors from onconnectcallback");
                   await props.loadCharacters(charActor, p.toText());
                 }}

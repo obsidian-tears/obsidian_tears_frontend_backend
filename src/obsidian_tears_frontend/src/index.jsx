@@ -17,19 +17,15 @@ import { characterCanisterId, itemCanisterId, network } from "./env";
 import principalToAccountIdentifier from "./utils";
 
 const ObsidianTears = () => {
-  const [loggedIn, setLoggedIn] = React.useState(false);
-  const [principal, setPrincipal] = React.useState("");
-  const [expandHeader, setExpandHeader] = React.useState(false);
+  // "" if not loggedIn, "plug" if using plug, "stoic" if using stoic
+  const [loggedIn, setLoggedIn] = React.useState("");
   const [route, setRoute] = React.useState("home");
-  const [usingPlug, setUsingPlug] = React.useState(false);
-  const [usingStoic, setUsingStoic] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [myNfts, setMyNfts] = React.useState([]);
   const [identity, setIdentity] = React.useState(null);
   const [gameActor, _setGameActor] = React.useState(null);
   const [charActor, _setCharActor] = React.useState(null);
   const [itemActor, _setItemActor] = React.useState(null);
-  const [stoicHttpAgent, setStoicHttpAgent] = React.useState(null);
   const [selectedNftIndex, _setSelectedNftIndex] = React.useState(null);
   const gameActorRef = React.useRef(gameActor);
   const itemActorRef = React.useRef(itemActor);
@@ -58,10 +54,10 @@ const ObsidianTears = () => {
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
 
-  const loadActors = async (plug, stoic, a) => {
+  const loadActors = async (loggedIn, a) => {
     console.log("loading actors");
     let characterActor;
-    if (plug) {
+    if (loggedIn === "plug") {
       setItemActor(
         await window.ic.plug.createActor({
           canisterId: itemCanisterId,
@@ -73,7 +69,7 @@ const ObsidianTears = () => {
         interfaceFactory: characterIdlFactory,
       });
       setCharActor(characterActor);
-    } else if (stoic) {
+    } else if (loggedIn === "stoic") {
       characterActor = Actor.createActor(characterIdlFactory, {
         agent: a,
         canisterId: characterCanisterId,
@@ -104,9 +100,9 @@ const ObsidianTears = () => {
 
   const verifyConnectionAndAgent = async () => {
     var connected;
-    if (usingPlug) {
+    if (loggedIn === "plug") {
       connected = await window.ic.plug.isConnected();
-    } else if (usingStoic) {
+    } else if (loggedIn === "stoic") {
       StoicIdentity.load().then(async (id) => {
         connected = id !== false;
       });
@@ -115,34 +111,32 @@ const ObsidianTears = () => {
     let agent;
     let p;
     if (connected) {
-      if (usingPlug) {
+      if (loggedIn === "plug") {
         p = await window.ic.plug.getPrincipal().toText();
         setPrincipal(p);
         if (!window.ic.plug.agent) {
           window.ic.plug.createAgent({ whitelist, host });
         }
-      } else if (usingStoic) {
+      } else if (loggedIn === "stoic") {
         p = identity.getPrincipal();
         setPrincipal(p.toText());
         agent = new HttpAgent({ identity, host });
         if (network === "local") {
           agent.fetchRootKey();
         }
-        setStoicHttpAgent(agent);
       }
     } else {
       connected = await tryToConnect();
     }
     if (connected) {
       console.log("about to load actors");
-      let characterActor = await loadActors(usingPlug, usingStoic, agent);
+      let characterActor = await loadActors(loggedIn, agent);
       console.log("finished loading actors. now load characters");
       await loadCharacters(characterActor, p.toText());
       console.log(
         `loaded actors: c,i,g: ${charActor}, ${itemActor}, ${gameActor}`
       );
     }
-    // setLoggedIn(connected)
   };
 
   const connectToStoic = async () => {
@@ -151,17 +145,13 @@ const ObsidianTears = () => {
       identity = await StoicIdentity.connect();
       let p = identity.getPrincipal().toText();
       setIdentity(identity);
-      setPrincipal(p);
       let agent = new HttpAgent({ identity: identity });
       if (network === "local") {
         agent.fetchRootKey();
       }
-      setStoicHttpAgent(agent);
-      setLoggedIn(true);
-      let characterActor = await loadActors(false, true, agent);
+      setLoggedIn("stoic");
+      let characterActor = await loadActors("stoic", agent);
       await loadCharacters(characterActor, p);
-      setUsingStoic(true);
-      setUsingPlug(false);
     });
   };
 
@@ -183,10 +173,10 @@ const ObsidianTears = () => {
 
   const tryToConnect = async () => {
     var connected = false;
-    if (usingPlug) {
+    if (loggedIn === "plug") {
       await window.ic.plug.requestConnect({ whitelist, host });
       connected = await window.ic.plug.isConnected();
-    } else if (usingStoic) {
+    } else if (loggedIn === "stoic") {
       let id = await StoicIdentity.connect();
       setIdentity(id);
       connected = id !== false;
@@ -195,14 +185,15 @@ const ObsidianTears = () => {
   };
 
   const logout = () => {
-    if (usingPlug) {
+    if (loggedIn === "plug") {
       window.ic.plug.disconnect();
-    } else if (usingStoic) {
+    } else if (loggedIn === "stoic") {
+      console.log("here");
       StoicIdentity.disconnect();
     }
 
     setRoute("home");
-    setLoggedIn(false);
+    setLoggedIn("");
   };
 
   React.useEffect(() => {
@@ -250,7 +241,7 @@ const ObsidianTears = () => {
                 Shop NFTs
               </button>
 
-              {loggedIn && (
+              {loggedIn !== "" && (
                 <div className="rightHeader2">
                   <button
                     className="buttonWood"
@@ -266,19 +257,10 @@ const ObsidianTears = () => {
 
           <Home
             loading={loading}
-            setLoading={setLoading}
             myNfts={myNfts}
-            setMyNfts={setMyNfts}
             connectToStoic={connectToStoic}
             loadActors={loadActors}
             loadCharacters={loadCharacters}
-            setUsingPlug={setUsingPlug}
-            setUsingStoic={setUsingStoic}
-            usingPlug={usingPlug}
-            usingStoic={usingStoic}
-            setPrincipal={setPrincipal}
-            principal={principal}
-            setRoute={setRoute}
             loggedIn={loggedIn}
             setLoggedIn={setLoggedIn}
             selectNft={selectNft}

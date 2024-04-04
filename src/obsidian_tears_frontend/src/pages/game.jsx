@@ -1,6 +1,7 @@
 import React from "react";
 import { useUnityContext } from "react-unity-webgl";
 import { Unity } from "react-unity-webgl";
+import { isMobile, isTablet } from "react-device-detect";
 import { unityUrls } from "../env";
 
 const Game = (props) => {
@@ -17,8 +18,28 @@ const Game = (props) => {
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
+  const initDataUnity = () => {
+    const myCharacter = props.selectedNftIndexRef;
+    sendMessage(
+      "ReactController(Clone)",
+      "InitData",
+      JSON.stringify(myCharacter)
+    );
+  };
+
+  const checkMobile = () => {
+    sendMessage(
+      "ReactController(Clone)",
+      "CheckMobilePlatform",
+      isMobile || isTablet ? 1 : 0
+    );
+  };
+
   React.useEffect(() => {
     if (isLoaded) {
+      checkMobile();
+      initDataUnity();
+
       // register unity functions
       addEventListener("SaveGame", async function (gameData, objectName) {
         window.saveData = gameData;
@@ -121,11 +142,21 @@ const Game = (props) => {
         }
       );
     }
+
+    updateLoadingPercentage(0);
   }, [isLoaded]);
 
-  React.useEffect(() => {
-    setLoadingPercentage(Math.round(loadingProgression * 100));
-  }, [loadingProgression]);
+  const getRandomInt = (max) => {
+    return Math.floor(Math.random() * max);
+  };
+
+  const updateLoadingPercentage = (percent) => {
+    if (percent < 99) {
+      let nextPercent = percent + getRandomInt(4);
+      setLoadingPercentage(nextPercent);
+      setTimeout(updateLoadingPercentage, 800, nextPercent);
+    }
+  };
 
   return (
     <>
@@ -147,7 +178,7 @@ const Game = (props) => {
             // We'll conditionally render the loading overlay if the Unity
             // Application is not loaded.
             <div className="loading-overlay">
-              <p>Loading... ({loadingPercentage}%)</p>
+              <p>Downloading... ({loadingPercentage}%)</p>
             </div>
           )}
           <Unity ref={ref} className="unity" unityProvider={unityProvider} />

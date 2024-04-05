@@ -99,7 +99,11 @@ const NftSelector = (props) => {
       id="body"
       style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
     >
-      <Navbar loggedInWith={props.loggedInWith} logout={props.logout} />
+      <Navbar
+        loggedInWith={props.loggedInWith}
+        setLoggedInWith={props.setLoggedInWith}
+        setRoute={props.setRoute}
+      />
       <div>
         <img src="menu-big-logo.png" alt="menu logo"></img>
 

@@ -31,8 +31,6 @@ const ObsidianTears = () => {
   const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
 
   // asset urls
-  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
-
   const loadActors = async (loggedInWith, agent) => {
     console.log("loading actors");
     let characterActor;
@@ -144,17 +142,6 @@ const ObsidianTears = () => {
     return connected;
   };
 
-  const logout = () => {
-    if (loggedInWith === "plug") {
-      window.ic.plug.disconnect();
-    } else if (loggedInWith === "stoic") {
-      StoicIdentity.disconnect();
-    }
-
-    setRoute("login");
-    setLoggedInWith("");
-  };
-
   React.useEffect(() => {
     async function checkAndRecoverSession() {
       if (gameActor == null && itemActor == null && charActor == null) {
@@ -174,7 +161,7 @@ const ObsidianTears = () => {
           loadActors={loadActors}
           setLoggedInWith={setLoggedInWith}
           loggedInWith={loggedInWith}
-          logout={logout}
+          setRoute={setRoute}
         />
       )}
       {route === "nftSelector" && (
@@ -183,8 +170,9 @@ const ObsidianTears = () => {
           gameActor={gameActor}
           charActor={charActor}
           principal={principal}
+          setLoggedInWith={setLoggedInWith}
           loggedInWith={loggedInWith}
-          logout={logout}
+          setRoute={setRoute}
         />
       )}
       {route === "game" && (

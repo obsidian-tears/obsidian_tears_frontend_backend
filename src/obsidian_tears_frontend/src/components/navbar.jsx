@@ -1,8 +1,22 @@
+import { StoicIdentity } from "ic-stoic-identity";
 import * as React from "react";
 
-const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
-
 const Navbar = (props) => {
+  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
+
+  const logout = () => {
+    let loggedInWith = props.loggedInWith;
+
+    if (loggedInWith === "plug") {
+      window.ic.plug.disconnect();
+    } else if (loggedInWith === "stoic") {
+      StoicIdentity.disconnect();
+    }
+
+    props.setRoute("login");
+    props.setLoggedInWith("");
+  };
+
   return (
     <div id="header">
       <div className="leftHeader">
@@ -32,7 +46,7 @@ const Navbar = (props) => {
             <button
               className="buttonWood"
               style={backgroundImageWood2}
-              onClick={() => props.logout()}
+              onClick={() => logout()}
             >
               Logout
             </button>

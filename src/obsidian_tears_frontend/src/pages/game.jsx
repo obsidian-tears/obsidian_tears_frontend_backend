@@ -6,24 +6,18 @@ import { unityUrls } from "../env";
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
 
-  const {
-    unityProvider,
-    isLoaded,
-    loadingProgression,
-    addEventListener,
-    sendMessage,
-  } = useUnityContext(unityUrls);
+  const { unityProvider, isLoaded, addEventListener, sendMessage } =
+    useUnityContext(unityUrls);
 
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
   const initDataUnity = () => {
-    const myCharacter = props.selectedNftIndexRef;
-    sendMessage(
-      "ReactController(Clone)",
-      "InitData",
-      JSON.stringify(myCharacter)
-    );
+    const initData = {
+      CharacterClass: props.selectedNftInfo.class,
+      CharacterUrl: props.selectedNftInfo.url,
+    };
+    sendMessage("ReactController(Clone)", "InitData", JSON.stringify(initData));
   };
 
   const checkMobile = () => {
@@ -43,10 +37,10 @@ const Game = (props) => {
       addEventListener("SaveGame", async function (gameData, objectName) {
         window.saveData = gameData;
         // call the actor function
-        let result = await props.gameActorRef.current.saveGame(
-          props.selectedNftIndexRef.current,
+        let result = await props.gameActor.saveGame(
+          props.selectedNftInfo.index,
           gameData,
-          props.authToken
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -60,9 +54,9 @@ const Game = (props) => {
         }
       });
       addEventListener("LoadGame", async function (objectName) {
-        let result = await props.gameActorRef.current.loadGame(
-          props.selectedNftIndexRef.current,
-          props.authToken
+        let result = await props.gameActor.loadGame(
+          props.selectedNftInfo.index,
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
@@ -87,10 +81,10 @@ const Game = (props) => {
         }
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
-        let result = await props.gameActorRef.current.openChest(
-          props.selectedNftIndexRef.current,
+        let result = await props.gameActor.openChest(
+          props.selectedNftInfo.index,
           chestId,
-          props.authToken
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
@@ -119,10 +113,10 @@ const Game = (props) => {
       addEventListener(
         "DefeatMonster",
         async function (monsterIndex, objectName) {
-          let result = await props.gameActorRef.current.defeatMonster(
-            props.selectedNftIndexRef.current,
+          let result = await props.gameActor.defeatMonster(
+            props.selectedNftInfo.index,
             monsterIndex,
-            props.authToken
+            props.selectedNftInfo.authToken
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];

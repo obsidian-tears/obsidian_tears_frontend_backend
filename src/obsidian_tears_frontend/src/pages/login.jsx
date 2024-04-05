@@ -21,13 +21,7 @@ const Login = (props) => {
             <div className="centerMe">
               <PlugConnect
                 whitelist={props.whitelist}
-                onConnectCallback={async () => {
-                  props.setLoggedInWith("plug");
-                  let p = await window.ic.plug.agent.getPrincipal();
-                  let charActor = await props.loadActors("plug", p.toText());
-                  console.log("loaded actors from onconnectcallback");
-                  await props.loadCharacters(charActor, p.toText());
-                }}
+                onConnectCallback={props.connectToPlug}
               />
               <br></br>
             </div>

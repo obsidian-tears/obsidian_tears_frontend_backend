@@ -2,10 +2,14 @@ import * as React from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Navbar from "../components/navbar";
 import { characterCanisterId, network } from "../env";
+import principalToAccountIdentifier from "../utils";
 
 const NftSelector = (props) => {
   const [loadingNft, setLoadingNft] = React.useState(false);
   const [clickIndex, setClickIndex] = React.useState(-1);
+  const [loading, setLoading] = React.useState(true);
+  const [myNfts, setMyNfts] = React.useState([]);
+  const [authToken, setAuthToken] = React.useState("");
 
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -14,13 +18,43 @@ const NftSelector = (props) => {
       ? `http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=`
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
+  const loadCharacters = async () => {
+    console.log(`load characters`);
+    let registry = await props.charActor.getRegistry();
+    const address = principalToAccountIdentifier(props.principal);
+    console.log(`address: ${address}`);
+    let nfts = registry.filter((val, i, arr) => val[1] == address);
+    console.log(`nfts: ${nfts}`);
+    setMyNfts(nfts);
+    setLoading(false);
+  };
+
+  const selectNft = async (index) => {
+    setSelectedNftIndex(index);
+    const authToken = await gameActor.getAuthToken(index);
+
+    if (authToken.Err) {
+      console.log(authToken.Err);
+      return;
+    }
+
+    setAuthToken(authToken.ok);
+    console.log("Selected NFT index: " + index);
+    setNftInfo(index);
+  };
+
   const handleNftSelect = async (nft, i) => {
     setLoadingNft(true);
     setClickIndex(i);
-    await props.selectNft(nft[0]);
+    selectNft;
+    await props.setNftInfo(nft[0]);
     setLoadingNft(false);
     setClickIndex(-1);
   };
+
+  React.useEffect(() => {
+    loadCharacters();
+  }, []);
 
   return (
     <div
@@ -31,7 +65,7 @@ const NftSelector = (props) => {
       <div>
         <img src="menu-big-logo.png" alt="menu logo"></img>
 
-        {!props.loading ? (
+        {!loading ? (
           <>
             <div className="centerMe">
               <h2 className="title2">Select a Hero to start the game</h2>
@@ -39,7 +73,7 @@ const NftSelector = (props) => {
             </div>
 
             <div className="container">
-              {props.myNfts.map((nft, i) => (
+              {myNfts.map((nft, i) => (
                 <div key={i}>
                   <a href={nftBaseUrl + nft[0]} target="_blank">
                     <img
@@ -67,7 +101,7 @@ const NftSelector = (props) => {
             </div>
           </>
         ) : (
-          <p className="whiteText">loading NFTs...</p>
+          <p className="whiteText">Loading NFTs...</p>
         )}
       </div>
     </div>

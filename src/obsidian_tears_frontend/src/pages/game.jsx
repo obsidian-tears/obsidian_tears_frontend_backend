@@ -13,12 +13,11 @@ const Game = (props) => {
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
 
   const initDataUnity = () => {
-    const myCharacter = props.selectedNftIndex;
-    sendMessage(
-      "ReactController(Clone)",
-      "InitData",
-      JSON.stringify(myCharacter)
-    );
+    const initData = {
+      CharacterClass: props.selectedNftInfo.class,
+      CharacterUrl: props.selectedNftInfo.url,
+    };
+    sendMessage("ReactController(Clone)", "InitData", JSON.stringify(initData));
   };
 
   const checkMobile = () => {
@@ -39,9 +38,9 @@ const Game = (props) => {
         window.saveData = gameData;
         // call the actor function
         let result = await props.gameActor.saveGame(
-          props.selectedNftIndex,
+          props.selectedNftInfo.index,
           gameData,
-          props.authToken
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -56,8 +55,8 @@ const Game = (props) => {
       });
       addEventListener("LoadGame", async function (objectName) {
         let result = await props.gameActor.loadGame(
-          props.selectedNftIndex,
-          props.authToken
+          props.selectedNftInfo.index,
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
@@ -83,9 +82,9 @@ const Game = (props) => {
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActor.openChest(
-          props.selectedNftIndex,
+          props.selectedNftInfo.index,
           chestId,
-          props.authToken
+          props.selectedNftInfo.authToken
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
@@ -115,9 +114,9 @@ const Game = (props) => {
         "DefeatMonster",
         async function (monsterIndex, objectName) {
           let result = await props.gameActor.defeatMonster(
-            props.selectedNftIndex,
+            props.selectedNftInfo.index,
             monsterIndex,
-            props.authToken
+            props.selectedNftInfo.authToken
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];

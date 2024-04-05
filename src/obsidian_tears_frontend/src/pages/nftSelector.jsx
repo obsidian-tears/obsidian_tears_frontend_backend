@@ -9,7 +9,6 @@ const NftSelector = (props) => {
   const [clickIndex, setClickIndex] = React.useState(-1);
   const [loading, setLoading] = React.useState(true);
   const [myNfts, setMyNfts] = React.useState([]);
-  const [authToken, setAuthToken] = React.useState("");
 
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -20,34 +19,73 @@ const NftSelector = (props) => {
 
   const loadCharacters = async () => {
     console.log(`load characters`);
-    let registry = await props.charActor.getRegistry();
+    const registry = await props.charActor.getRegistry();
     const address = principalToAccountIdentifier(props.principal);
     console.log(`address: ${address}`);
-    let nfts = registry.filter((val, i, arr) => val[1] == address);
+    const nfts = registry.filter((val, _i, _arr) => val[1] == address);
     console.log(`nfts: ${nfts}`);
     setMyNfts(nfts);
     setLoading(false);
   };
 
-  const selectNft = async (index) => {
-    setSelectedNftIndex(index);
-    const authToken = await gameActor.getAuthToken(index);
+  const getCharacterData = async (nftIndex) => {
+    const metadata = await props.charActor.getMetadata();
+    const meta = metadata.filter((val, _i, _arr) => val[0] == nftIndex);
 
+    const nft = meta[0][1];
+    const index = meta[0][0];
+    if (nft.nonfungible == undefined) return;
+
+    const metadataArray = nft.nonfungible.metadata;
+    if (metadataArray.length == 0) return;
+
+    const value = metadataArray[0][1];
+    let nftClass;
+
+    switch (value) {
+      case 0:
+        nftClass = "archer";
+        break;
+      case 1:
+        nftClass = "wizard";
+        break;
+      case 2:
+        nftClass = "warrior";
+        break;
+      default:
+        nftClass = "warrior";
+        break;
+    }
+
+    console.log("NFT Class: " + nftClass);
+    return {
+      index: nftIndex,
+      class: nftClass,
+      url: `https://${characterCanisterId}.raw.icp0.io/?index=${index}&battle=true`,
+    };
+  };
+
+  const getNftInfo = async (index) => {
+    const authToken = await props.gameActor.getAuthToken(index);
     if (authToken.Err) {
-      console.log(authToken.Err);
+      console.error(authToken.Err);
       return;
     }
 
-    setAuthToken(authToken.ok);
-    console.log("Selected NFT index: " + index);
-    setNftInfo(index);
+    const nftInfo = await getCharacterData(index);
+    if (nftInfo == undefined) {
+      console.error("Unable to get nft metadata");
+      return;
+    }
+    nftInfo["authToken"] = authToken.ok;
+
+    return nftInfo;
   };
 
   const handleNftSelect = async (nft, i) => {
     setLoadingNft(true);
     setClickIndex(i);
-    selectNft;
-    await props.setNftInfo(nft[0]);
+    await props.setNftInfo(await getNftInfo(nft[0]));
     setLoadingNft(false);
     setClickIndex(-1);
   };

@@ -24,7 +24,6 @@ import AID "lib/util/AccountIdentifier";
 import M "middleware";
 import Ref "reference";
 import T "types";
-import AccountIdentifier "lib/util/AccountIdentifier";
 
 actor class _ObsidianTearsBackend() = this {
   // Types

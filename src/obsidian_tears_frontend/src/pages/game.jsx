@@ -17,12 +17,15 @@ const Game = (props) => {
       CharacterClass: props.selectedNftInfo.class,
       CharacterUrl: props.selectedNftInfo.url,
     };
-    sendMessage("ReactController(Clone)", "InitData", JSON.stringify(initData));
+    console.log("InitDataUnity:");
+    console.log(JSON.stringify(initData));
+    sendMessage("ICConnect", "InitData", JSON.stringify(initData));
   };
 
   const checkMobile = () => {
+    console.log("CheckMobile: " + isMobile || isTablet ? 1 : 0);
     sendMessage(
-      "ReactController(Clone)",
+      "CheckMobile",
       "CheckMobilePlatform",
       isMobile || isTablet ? 1 : 0
     );

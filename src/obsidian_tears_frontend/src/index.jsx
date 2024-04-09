@@ -9,7 +9,6 @@ import { StoicIdentity } from "ic-stoic-identity";
 import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
 import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
 import { characterCanisterId, itemCanisterId } from "./env";
-import { loadStoicActors } from "./providers/stoicProvider";
 
 const ObsidianTears = () => {
   // loginInfo {identity, principal, loggedInWith ("plug", "stoic" or "" if not logged)}
@@ -35,15 +34,7 @@ const ObsidianTears = () => {
         interfaceFactory: characterIdlFactory,
       });
       setCharActor(characterActor);
-    } else if (loggedInWith === "stoic") {
-      characterActor = loadStoicActors(
-        agent,
-        setGameActor,
-        setCharActor,
-        setItemActor
-      );
     }
-    return characterActor;
   };
 
   // const verifyConnectionAndAgent = async () => {
@@ -70,9 +61,21 @@ const ObsidianTears = () => {
     setRoute("game");
   };
 
-  const saveLogin = async () => {};
+  const saveLogin = async (identity) => {
+    setLoginInfo({
+      loggedInWith: "stoic",
+      identity: identity,
+      principal: identity.getPrincipal().toText(),
+    });
+  };
 
-  const saveActors = async () => {};
+  const saveActors = async (gameActor, charActor, itemActor) => {
+    setGameActor(gameActor);
+    setCharActor(charActor);
+    setItemActor(itemActor);
+
+    setRoute("nftSelector");
+  };
 
   const logout = () => {
     if (loginInfo.loggedInWith === "plug") {
@@ -102,15 +105,11 @@ const ObsidianTears = () => {
       {route === "login" && (
         <Login
           identity={loginInfo.identity}
-          setLoginInfo={setLoginInfo}
-          setRoute={setRoute}
+          saveLogin={saveLogin}
+          saveActors={saveActors}
           connectToPlug={connectToPlug}
-          setGameActor={setGameActor}
-          setCharActor={setCharActor}
-          setItemActor={setItemActor}
         />
       )}
-      {console.log(loginInfo.identity)}
       {route === "nftSelector" && (
         <NftSelector
           setNftInfo={setNftInfo}

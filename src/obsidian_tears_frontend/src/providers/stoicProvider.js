@@ -8,28 +8,6 @@ import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did
 import { itemIdlFactory } from "../../idl_factories/itemIdlFactory.did";
 import { characterCanisterId, itemCanisterId, network } from "../env";
 
-export const loadStoicActors = (
-  agent,
-  setGameActor,
-  setCharActor,
-  setItemActor
-) => {
-  let characterActor = Actor.createActor(characterIdlFactory, {
-    agent: agent,
-    canisterId: characterCanisterId,
-  });
-  setGameActor(backendCreateActor(backendCanisterId, { agent: agent }));
-  setCharActor(characterActor);
-  setItemActor(
-    Actor.createActor(itemIdlFactory, {
-      agent: agent,
-      canisterId: itemCanisterId,
-    })
-  );
-
-  return characterActor;
-};
-
 // export const verifyStoicConnectionAndAgent = (
 //   identity,
 //   setLoginInfo,
@@ -57,26 +35,25 @@ export const loadStoicActors = (
 // };
 
 //add missing arguments
-export const connectToStoic = async (
-  identity,
-  setLoginInfo,
-  setRoute,
-  setGameActor,
-  setCharActor,
-  setItemActor
-) => {
+export const connectToStoic = async (identity, saveLogin, saveActors) => {
   StoicIdentity.load().then(async (identity) => {
     identity = await StoicIdentity.connect();
     let agent = new HttpAgent({ identity: identity });
     if (network === "local") {
       agent.fetchRootKey();
     }
-    setLoginInfo({
-      loggedInWith: "stoic",
-      identity: identity,
-      principal: identity.getPrincipal().toText(),
+
+    let gameActor = backendCreateActor(backendCanisterId, { agent: agent });
+    let charActor = Actor.createActor(characterIdlFactory, {
+      agent: agent,
+      canisterId: characterCanisterId,
     });
-    await loadStoicActors(agent, setGameActor, setCharActor, setItemActor);
-    setRoute("nftSelector");
+    let itemActor = Actor.createActor(itemIdlFactory, {
+      agent: agent,
+      canisterId: itemCanisterId,
+    });
+
+    saveLogin(identity);
+    saveActors(gameActor, charActor, itemActor);
   });
 };

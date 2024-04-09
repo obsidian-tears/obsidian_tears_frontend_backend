@@ -6,9 +6,6 @@ import Login from "./pages/login";
 import NftSelector from "./pages/nftSelector";
 
 import { StoicIdentity } from "ic-stoic-identity";
-import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
-import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
-import { characterCanisterId, itemCanisterId } from "./env";
 
 const ObsidianTears = () => {
   // loginInfo {identity, principal, loggedInWith ("plug", "stoic" or "" if not logged)}
@@ -19,24 +16,6 @@ const ObsidianTears = () => {
   const [itemActor, setItemActor] = React.useState(null);
   const [selectedNftInfo, setSelectedNftInfo] = React.useState(null);
 
-  const loadActors = async (loggedInWith, agent) => {
-    console.log("loading actors");
-    let characterActor;
-    if (loggedInWith === "plug") {
-      setItemActor(
-        await agent.createActor({
-          canisterId: itemCanisterId,
-          interfaceFactory: itemIdlFactory,
-        })
-      );
-      characterActor = await agent.createActor({
-        canisterId: characterCanisterId,
-        interfaceFactory: characterIdlFactory,
-      });
-      setCharActor(characterActor);
-    }
-  };
-
   // const verifyConnectionAndAgent = async () => {
   //   if (loginInfo.loggedInWith === "plug") {
   //     //verifyPlugConnectionAndAgent(identity, setPrincipal, setIdentity, setRoute);
@@ -44,29 +23,27 @@ const ObsidianTears = () => {
   //     //verifyStoicConnectionAndAgent(loginInfo.identity, setLoginInfo, setRoute);
   // };
 
-  const connectToPlug = async () => {
-    setLoginInfo((prevState) => ({
-      ...prevState,
-      loggedInWith: "plug",
-    }));
-    let p = await window.ic.plug.agent.getPrincipal();
-    setPrincipal(p);
-    await loadActors("plug", window.ic.plug);
-    setRoute("nftSelector");
-  };
-
   const setNftInfo = async (nftInfo) => {
     setSelectedNftInfo(nftInfo);
     console.log("Selected NFT index: " + nftInfo.index);
     setRoute("game");
   };
 
-  const saveLogin = async (identity) => {
-    setLoginInfo({
-      loggedInWith: "stoic",
-      identity: identity,
-      principal: identity.getPrincipal().toText(),
-    });
+  const saveLogin = async (loggedInWith, identity) => {
+    if (loggedInWith === "stoic") {
+      setLoginInfo({
+        loggedInWith,
+        identity,
+        principal: identity.getPrincipal().toText(),
+      });
+    } else if (loggedInWith === "plug") {
+      let principal = await window.ic.plug.agent.getPrincipal();
+      setLoginInfo((prevState) => ({
+        ...prevState,
+        loggedInWith,
+        principal,
+      }));
+    }
   };
 
   const saveActors = async (gameActor, charActor, itemActor) => {
@@ -107,7 +84,6 @@ const ObsidianTears = () => {
           identity={loginInfo.identity}
           saveLogin={saveLogin}
           saveActors={saveActors}
-          connectToPlug={connectToPlug}
         />
       )}
       {route === "nftSelector" && (

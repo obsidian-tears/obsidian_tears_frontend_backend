@@ -44,16 +44,16 @@ const NftSelector = (props) => {
 
     switch (value) {
       case 0:
-        nftClass = "archer";
+        nftClass = "RANGER";
         break;
       case 1:
-        nftClass = "wizard";
+        nftClass = "MAGE";
         break;
       case 2:
-        nftClass = "warrior";
+        nftClass = "FIGHTER";
         break;
       default:
-        nftClass = "warrior";
+        nftClass = "FIGHTER";
         break;
     }
 

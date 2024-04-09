@@ -30,31 +30,31 @@ export const loadStoicActors = (
   return characterActor;
 };
 
-export const verifyStoicConnectionAndAgent = (
-  identity,
-  setLoginInfo,
-  setRoute
-) => {
-  StoicIdentity.load().then(async (id) => {
-    if (id) {
-      setLoginInfo((prevState) => ({
-        ...prevState,
-        principal: identity.getPrincipal(),
-      }));
-      let agent = new HttpAgent({ identity, host });
-      if (network === "local") {
-        agent.fetchRootKey();
-      }
-    } else {
-      let id = await StoicIdentity.connect();
-      setLoginInfo((prevState) => ({
-        ...prevState,
-        identity: identity,
-      }));
-      if (id) setRoute("nftSelector");
-    }
-  });
-};
+// export const verifyStoicConnectionAndAgent = (
+//   identity,
+//   setLoginInfo,
+//   setRoute
+// ) => {
+//   StoicIdentity.load().then(async (id) => {
+//     if (id) {
+//       setLoginInfo((prevState) => ({
+//         ...prevState,
+//         principal: identity.getPrincipal(),
+//       }));
+//       let agent = new HttpAgent({ identity, host });
+//       if (network === "local") {
+//         agent.fetchRootKey();
+//       }
+//     } else {
+//       let id = await StoicIdentity.connect();
+//       setLoginInfo((prevState) => ({
+//         ...prevState,
+//         identity: identity,
+//       }));
+//       if (id) setRoute("nftSelector");
+//     }
+//   });
+// };
 
 //add missing arguments
 export const connectToStoic = async (

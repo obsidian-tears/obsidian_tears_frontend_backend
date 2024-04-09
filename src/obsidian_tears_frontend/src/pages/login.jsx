@@ -1,8 +1,14 @@
+import { Actor } from "@dfinity/agent";
 import PlugConnect from "@psychedelic/plug-connect";
 import * as React from "react";
+import { obsidian_tears_backend as backendActor } from "../../../declarations/obsidian_tears_backend";
 import Navbar from "../components/navbar";
+import { characterCanisterId, itemCanisterId } from "../env";
+import { connectToStoic } from "../providers/stoicProvider";
 
 const Login = (props) => {
+  const gameCanisterId = Actor.canisterIdOf(backendActor);
+  const whitelist = [gameCanisterId, itemCanisterId, characterCanisterId];
   // asset urls
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 
@@ -11,7 +17,7 @@ const Login = (props) => {
       id="body"
       style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
     >
-      <Navbar loggedInWith={props.loggedInWith} logout={props.logout} />
+      <Navbar />
 
       <div>
         <img src="menu-big-logo.png" alt="menu logo"></img>
@@ -20,7 +26,7 @@ const Login = (props) => {
           {false && (
             <div className="centerMe">
               <PlugConnect
-                whitelist={props.whitelist}
+                whitelist={whitelist}
                 onConnectCallback={props.connectToPlug}
               />
               <br></br>
@@ -31,7 +37,14 @@ const Login = (props) => {
               className={"buttonWoodGridXL"}
               style={backgroundImageWood3}
               onClick={async () => {
-                await props.connectToStoic();
+                await connectToStoic(
+                  props.identity,
+                  props.setLoginInfo,
+                  props.setRoute,
+                  props.setGameActor,
+                  props.setCharActor,
+                  props.setItemActor
+                );
               }}
             >
               Connect to Stoic

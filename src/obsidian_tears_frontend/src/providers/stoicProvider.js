@@ -8,6 +8,29 @@ import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did
 import { itemIdlFactory } from "../../idl_factories/itemIdlFactory.did";
 import { characterCanisterId, itemCanisterId, network } from "../env";
 
+export const connectToStoic = async (identity, saveLogin, saveActors) => {
+  StoicIdentity.load().then(async (identity) => {
+    identity = await StoicIdentity.connect();
+    let agent = new HttpAgent({ identity: identity });
+    if (network === "local") {
+      agent.fetchRootKey();
+    }
+
+    let gameActor = backendCreateActor(backendCanisterId, { agent: agent });
+    let charActor = Actor.createActor(characterIdlFactory, {
+      agent: agent,
+      canisterId: characterCanisterId,
+    });
+    let itemActor = Actor.createActor(itemIdlFactory, {
+      agent: agent,
+      canisterId: itemCanisterId,
+    });
+
+    saveLogin("stoic", identity);
+    saveActors(gameActor, charActor, itemActor);
+  });
+};
+
 // export const verifyStoicConnectionAndAgent = (
 //   identity,
 //   setLoginInfo,
@@ -33,27 +56,3 @@ import { characterCanisterId, itemCanisterId, network } from "../env";
 //     }
 //   });
 // };
-
-//add missing arguments
-export const connectToStoic = async (identity, saveLogin, saveActors) => {
-  StoicIdentity.load().then(async (identity) => {
-    identity = await StoicIdentity.connect();
-    let agent = new HttpAgent({ identity: identity });
-    if (network === "local") {
-      agent.fetchRootKey();
-    }
-
-    let gameActor = backendCreateActor(backendCanisterId, { agent: agent });
-    let charActor = Actor.createActor(characterIdlFactory, {
-      agent: agent,
-      canisterId: characterCanisterId,
-    });
-    let itemActor = Actor.createActor(itemIdlFactory, {
-      agent: agent,
-      canisterId: itemCanisterId,
-    });
-
-    saveLogin(identity);
-    saveActors(gameActor, charActor, itemActor);
-  });
-};

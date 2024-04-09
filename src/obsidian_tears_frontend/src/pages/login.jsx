@@ -39,11 +39,9 @@ const Login = (props) => {
               onClick={async () => {
                 await connectToStoic(
                   props.identity,
-                  props.setLoginInfo,
-                  props.setRoute,
-                  props.setGameActor,
-                  props.setCharActor,
-                  props.setItemActor
+                  props.saveLogin,
+                  props.saveActors,
+                  props.connectToPlug
                 );
               }}
             >

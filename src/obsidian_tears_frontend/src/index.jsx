@@ -9,10 +9,7 @@ import { StoicIdentity } from "ic-stoic-identity";
 import { characterIdlFactory } from "../idl_factories/characterIdlFactory.did";
 import { itemIdlFactory } from "../idl_factories/itemIdlFactory.did";
 import { characterCanisterId, itemCanisterId } from "./env";
-import {
-  loadStoicActors,
-  verifyStoicConnectionAndAgent,
-} from "./providers/stoicProvider";
+import { loadStoicActors } from "./providers/stoicProvider";
 
 const ObsidianTears = () => {
   // loginInfo {identity, principal, loggedInWith ("plug", "stoic" or "" if not logged)}
@@ -49,12 +46,12 @@ const ObsidianTears = () => {
     return characterActor;
   };
 
-  const verifyConnectionAndAgent = async () => {
-    if (loginInfo.loggedInWith === "plug") {
-      //verifyPlugConnectionAndAgent(identity, setPrincipal, setIdentity, setRoute);
-    } else if (loginInfo.loggedInWith === "stoic")
-      verifyStoicConnectionAndAgent(loginInfo.identity, setLoginInfo, setRoute);
-  };
+  // const verifyConnectionAndAgent = async () => {
+  //   if (loginInfo.loggedInWith === "plug") {
+  //     //verifyPlugConnectionAndAgent(identity, setPrincipal, setIdentity, setRoute);
+  //   } else if (loginInfo.loggedInWith === "stoic")
+  //     //verifyStoicConnectionAndAgent(loginInfo.identity, setLoginInfo, setRoute);
+  // };
 
   const connectToPlug = async () => {
     setLoginInfo((prevState) => ({
@@ -91,14 +88,14 @@ const ObsidianTears = () => {
     }));
   };
 
-  React.useEffect(() => {
-    async function checkAndRecoverSession() {
-      if (gameActor == null && itemActor == null && charActor == null) {
-        await verifyConnectionAndAgent();
-      }
-    }
-    checkAndRecoverSession();
-  }, [gameActor, itemActor, charActor]);
+  // React.useEffect(() => {
+  //   async function checkAndRecoverSession() {
+  //     if (gameActor == null && itemActor == null && charActor == null) {
+  //       await verifyConnectionAndAgent();
+  //     }
+  //   }
+  //   checkAndRecoverSession();
+  // }, [gameActor, itemActor, charActor]);
 
   return (
     <>

@@ -37,7 +37,7 @@ const ObsidianTears = () => {
     }
   };
 
-  const saveActors = async (gameActor, charActor) => {
+  const saveActors = async (gameActor, charActor, itemActor) => {
     setGameActor(gameActor);
     setCharActor(charActor);
 

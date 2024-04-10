@@ -13,15 +13,7 @@ const ObsidianTears = () => {
   const [route, setRoute] = React.useState("login"); // "login" -> "nftSelector" -> "game"
   const [gameActor, setGameActor] = React.useState(null);
   const [charActor, setCharActor] = React.useState(null);
-  const [itemActor, setItemActor] = React.useState(null);
   const [selectedNftInfo, setSelectedNftInfo] = React.useState(null);
-
-  // const verifyConnectionAndAgent = async () => {
-  //   if (loginInfo.loggedInWith === "plug") {
-  //     //verifyPlugConnectionAndAgent(identity, setPrincipal, setIdentity, setRoute);
-  //   } else if (loginInfo.loggedInWith === "stoic")
-  //     //verifyStoicConnectionAndAgent(loginInfo.identity, setLoginInfo, setRoute);
-  // };
 
   const setNftInfo = async (nftInfo) => {
     setSelectedNftInfo(nftInfo);
@@ -38,18 +30,16 @@ const ObsidianTears = () => {
       });
     } else if (loggedInWith === "plug") {
       let principal = await window.ic.plug.agent.getPrincipal();
-      setLoginInfo((prevState) => ({
-        ...prevState,
+      setLoginInfo({
         loggedInWith,
         principal,
-      }));
+      });
     }
   };
 
-  const saveActors = async (gameActor, charActor, itemActor) => {
+  const saveActors = async (gameActor, charActor) => {
     setGameActor(gameActor);
     setCharActor(charActor);
-    setItemActor(itemActor);
 
     setRoute("nftSelector");
   };
@@ -62,29 +52,15 @@ const ObsidianTears = () => {
     }
 
     setRoute("login");
-    setLoginInfo((prevState) => ({
-      ...prevState,
+    setLoginInfo({
       loggedInWith: "",
-    }));
+    });
   };
-
-  // React.useEffect(() => {
-  //   async function checkAndRecoverSession() {
-  //     if (gameActor == null && itemActor == null && charActor == null) {
-  //       await verifyConnectionAndAgent();
-  //     }
-  //   }
-  //   checkAndRecoverSession();
-  // }, [gameActor, itemActor, charActor]);
 
   return (
     <>
       {route === "login" && (
-        <Login
-          identity={loginInfo.identity}
-          saveLogin={saveLogin}
-          saveActors={saveActors}
-        />
+        <Login saveLogin={saveLogin} saveActors={saveActors} />
       )}
       {route === "nftSelector" && (
         <NftSelector

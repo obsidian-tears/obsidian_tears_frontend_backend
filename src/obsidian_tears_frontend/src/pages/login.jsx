@@ -38,12 +38,7 @@ const Login = (props) => {
               className={"buttonWoodGridXL"}
               style={backgroundImageWood3}
               onClick={async () => {
-                await connectToStoic(
-                  props.identity,
-                  props.saveLogin,
-                  props.saveActors,
-                  props.connectToPlug
-                );
+                await connectToStoic(props.saveLogin, props.saveActors);
               }}
             >
               Connect to Stoic

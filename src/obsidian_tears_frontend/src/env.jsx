@@ -40,6 +40,5 @@ const buildUnityUrls = () => {
   };
 };
 
-export const itemCanisterId = canisterIds[network]["itemCanister"];
 export const characterCanisterId = canisterIds[network]["characterCanister"];
 export const unityUrls = buildUnityUrls();

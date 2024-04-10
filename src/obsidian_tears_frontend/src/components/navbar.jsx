@@ -26,8 +26,7 @@ const Navbar = (props) => {
         >
           Shop NFTs
         </button>
-
-        {props.loggedInWith !== "" && (
+        {props.logout && (
           <div className="rightHeader2">
             <button
               className="buttonWood"

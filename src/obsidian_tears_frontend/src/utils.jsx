@@ -34,3 +34,24 @@ const toHexString = (byteArray) => {
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 };
+
+// Source: https://medium.com/@kevinkoobs/how-to-detect-if-a-user-uses-a-mobile-device-with-javascript-f19e26d22a9b
+export const isMobileOrTablet = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const width = screen.availWidth;
+  const height = screen.availHeight;
+
+  if (userAgent.includes("mobi") || userAgent.includes("tablet")) {
+    return true;
+  }
+  // Screen is higher than it’s wide, so we have portrait mode
+  if (height > width && width < 800) {
+    return true;
+  }
+  // Screen is wider than it’s high, so we have landscape mode
+  if (width > height && height < 800) {
+    return true;
+  }
+
+  return false;
+};

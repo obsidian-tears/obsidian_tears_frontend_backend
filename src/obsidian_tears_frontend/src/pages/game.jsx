@@ -1,7 +1,7 @@
 import React from "react";
-import { isMobile, isTablet } from "react-device-detect";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
+import { isMobileOrTablet } from "../utils";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
@@ -23,12 +23,11 @@ const Game = (props) => {
   };
 
   const checkMobile = () => {
-    console.log("CheckMobile: " + isMobile || isTablet ? 1 : 0);
-    sendMessage(
-      "CheckMobile",
-      "CheckMobilePlatform",
-      isMobile || isTablet ? 1 : 0
-    );
+    const isTabletOrMobile = isMobileOrTablet();
+
+    console.log("CheckMobile:");
+    console.log(isTabletOrMobile);
+    sendMessage("CheckMobile", "CheckMobilePlatform", isTabletOrMobile ? 1 : 0);
   };
 
   React.useEffect(() => {

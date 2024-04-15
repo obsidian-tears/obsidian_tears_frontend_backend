@@ -188,11 +188,11 @@ actor class _ObsidianTearsBackend() = this {
         if (chest.gold > 0) {
           rewardInfo := {
             itemIds = rewardInfo.itemIds;
-            gold = _giveGold(chest.gold, caller, true);
+            gold = giveGold(chest.gold, caller, true);
             xp = rewardInfo.xp;
           };
         };
-        let itemResult : T.RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
+        let itemResult : T.RewardInfo = await mintRewardItems(chest.itemReward, caller, characterIndex);
         rewardInfo := {
           itemIds = itemResult.itemIds;
           gold = rewardInfo.gold;
@@ -220,9 +220,9 @@ actor class _ObsidianTearsBackend() = this {
     switch (optMonster) {
       case (?monster) {
         // give player gold
-        let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
+        let itemInfo : T.RewardInfo = await mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
         let rewardInfo : T.RewardInfo = {
-          gold = _giveGold(monster.gold, caller, true);
+          gold = giveGold(monster.gold, caller, true);
           xp = monster.xp;
           itemIds = itemInfo.itemIds;
         };
@@ -253,7 +253,7 @@ actor class _ObsidianTearsBackend() = this {
   // helper functions
   // -----------------------------------
 
-  func _append<T>(array : [T], val : T) : [T] {
+  func append<T>(array : [T], val : T) : [T] {
     let new = Array.tabulate<T>(
       array.size() +1,
       func(i) {
@@ -267,7 +267,7 @@ actor class _ObsidianTearsBackend() = this {
     new;
   };
 
-  func _appendAll<T>(array : [T], val : [T]) : [T] {
+  func appendAll<T>(array : [T], val : [T]) : [T] {
     if (val.size() == 0) {
       return array;
     };
@@ -284,7 +284,7 @@ actor class _ObsidianTearsBackend() = this {
     new;
   };
 
-  func _getParam(url : Text, param : Text) : ?Text {
+  func getParam(url : Text, param : Text) : ?Text {
     var _s : Text = url;
     Iter.iterate<Text>(
       Text.split(_s, #text("/")),
@@ -320,13 +320,13 @@ actor class _ObsidianTearsBackend() = this {
     return t;
   };
 
-  func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {
+  func mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {
     // check probability and mint items
     let optRandomNumber : ?Nat = Random.Finite(Principal.toBlob(caller)).range(8);
     switch (optRandomNumber) {
       case (?randomNumber) {
         if (randomNumber % 100 <= Nat8.toNat(itemProb)) {
-          await _mintRewardItems(itemReward, caller, characterIndex);
+          await mintRewardItems(itemReward, caller, characterIndex);
         } else {
           {
             xp = 0;
@@ -345,7 +345,7 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async T.RewardInfo {
+  func mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async T.RewardInfo {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     var defaultReward : T.RewardInfo = {
       xp = 0;
@@ -367,7 +367,7 @@ actor class _ObsidianTearsBackend() = this {
             case (?item) {
               ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
               defaultReward := {
-                itemIds = _append(defaultReward.itemIds, item.unityId);
+                itemIds = append(defaultReward.itemIds, item.unityId);
                 gold = 0;
                 xp = 0;
               };
@@ -394,7 +394,7 @@ actor class _ObsidianTearsBackend() = this {
             // give item to user
             ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
             defaultReward := {
-              itemIds = _append(defaultReward.itemIds, item.unityId);
+              itemIds = append(defaultReward.itemIds, item.unityId);
               gold = 0;
               xp = 0;
             };
@@ -407,7 +407,7 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  func _giveGold(gold : Nat32, caller : Principal, positive : Bool) : Nat32 {
+  func giveGold(gold : Nat32, caller : Principal, positive : Bool) : Nat32 {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // give user gold
     let optCurrGold : ?Nat32 = Map.get(goldMap, accountHash, address);
@@ -457,7 +457,7 @@ actor class _ObsidianTearsBackend() = this {
         let optNonNftItems : ?[Nat16] = Map.get(ownedNonNftItems, tokenHash, characterIndex);
         switch (optNonNftItems) {
           case (?nonNftItems) {
-            Map.set(ownedNonNftItems, tokenHash, characterIndex, _append(nonNftItems, itemIndex));
+            Map.set(ownedNonNftItems, tokenHash, characterIndex, append(nonNftItems, itemIndex));
             return #Ok(metadata);
           };
           case _ return #Err(#Other "item definition doesn't exist");

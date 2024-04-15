@@ -16,7 +16,7 @@ import AID "../src/obsidian_tears_backend/lib/util/AccountIdentifier";
 import Main "../src/obsidian_tears_backend/main";
 import T "../src/obsidian_tears_backend/types";
 
-let backendActor = await Main._ObsidianTearsBackend();
+let backendActor = await Main.ObsidianTearsBackend();
 
 // ==================
 // setup

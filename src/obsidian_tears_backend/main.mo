@@ -25,7 +25,7 @@ import M "middleware";
 import Ref "reference";
 import T "types";
 
-actor class _ObsidianTearsBackend() = this {
+actor class ObsidianTearsBackend() = this {
   // Types
   type AccountIdentifier = ER.AccountIdentifier;
   type TokenIndex = ER.TokenIndex;
@@ -365,7 +365,7 @@ actor class _ObsidianTearsBackend() = this {
           );
           switch (optItem) {
             case (?item) {
-              ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
+              ignore (await mintItemMetadata(item.metadata, address, characterIndex, item.id));
               defaultReward := {
                 itemIds = append(defaultReward.itemIds, item.unityId);
                 gold = 0;
@@ -392,7 +392,7 @@ actor class _ObsidianTearsBackend() = this {
             // choose a random item from the list
             let item : Ref.Item = filteredItems[randomNumber! % filteredItems.size()];
             // give item to user
-            ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
+            ignore (await mintItemMetadata(item.metadata, address, characterIndex, item.id));
             defaultReward := {
               itemIds = append(defaultReward.itemIds, item.unityId);
               gold = 0;
@@ -445,13 +445,13 @@ actor class _ObsidianTearsBackend() = this {
     );
     switch (itemContainer) {
       case (?item) {
-        return await _mintItem(item.metadata, recipient, characterIndex, itemId);
+        return await mintItemMetadata(item.metadata, recipient, characterIndex, itemId);
       };
       case _ #Err(#Other "Unable to retrieve item data");
     };
   };
 
-  func _mintItem(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async T.ApiResponse<[Nat8]> {
+  func mintItemMetadata(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async T.ApiResponse<[Nat8]> {
     try {
       if (metadata == []) {
         let optNonNftItems : ?[Nat16] = Map.get(ownedNonNftItems, tokenHash, characterIndex);

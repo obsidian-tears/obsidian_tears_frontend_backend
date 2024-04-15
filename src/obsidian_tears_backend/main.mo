@@ -67,16 +67,16 @@ actor class _ObsidianTearsBackend() = this {
   // system functions
   system func preupgrade() {
     // canistergeek
-    _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
-    _canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
+    canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+    canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
   };
 
   system func postupgrade() {
     // canistergeek
-    canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
-    _canistergeekMonitorUD := null;
-    canistergeekLogger.postupgrade(_canistergeekLoggerUD);
-    _canistergeekLoggerUD := null;
+    canistergeekMonitor.postupgrade(canistergeekMonitorUD);
+    canistergeekMonitorUD := null;
+    canistergeekLogger.postupgrade(canistergeekLoggerUD);
+    canistergeekLoggerUD := null;
     canistergeekLogger.setMaxMessagesCount(3000);
     canistergeekLogger.logMessage("postupgrade");
   };
@@ -490,10 +490,10 @@ actor class _ObsidianTearsBackend() = this {
   // canistergeek
   // -----------------------------------
 
-  stable var _canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
+  stable var canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
   private let canistergeekMonitor = Canistergeek.Monitor();
 
-  stable var _canistergeekLoggerUD : ?Canistergeek.LoggerUpgradeData = null;
+  stable var canistergeekLoggerUD : ?Canistergeek.LoggerUpgradeData = null;
   private let canistergeekLogger = Canistergeek.Logger();
 
   private let adminPrincipal : Text = "csvbe-getzk-3k2vt-boxl5-v2mzn-rzn23-oraa7-gjauz-dvoyn-upjlb-3ae";

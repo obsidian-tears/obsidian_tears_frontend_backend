@@ -8,9 +8,10 @@ import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did
 import { itemIdlFactory } from "../../idl_factories/itemIdlFactory.did";
 import { characterCanisterId, itemCanisterId, network } from "../env";
 
-export const connectToStoic = async (identity, saveLogin, saveActors) => {
-  StoicIdentity.load().then(async (identity) => {
-    identity = await StoicIdentity.connect();
+export const connectToStoic = async (saveLogin, saveActors) => {
+  StoicIdentity.load().then(async () => {
+    let identity = await StoicIdentity.connect();
+    console.log(identity);
     let agent = new HttpAgent({ identity: identity });
     if (network === "local") {
       agent.fetchRootKey();
@@ -26,8 +27,8 @@ export const connectToStoic = async (identity, saveLogin, saveActors) => {
       canisterId: itemCanisterId,
     });
 
-    saveLogin("stoic", identity);
     saveActors(gameActor, charActor, itemActor);
+    saveLogin("stoic", identity);
   });
 };
 

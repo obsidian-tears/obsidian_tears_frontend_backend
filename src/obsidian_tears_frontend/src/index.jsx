@@ -37,7 +37,7 @@ const ObsidianTears = () => {
         principal: identity.getPrincipal().toText(),
       });
     } else if (loggedInWith === "plug") {
-      let principal = await window.ic.plug.agent.getPrincipal();
+      let principal = await window.ic.plug.getPrincipal(true);
       setLoginInfo((prevState) => ({
         ...prevState,
         loggedInWith,
@@ -80,11 +80,7 @@ const ObsidianTears = () => {
   return (
     <>
       {route === "login" && (
-        <Login
-          identity={loginInfo.identity}
-          saveLogin={saveLogin}
-          saveActors={saveActors}
-        />
+        <Login saveLogin={saveLogin} saveActors={saveActors} />
       )}
       {route === "nftSelector" && (
         <NftSelector

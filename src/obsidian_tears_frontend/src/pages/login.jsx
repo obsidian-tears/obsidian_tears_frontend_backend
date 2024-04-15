@@ -1,19 +1,16 @@
 import * as React from "react";
-import { obsidian_tears_backend as backendActor } from "../../../declarations/obsidian_tears_backend";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
 import { connectToPlug } from "../providers/plugProvider";
 
 const Login = (props) => {
-  const gameCanisterId = Actor.canisterIdOf(backendActor);
-  const whitelist = [gameCanisterId, characterCanisterId];
   // asset urls
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 
   const handlePlugButton = async () => {
     if (!window.ic || !window.ic.plug)
       window.open("https://plugwallet.ooo/", "_blank");
-    else connectToPlug(props.saveLogin, props.saveActors);
+    else await connectToPlug(props.saveLogin, props.saveActors);
   };
 
   return (
@@ -30,7 +27,7 @@ const Login = (props) => {
             <button
               className={"buttonWoodGridXL"}
               style={backgroundImageWood3}
-              onClick={() => handlePlugButton()}
+              onClick={async () => await handlePlugButton()}
             >
               Connect to Plug
             </button>

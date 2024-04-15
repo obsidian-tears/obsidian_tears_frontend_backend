@@ -3,8 +3,7 @@ import {
   createActor as backendCreateActor,
 } from "../../../declarations/obsidian_tears_backend";
 import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did";
-import { itemIdlFactory } from "../../idl_factories/itemIdlFactory.did";
-import { characterCanisterId, itemCanisterId, network } from "../env";
+import { characterCanisterId, network } from "../env";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 export const connectToPlug = async (saveLogin, saveActors) => {
@@ -28,10 +27,6 @@ export const connectToPlug = async (saveLogin, saveActors) => {
     canisterId: characterCanisterId,
     interfaceFactory: characterIdlFactory,
   });
-  let itemActor = await plug.createActor({
-    canisterId: itemCanisterId,
-    interfaceFactory: itemIdlFactory,
-  });
 
   // let agent = new HttpAgent({ identity: principal });
   // if (network === "local") {
@@ -43,11 +38,7 @@ export const connectToPlug = async (saveLogin, saveActors) => {
   //   agent,
   //   canisterId: characterCanisterId,
   // });
-  // let itemActor = Actor.createActor(itemIdlFactory, {
-  //   agent,
-  //   canisterId: itemCanisterId,
-  // });
 
-  saveActors(gameActor, charActor, itemActor);
+  saveActors(gameActor, charActor);
   saveLogin("plug", principal);
 };

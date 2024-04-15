@@ -1,8 +1,12 @@
 import * as React from "react";
+import { obsidian_tears_backend as backendActor } from "../../../declarations/obsidian_tears_backend";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
 import { connectToPlug } from "../providers/plugProvider";
+
 const Login = (props) => {
+  const gameCanisterId = Actor.canisterIdOf(backendActor);
+  const whitelist = [gameCanisterId, characterCanisterId];
   // asset urls
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 

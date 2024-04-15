@@ -237,7 +237,7 @@ actor class ObsidianTearsBackend() = this {
   // -----------------------------------
   // http
   // -----------------------------------
-  public query func http_request(_request : T.HttpRequest) : async T.HttpResponse {
+  public query func http_request(request : T.HttpRequest) : async T.HttpResponse {
     let name = "Obsidian Tears RPG";
     return {
       status_code = 200;

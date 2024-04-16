@@ -2,8 +2,6 @@ import Array "mo:base/Array";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
-import HashMap "mo:base/HashMap";
-import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
@@ -237,7 +235,7 @@ actor class ObsidianTearsBackend() = this {
   // -----------------------------------
   // http
   // -----------------------------------
-  public query func http_request(request : T.HttpRequest) : async T.HttpResponse {
+  public query func http_request(_request : T.HttpRequest) : async T.HttpResponse {
     let name = "Obsidian Tears RPG";
     return {
       status_code = 200;
@@ -265,59 +263,6 @@ actor class ObsidianTearsBackend() = this {
       },
     );
     new;
-  };
-
-  func appendAll<T>(array : [T], val : [T]) : [T] {
-    if (val.size() == 0) {
-      return array;
-    };
-    let new = Array.tabulate<T>(
-      array.size() + val.size(),
-      func(i) {
-        if (i < array.size()) {
-          array[i];
-        } else {
-          val[i - array.size()];
-        };
-      },
-    );
-    new;
-  };
-
-  func getParam(url : Text, param : Text) : ?Text {
-    var _s : Text = url;
-    Iter.iterate<Text>(
-      Text.split(_s, #text("/")),
-      func(x, _i) {
-        _s := x;
-      },
-    );
-    Iter.iterate<Text>(
-      Text.split(_s, #text("?")),
-      func(x, _i) {
-        if (_i == 1) _s := x;
-      },
-    );
-    var t : ?Text = null;
-    var found : Bool = false;
-    Iter.iterate<Text>(
-      Text.split(_s, #text("&")),
-      func(x, _i) {
-        if (found == false) {
-          Iter.iterate<Text>(
-            Text.split(x, #text("=")),
-            func(y, _ii) {
-              if (_ii == 0) {
-                if (Text.equal(y, param)) found := true;
-              } else if (found == true) {
-                t := ?y;
-              };
-            },
-          );
-        };
-      },
-    );
-    return t;
   };
 
   func mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {

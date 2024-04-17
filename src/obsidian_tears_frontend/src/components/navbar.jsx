@@ -31,7 +31,7 @@ const Navbar = (props) => {
             <button
               className="buttonWood"
               style={backgroundImageWood2}
-              onClick={() => props.logout()}
+              onClick={async () => await props.logout()}
             >
               Logout
             </button>

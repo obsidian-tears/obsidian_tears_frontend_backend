@@ -21,7 +21,7 @@ export const connectToStoic = async (saveLogin, saveActors) => {
       canisterId: characterCanisterId,
     });
 
-    saveLogin("stoic", { stoic_identity: identity });
+    saveLogin("stoic", identity.getPrincipal().toText());
     saveActors(gameActor, charActor);
   });
 };

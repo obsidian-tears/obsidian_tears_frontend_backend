@@ -18,10 +18,7 @@ const NftSelector = (props) => {
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
   const loadCharacters = async () => {
-    console.log(`load characters`);
-    console.log("charactor", props.charActor);
     const registry = await props.charActor.getRegistry();
-    console.log("registry", registry);
     const address = principalToAccountIdentifier(props.principal);
     console.log(`address: ${address}`);
     const nfts = registry.filter((val, _i, _arr) => val[1] == address);

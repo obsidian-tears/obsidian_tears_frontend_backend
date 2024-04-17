@@ -21,23 +21,25 @@ const ObsidianTears = () => {
     setRoute("game");
   };
 
-  const saveLogin = async (loggedInWith, identity) => {
+  const saveLogin = async (
+    loggedInWith,
+    { stoic_identity, plug_principal }
+  ) => {
     if (loggedInWith === "stoic") {
       setLoginInfo({
         loggedInWith,
-        identity,
-        principal: identity.getPrincipal().toText(),
+        stoic_identity,
+        principal: stoic_identity.getPrincipal().toText(),
       });
     } else if (loggedInWith === "plug") {
-      let principal = await window.ic.plug.agent.getPrincipal();
       setLoginInfo({
         loggedInWith,
-        principal,
+        principal: plug_principal,
       });
     }
   };
 
-  const saveActors = async (gameActor, charActor, itemActor) => {
+  const saveActors = async (gameActor, charActor) => {
     setGameActor(gameActor);
     setCharActor(charActor);
 

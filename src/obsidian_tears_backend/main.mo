@@ -23,7 +23,7 @@ import M "middleware";
 import Ref "reference";
 import T "types";
 
-actor class ObsidianTearsBackend() = this {
+actor class _ObsidianTearsBackend() = this {
   // Types
   type AccountIdentifier = ER.AccountIdentifier;
   type TokenIndex = ER.TokenIndex;

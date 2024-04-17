@@ -12,7 +12,7 @@ module Middleware {
   public func generateAuthToken() : async (Text) {
     let blob = await Random.blob();
     let fuzz = Fuzz.fromBlob(blob);
-    return fuzz.text.randomAlphanumeric(39); // this generates a 40 character long string
+    return fuzz.text.randomAlphanumeric(40);
   };
 
   public func hasValidToken(index : ER.TokenIndex, authToken : Text, registry : Map.Map<Text, T.TokenWithTimestamp>) : Bool {

@@ -36,9 +36,9 @@ module {
   };
 
   public func isAdmin(caller : Principal) : Bool {
-    let _minters : [Text] = getAdminPrincipals();
+    let minters : [Text] = getAdminPrincipals();
     let callerText = Principal.toText(caller);
 
-    return Array.indexOf<Text>(callerText, _minters, Text.equal) != null;
+    return Array.indexOf<Text>(callerText, minters, Text.equal) != null;
   };
 };

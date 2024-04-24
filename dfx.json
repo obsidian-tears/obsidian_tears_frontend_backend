@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "dfx": "0.18.0",
+  "dfx": "0.19.0",
   "canisters": {
     "obsidian_tears_backend": {
       "type": "motoko",

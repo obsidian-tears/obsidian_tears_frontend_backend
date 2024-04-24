@@ -105,7 +105,7 @@ const NftSelector = (props) => {
         {!loading ? (
           <>
             <div className="centerMe">
-              <h2 className="title2">Select a Hero to start the game</h2>
+              <h2 className="title">Select a Hero to start the game</h2>
               <br></br>
             </div>
 

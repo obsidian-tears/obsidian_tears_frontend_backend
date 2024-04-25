@@ -94,10 +94,7 @@ const NftSelector = (props) => {
   }, []);
 
   return (
-    <div
-      id="body"
-      style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
-    >
+    <div id="body">
       <Navbar logout={props.logout} />
       <div>
         <img src="menu-big-logo.png" alt="menu logo"></img>
@@ -105,10 +102,22 @@ const NftSelector = (props) => {
         {!loading ? (
           <>
             <div className="centerMe">
+              <br></br>
               <h2 className="title">Select a Hero to start the game</h2>
               <br></br>
             </div>
 
+            {myNfts.length == 0 && (
+              <div className="centerMe">
+                <br></br>
+                <h2
+                  className="title"
+                  style={{ fontSize: "26px", fontWeight: 500 }}
+                >
+                  Ups... No NFTs found in this wallet.
+                </h2>
+              </div>
+            )}
             <div className="container">
               {myNfts.map((nft, i) => (
                 <div key={i}>
@@ -138,7 +147,9 @@ const NftSelector = (props) => {
             </div>
           </>
         ) : (
-          <p className="whiteText">Loading NFTs...</p>
+          <div className="centerMe">
+            <h2 className="title">Loading NFTs...</h2>
+          </div>
         )}
       </div>
     </div>

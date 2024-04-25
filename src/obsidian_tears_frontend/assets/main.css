@@ -57,11 +57,11 @@ body {
 
 /* container for nfts using grid display */
 .container {
-  width: 100%;
+  width: 1280px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-auto-rows: 17em;
-  grid-gap: 4em;
+  grid-gap: 5em;
   height: 100%;
   margin: 0px auto;
   text-align: center;
@@ -76,12 +76,6 @@ body {
   line-height: 32px;
   margin: 0 0 24px;
   text-align: center;
-}
-
-.whiteText {
-  color: #ffffff;
-  font-family: "Raleway", sans-serif;
-  font-size: 32px;
 }
 
 .buttonWood {

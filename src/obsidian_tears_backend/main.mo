@@ -11,6 +11,7 @@ import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Nat64 "mo:base/Nat64";
 import Canistergeek "mo:canistergeek/canistergeek";
 import Map "mo:map/Map";
 
@@ -458,6 +459,15 @@ actor class _ObsidianTearsBackend() = this {
     if (not (Principal.toText(principal) == adminPrincipal)) {
       Debug.trap("Not Authorized");
     };
+  };
+
+  // clean authTokenRegistry every 24 hours
+  system func timer(setGlobalTimer : Nat64 -> ()) : async () {
+    let secondsMore : Nat64 = 24 * 60 * 60;
+    let next = Nat64.fromIntWrap(Time.now()) + secondsMore;
+    setGlobalTimer(next);
+
+    M.cleanAuthTokenRegistry(authTokenRegistry);
   };
 
   // -----------------------------------

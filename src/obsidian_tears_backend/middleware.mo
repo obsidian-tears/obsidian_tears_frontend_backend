@@ -2,6 +2,8 @@ import Random "mo:base/Random";
 import Time "mo:base/Time";
 import Fuzz "mo:fuzz";
 import Map "mo:map/Map";
+import Buffer "mo:base/Buffer";
+import { thash } "mo:map/Map";
 
 import ER "lib/ext/Core";
 import T "types";
@@ -25,5 +27,25 @@ module Middleware {
     let timestamp : Time.Time = tokenWithTimestamp.1;
 
     return (tokenIndex == index) and ((timestamp + fullDay) > Time.now());
+  };
+
+  public func isNotOld(_id : Text, token : T.TokenWithTimestamp) : Bool {
+    let currentTime : Time.Time = Time.now();
+    return currentTime - token.1 < fullDay;
+  };
+
+  public func cleanAuthTokenRegistry(registry : Map.Map<Text, T.TokenWithTimestamp>) : () {
+    var idBuffer = Buffer.Buffer<Text>(0);
+
+    Map.forEach(
+      registry,
+      func(K : Text, V : T.TokenWithTimestamp) {
+        if (isNotOld(K, V)) idBuffer.add(K);
+      },
+    );
+
+    for (id in idBuffer.vals()) {
+      Map.delete(registry, thash, id);
+    };
   };
 };

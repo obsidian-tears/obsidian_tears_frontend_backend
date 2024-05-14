@@ -10,7 +10,7 @@ let authToken : Text = "abc123";
 let authToken2 : Text = "abc1234";
 let playerNftId : Nat32 = 1;
 let playerNftId2 : Nat32 = 2;
-let dayAgo : Time.Time = Time.now() - 90000000000000; // 25 hours ago in nanoseconds
+let dayAgo : Time.Time = Time.now() - 25 * 60 * 60 * 1000000000; // 25 hours ago in nanoseconds
 var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
 
 await suite(
@@ -61,7 +61,9 @@ await suite(
         Middleware.cleanAuthTokenRegistry(authTokenRegistry);
 
         let finalRegistrySize = Map.size(authTokenRegistry);
+        let onlyElement = Map.has(authTokenRegistry, Map.thash, authToken);
         expect.nat(finalRegistrySize).equal(1);
+        expect.bool(onlyElement).isTrue();
       },
     );
   },

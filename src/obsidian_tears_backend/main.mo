@@ -463,8 +463,8 @@ actor class _ObsidianTearsBackend() = this {
 
   // clean authTokenRegistry every 24 hours
   system func timer(setGlobalTimer : Nat64 -> ()) : async () {
-    let secondsMore : Nat64 = 24 * 60 * 60;
-    let next = Nat64.fromIntWrap(Time.now()) + secondsMore;
+    let dayInNanoseconds : Nat64 = 24 * 60 * 60 * 1000000000;
+    let next = Nat64.fromIntWrap(Time.now()) + dayInNanoseconds;
     setGlobalTimer(next);
 
     M.cleanAuthTokenRegistry(authTokenRegistry);

@@ -29,9 +29,9 @@ module Middleware {
     return (tokenIndex == index) and ((timestamp + fullDay) > Time.now());
   };
 
-  public func isNotOld(_id : Text, token : T.TokenWithTimestamp) : Bool {
+  private func isNotOld(_id : Text, token : T.TokenWithTimestamp) : Bool {
     let currentTime : Time.Time = Time.now();
-    return currentTime - token.1 < fullDay;
+    return currentTime - token.1 > fullDay;
   };
 
   public func cleanAuthTokenRegistry(registry : Map.Map<Text, T.TokenWithTimestamp>) : () {

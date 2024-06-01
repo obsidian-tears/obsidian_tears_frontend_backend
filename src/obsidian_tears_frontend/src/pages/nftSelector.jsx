@@ -114,7 +114,7 @@ const NftSelector = (props) => {
                   className="title"
                   style={{ fontSize: "26px", fontWeight: 500 }}
                 >
-                  Ups... No NFTs found in this wallet.
+                  Oops... No NFTs found in this wallet.
                 </h2>
               </div>
             )}

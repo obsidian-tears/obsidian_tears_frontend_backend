@@ -45,11 +45,11 @@ export const isMobileOrTablet = () => {
     return true;
   }
   // Screen is higher than it’s wide, so we have portrait mode
-  if (height > width && width < 800) {
+  if (height > width && width <= 600 && height <= 1200) {
     return true;
   }
   // Screen is wider than it’s high, so we have landscape mode
-  if (width > height && height < 800) {
+  if (width > height && height <= 600 && width <= 1200) {
     return true;
   }
 

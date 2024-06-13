@@ -2,8 +2,6 @@ import Array "mo:base/Array";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
-import HashMap "mo:base/HashMap";
-import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
@@ -13,6 +11,7 @@ import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Nat64 "mo:base/Nat64";
 import Canistergeek "mo:canistergeek/canistergeek";
 import Map "mo:map/Map";
 
@@ -32,27 +31,27 @@ actor class _ObsidianTearsBackend() = this {
   type CommonError = ER.CommonError;
   type Metadata = EC.Metadata;
 
-  stable var _lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
+  stable var lastRegistryUpdate : Time.Time = Time.now(); // keep track of the last time registries were updated
 
   // Env
-  let _itemCanister : Text = Env.getItemCanisterId();
-  let _characterCanister : Text = Env.getCharacterCanisterId();
+  let itemCanisterEnv : Text = Env.getItemCanisterId();
+  let characterCanisterEnv : Text = Env.getCharacterCanisterId();
 
   // Actors
-  var _characterActor : T.CharacterInterface = actor (_characterCanister);
-  var _itemActor : T.ItemInterface = actor (_itemCanister);
+  var characterActor : T.CharacterInterface = actor (characterCanisterEnv);
+  var itemActor : T.ItemInterface = actor (itemCanisterEnv);
 
   let tokenHash : Map.HashUtils<TokenIndex> = (TokenIndex.hash, TokenIndex.equal);
   let accountHash : Map.HashUtils<AccountIdentifier> = (AID.hash, AID.equal);
 
   // State
   stable var authTokenRegistry : Map.Map<Text, T.TokenWithTimestamp> = Map.new<Text, T.TokenWithTimestamp>();
-  stable var _saveData : Map.Map<TokenIndex, Text> = Map.new<TokenIndex, Text>();
-  stable var _ownedNonNftItems : Map.Map<TokenIndex, [Nat16]> = Map.new<TokenIndex, [Nat16]>();
-  stable var _gold : Map.Map<AccountIdentifier, Nat32> = Map.new<AccountIdentifier, Nat32>();
-  stable var _characterRegistry : Map.Map<TokenIndex, AccountIdentifier> = Map.new<TokenIndex, AccountIdentifier>();
-  stable var _itemRegistry : Map.Map<TokenIndex, AccountIdentifier> = Map.new<TokenIndex, AccountIdentifier>();
-  stable var _itemMetadata : Map.Map<TokenIndex, Metadata> = Map.new<TokenIndex, Metadata>();
+  stable var saveData : Map.Map<TokenIndex, Text> = Map.new<TokenIndex, Text>();
+  stable var ownedNonNftItems : Map.Map<TokenIndex, [Nat16]> = Map.new<TokenIndex, [Nat16]>();
+  stable var goldMap : Map.Map<AccountIdentifier, Nat32> = Map.new<AccountIdentifier, Nat32>();
+  stable var characterRegistry : Map.Map<TokenIndex, AccountIdentifier> = Map.new<TokenIndex, AccountIdentifier>();
+  stable var itemRegistry : Map.Map<TokenIndex, AccountIdentifier> = Map.new<TokenIndex, AccountIdentifier>();
+  stable var itemMetadata : Map.Map<TokenIndex, Metadata> = Map.new<TokenIndex, Metadata>();
 
   // ********* NOW ********* //
   // TODO create new game function that sets player data at default
@@ -67,16 +66,16 @@ actor class _ObsidianTearsBackend() = this {
   // system functions
   system func preupgrade() {
     // canistergeek
-    _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
-    _canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
+    canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+    canistergeekLoggerUD := ?canistergeekLogger.preupgrade();
   };
 
   system func postupgrade() {
     // canistergeek
-    canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
-    _canistergeekMonitorUD := null;
-    canistergeekLogger.postupgrade(_canistergeekLoggerUD);
-    _canistergeekLoggerUD := null;
+    canistergeekMonitor.postupgrade(canistergeekMonitorUD);
+    canistergeekMonitorUD := null;
+    canistergeekLogger.postupgrade(canistergeekLoggerUD);
+    canistergeekLoggerUD := null;
     canistergeekLogger.setMaxMessagesCount(3000);
     canistergeekLogger.logMessage("postupgrade");
   };
@@ -92,23 +91,23 @@ actor class _ObsidianTearsBackend() = this {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
 
     // get and update character cache registry
-    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
+    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await characterActor.tokens(address);
     let characterIndices = switch (resultCharacter) {
       case (#ok(characterIndices)) characterIndices;
       case (#err(_e)) return #Err(#Other("Error verifying user"));
     };
     for (index in characterIndices.vals()) {
-      Map.set(_characterRegistry, tokenHash, index, address);
+      Map.set(characterRegistry, tokenHash, index, address);
     };
 
     // get and update item cache registry
-    let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    let resultItem : Result.Result<[TokenIndex], CommonError> = await itemActor.tokens(address);
     let itemIndeces = switch (resultItem) {
       case (#ok(itemIndeces)) itemIndeces;
       case (#err(_e))[];
     };
     for (index in itemIndeces.vals()) {
-      Map.set(_itemRegistry, tokenHash, index, address);
+      Map.set(itemRegistry, tokenHash, index, address);
     };
 
     // return characterIndices
@@ -120,26 +119,26 @@ actor class _ObsidianTearsBackend() = this {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
 
     // check ownership of hero NFT and update character cache registry
-    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await _characterActor.tokens(address);
+    let resultCharacter : Result.Result<[TokenIndex], CommonError> = await characterActor.tokens(address);
     let characterIndices = switch (resultCharacter) {
       case (#ok(characterIndices)) characterIndices;
       case (#err(_e)) return #err("Error verifying user");
     };
     var found = false;
     for (index in characterIndices.vals()) {
-      Map.set(_characterRegistry, tokenHash, index, address);
+      Map.set(characterRegistry, tokenHash, index, address);
       if (characterIndex == index) found := true;
     };
     if (not found) return #err("Caller is not owner of NFT " # debug_show characterIndex);
 
     // // get and update item cache registry
-    // let resultItem : Result.Result<[TokenIndex], CommonError> = await _itemActor.tokens(address);
+    // let resultItem : Result.Result<[TokenIndex], CommonError> = await itemActor.tokens(address);
     // let itemIndeces = switch (resultItem) {
     //   case (#ok(itemIndeces)) itemIndeces;
     //   case (#err(_e)) [];
     // };
     // for (index in itemIndeces.vals()) {
-    //   _itemRegistry.put(index, address);
+    //   itemRegistry.put(index, address);
     // };
 
     // generate new authtoken
@@ -154,7 +153,7 @@ actor class _ObsidianTearsBackend() = this {
   public shared func loadGame(characterIndex : TokenIndex, authToken : Text) : async (T.ApiResponse<Text>) {
     if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
-    switch (Map.get(_saveData, tokenHash, characterIndex)) {
+    switch (Map.get(saveData, tokenHash, characterIndex)) {
       case (?save) return #Ok(save);
       case (null) return #Err(#Other("No save data"));
     };
@@ -164,7 +163,7 @@ actor class _ObsidianTearsBackend() = this {
   public shared func saveGame(characterIndex : TokenIndex, gameData : Text, authToken : Text) : async (T.ApiResponse<Text>) {
     if (not M.hasValidToken(characterIndex, authToken, authTokenRegistry)) return #Err(#Unauthorized);
 
-    Map.set(_saveData, tokenHash, characterIndex, gameData);
+    Map.set(saveData, tokenHash, characterIndex, gameData);
     return #Ok(gameData);
   };
 
@@ -188,11 +187,11 @@ actor class _ObsidianTearsBackend() = this {
         if (chest.gold > 0) {
           rewardInfo := {
             itemIds = rewardInfo.itemIds;
-            gold = _giveGold(chest.gold, caller, true);
+            gold = giveGold(chest.gold, caller, true);
             xp = rewardInfo.xp;
           };
         };
-        let itemResult : T.RewardInfo = await _mintRewardItems(chest.itemReward, caller, characterIndex);
+        let itemResult : T.RewardInfo = await mintRewardItems(chest.itemReward, caller, characterIndex);
         rewardInfo := {
           itemIds = itemResult.itemIds;
           gold = rewardInfo.gold;
@@ -220,9 +219,9 @@ actor class _ObsidianTearsBackend() = this {
     switch (optMonster) {
       case (?monster) {
         // give player gold
-        let itemInfo : T.RewardInfo = await _mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
+        let itemInfo : T.RewardInfo = await mintRewardItemsProb(monster.itemReward, caller, monster.itemProb, characterIndex);
         let rewardInfo : T.RewardInfo = {
-          gold = _giveGold(monster.gold, caller, true);
+          gold = giveGold(monster.gold, caller, true);
           xp = monster.xp;
           itemIds = itemInfo.itemIds;
         };
@@ -243,7 +242,7 @@ actor class _ObsidianTearsBackend() = this {
       status_code = 200;
       headers = [("content-type", "text/plain")];
       body = Text.encodeUtf8(
-        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Saved Games:                              " # debug_show (_saveData.size()) # "\n" # "---\n" # "Admins:                                    " # debug_show (Env.getAdminPrincipals()) # "\n"
+        name # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Saved Games:                              " # debug_show (saveData.size()) # "\n" # "---\n" # "Admins:                                    " # debug_show (Env.getAdminPrincipals()) # "\n"
       );
       streaming_strategy = null;
     };
@@ -253,7 +252,7 @@ actor class _ObsidianTearsBackend() = this {
   // helper functions
   // -----------------------------------
 
-  func _append<T>(array : [T], val : T) : [T] {
+  func append<T>(array : [T], val : T) : [T] {
     let new = Array.tabulate<T>(
       array.size() +1,
       func(i) {
@@ -267,66 +266,13 @@ actor class _ObsidianTearsBackend() = this {
     new;
   };
 
-  func _appendAll<T>(array : [T], val : [T]) : [T] {
-    if (val.size() == 0) {
-      return array;
-    };
-    let new = Array.tabulate<T>(
-      array.size() + val.size(),
-      func(i) {
-        if (i < array.size()) {
-          array[i];
-        } else {
-          val[i - array.size()];
-        };
-      },
-    );
-    new;
-  };
-
-  func _getParam(url : Text, param : Text) : ?Text {
-    var _s : Text = url;
-    Iter.iterate<Text>(
-      Text.split(_s, #text("/")),
-      func(x, _i) {
-        _s := x;
-      },
-    );
-    Iter.iterate<Text>(
-      Text.split(_s, #text("?")),
-      func(x, _i) {
-        if (_i == 1) _s := x;
-      },
-    );
-    var t : ?Text = null;
-    var found : Bool = false;
-    Iter.iterate<Text>(
-      Text.split(_s, #text("&")),
-      func(x, _i) {
-        if (found == false) {
-          Iter.iterate<Text>(
-            Text.split(x, #text("=")),
-            func(y, _ii) {
-              if (_ii == 0) {
-                if (Text.equal(y, param)) found := true;
-              } else if (found == true) {
-                t := ?y;
-              };
-            },
-          );
-        };
-      },
-    );
-    return t;
-  };
-
-  func _mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {
+  func mintRewardItemsProb(itemReward : Ref.ItemReward, caller : Principal, itemProb : Nat8, characterIndex : TokenIndex) : async T.RewardInfo {
     // check probability and mint items
     let optRandomNumber : ?Nat = Random.Finite(Principal.toBlob(caller)).range(8);
     switch (optRandomNumber) {
       case (?randomNumber) {
         if (randomNumber % 100 <= Nat8.toNat(itemProb)) {
-          await _mintRewardItems(itemReward, caller, characterIndex);
+          await mintRewardItems(itemReward, caller, characterIndex);
         } else {
           {
             xp = 0;
@@ -345,7 +291,7 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  func _mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async T.RewardInfo {
+  func mintRewardItems(itemReward : Ref.ItemReward, caller : Principal, characterIndex : TokenIndex) : async T.RewardInfo {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     var defaultReward : T.RewardInfo = {
       xp = 0;
@@ -365,9 +311,9 @@ actor class _ObsidianTearsBackend() = this {
           );
           switch (optItem) {
             case (?item) {
-              ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
+              ignore (await mintItemMetadata(item.metadata, address, characterIndex, item.id));
               defaultReward := {
-                itemIds = _append(defaultReward.itemIds, item.unityId);
+                itemIds = append(defaultReward.itemIds, item.unityId);
                 gold = 0;
                 xp = 0;
               };
@@ -392,9 +338,9 @@ actor class _ObsidianTearsBackend() = this {
             // choose a random item from the list
             let item : Ref.Item = filteredItems[randomNumber! % filteredItems.size()];
             // give item to user
-            ignore (await _mintItem(item.metadata, address, characterIndex, item.id));
+            ignore (await mintItemMetadata(item.metadata, address, characterIndex, item.id));
             defaultReward := {
-              itemIds = _append(defaultReward.itemIds, item.unityId);
+              itemIds = append(defaultReward.itemIds, item.unityId);
               gold = 0;
               xp = 0;
             };
@@ -407,24 +353,24 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
-  func _giveGold(gold : Nat32, caller : Principal, positive : Bool) : Nat32 {
+  func giveGold(gold : Nat32, caller : Principal, positive : Bool) : Nat32 {
     let address : AccountIdentifier = AID.fromPrincipal(caller, null);
     // give user gold
-    let optCurrGold : ?Nat32 = Map.get(_gold, accountHash, address);
+    let optCurrGold : ?Nat32 = Map.get(goldMap, accountHash, address);
     switch (optCurrGold) {
       case (?currGold) {
         if (positive) {
-          Map.set(_gold, accountHash, address, currGold + gold);
+          Map.set(goldMap, accountHash, address, currGold + gold);
         } else {
           if (gold >= currGold) {
-            Map.set(_gold, accountHash, address, Nat32.fromNat(0));
+            Map.set(goldMap, accountHash, address, Nat32.fromNat(0));
           } else {
-            Map.set(_gold, accountHash, address, currGold - gold);
+            Map.set(goldMap, accountHash, address, currGold - gold);
           };
         };
       };
       case _ {
-        Map.set(_gold, accountHash, address, gold);
+        Map.set(goldMap, accountHash, address, gold);
       };
     };
     gold;
@@ -445,25 +391,25 @@ actor class _ObsidianTearsBackend() = this {
     );
     switch (itemContainer) {
       case (?item) {
-        return await _mintItem(item.metadata, recipient, characterIndex, itemId);
+        return await mintItemMetadata(item.metadata, recipient, characterIndex, itemId);
       };
       case _ #Err(#Other "Unable to retrieve item data");
     };
   };
 
-  func _mintItem(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async T.ApiResponse<[Nat8]> {
+  func mintItemMetadata(metadata : [Nat8], recipient : AccountIdentifier, characterIndex : TokenIndex, itemIndex : Nat16) : async T.ApiResponse<[Nat8]> {
     try {
       if (metadata == []) {
-        let optNonNftItems : ?[Nat16] = Map.get(_ownedNonNftItems, tokenHash, characterIndex);
+        let optNonNftItems : ?[Nat16] = Map.get(ownedNonNftItems, tokenHash, characterIndex);
         switch (optNonNftItems) {
           case (?nonNftItems) {
-            Map.set(_ownedNonNftItems, tokenHash, characterIndex, _append(nonNftItems, itemIndex));
+            Map.set(ownedNonNftItems, tokenHash, characterIndex, append(nonNftItems, itemIndex));
             return #Ok(metadata);
           };
           case _ return #Err(#Other "item definition doesn't exist");
         };
       } else {
-        await _itemActor.mintItem(metadata, recipient);
+        await itemActor.mintItem(metadata, recipient);
         return #Ok(metadata);
       };
     } catch (e) {
@@ -472,28 +418,28 @@ actor class _ObsidianTearsBackend() = this {
   };
 
   func getItemRegistry() : async () {
-    let result = await _itemActor.getRegistry();
-    _itemRegistry := Map.fromIter(result.vals(), tokenHash);
+    let result = await itemActor.getRegistry();
+    itemRegistry := Map.fromIter(result.vals(), tokenHash);
   };
 
   func getItemMetadata() : async () {
-    let result = await _itemActor.getMetadata();
-    _itemMetadata := Map.fromIter(result.vals(), tokenHash);
+    let result = await itemActor.getMetadata();
+    itemMetadata := Map.fromIter(result.vals(), tokenHash);
   };
 
   func getCharacterRegistry() : async () {
-    let result = await _characterActor.getRegistry();
-    _characterRegistry := Map.fromIter(result.vals(), tokenHash);
+    let result = await characterActor.getRegistry();
+    characterRegistry := Map.fromIter(result.vals(), tokenHash);
   };
 
   // -----------------------------------
   // canistergeek
   // -----------------------------------
 
-  stable var _canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
+  stable var canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
   private let canistergeekMonitor = Canistergeek.Monitor();
 
-  stable var _canistergeekLoggerUD : ?Canistergeek.LoggerUpgradeData = null;
+  stable var canistergeekLoggerUD : ?Canistergeek.LoggerUpgradeData = null;
   private let canistergeekLogger = Canistergeek.Logger();
 
   private let adminPrincipal : Text = "csvbe-getzk-3k2vt-boxl5-v2mzn-rzn23-oraa7-gjauz-dvoyn-upjlb-3ae";
@@ -515,6 +461,15 @@ actor class _ObsidianTearsBackend() = this {
     };
   };
 
+  // clean authTokenRegistry every 24 hours
+  system func timer(setGlobalTimer : Nat64 -> ()) : async () {
+    let dayInNanoseconds : Nat64 = 24 * 60 * 60 * 1000000000;
+    let next = Nat64.fromIntWrap(Time.now()) + dayInNanoseconds;
+    setGlobalTimer(next);
+
+    M.cleanAuthTokenRegistry(authTokenRegistry);
+  };
+
   // -----------------------------------
   // management
   // -----------------------------------
@@ -525,21 +480,21 @@ actor class _ObsidianTearsBackend() = this {
     await getCharacterRegistry();
     await getItemRegistry();
     await getItemMetadata();
-    _lastRegistryUpdate := Time.now();
+    lastRegistryUpdate := Time.now();
   };
 
   public func specSetStubbedCanisterIds(characterCanisterId : Text, itemCanisterId : Text) : async Result.Result<(), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
-    _characterActor := actor (characterCanisterId);
-    _itemActor := actor (itemCanisterId);
+    characterActor := actor (characterCanisterId);
+    itemActor := actor (itemCanisterId);
     #ok;
   };
 
   public query func specGetCharacterOwner(characterIndex : ER.TokenIndex) : async Result.Result<(ER.AccountIdentifier), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
-    let ownerId = Map.get(_characterRegistry, tokenHash, characterIndex);
+    let ownerId = Map.get(characterRegistry, tokenHash, characterIndex);
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);
       case (null) return #err("Not Found");
@@ -549,7 +504,7 @@ actor class _ObsidianTearsBackend() = this {
   public query func specGetItemOwner(itemIndex : ER.TokenIndex) : async Result.Result<(ER.AccountIdentifier), Text> {
     if (Env.network != "local") return #err("Method only allowed in local");
 
-    let ownerId = Map.get(_itemRegistry, tokenHash, itemIndex);
+    let ownerId = Map.get(itemRegistry, tokenHash, itemIndex);
     switch (ownerId) {
       case (?ownerId) return #ok(ownerId);
       case (null) return #err("Not Found");

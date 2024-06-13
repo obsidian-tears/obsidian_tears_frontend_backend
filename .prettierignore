@@ -5,3 +5,7 @@ src/declarations/
 # packages
 .mops
 dist
+
+# artifacts
+build
+coverage

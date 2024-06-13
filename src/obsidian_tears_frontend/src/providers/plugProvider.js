@@ -1,27 +1,33 @@
-import {
-  canisterId as backendCanisterId,
-  createActor as backendCreateActor,
-} from "../../../declarations/obsidian_tears_backend";
+import { Actor } from "@dfinity/agent";
+import { canisterId as backendCanisterId } from "../../../declarations/obsidian_tears_backend";
+import { idlFactory as backendIdlFactory } from "../../../declarations/obsidian_tears_backend/obsidian_tears_backend.did.js";
 import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did";
-import { characterCanisterId } from "../env";
+import { characterCanisterId, network } from "../env";
 import { PlugMobileProvider } from "@funded-labs/plug-mobile-sdk";
 
-const whitelist = [backendCanisterId, characterCanisterId];
+const WHITELIST = [backendCanisterId, characterCanisterId];
 
 export const connectToPlug = async (saveLogin, saveActors) => {
   const plug = window.ic.plug;
 
-  await plug.requestConnect({ whitelist });
+  const host =
+    network === "local" ? "http://127.0.0.1:4943/" : "https://icp0.io";
+  await plug.requestConnect({ WHITELIST, host });
 
   // handle if timeout / not allowed
   if (!(await plug.isConnected())) return;
 
-  const gameActor = backendCreateActor(backendCanisterId, {
+  if (network === "local") {
+    plug.agent.fetchRootKey();
+  }
+
+  const gameActor = Actor.createActor(backendIdlFactory, {
     agent: plug.agent,
+    canisterId: backendCanisterId,
   });
-  const charActor = await plug.createActor({
+  const charActor = Actor.createActor(characterIdlFactory, {
+    agent: plug.agent,
     canisterId: characterCanisterId,
-    interfaceFactory: characterIdlFactory,
   });
 
   saveActors(gameActor, charActor);
@@ -43,10 +49,13 @@ export const connectToPlugMobile = async () => {
 
   const agent = await provider.createAgent({
     host: "https://icp0.io",
-    targets: whitelist,
+    targets: WHITELIST,
   });
 
-  const gameActor = backendCreateActor(backendCanisterId, { agent });
+  const gameActor = Actor.createActor(backendIdlFactory, {
+    agent: agent,
+    canisterId: backendCanisterId,
+  });
 
   const charActor = Actor.createActor(characterIdlFactory, {
     agent: agent,

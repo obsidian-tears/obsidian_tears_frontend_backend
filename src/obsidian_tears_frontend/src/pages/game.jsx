@@ -150,10 +150,12 @@ const Game = (props) => {
   };
 
   const updateLoadingPercentage = (percent) => {
-    if (percent < 99) {
+    if (percent < 97) {
       let nextPercent = percent + getRandomInt(4);
       setLoadingPercentage(nextPercent);
       setTimeout(updateLoadingPercentage, 800, nextPercent);
+    } else {
+      setLoadingPercentage(100);
     }
   };
 

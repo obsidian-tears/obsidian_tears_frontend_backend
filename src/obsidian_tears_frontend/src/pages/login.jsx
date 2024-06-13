@@ -16,13 +16,14 @@ const Login = (props) => {
   };
 
   return (
-    <div
-      id="body"
-      style={{ backgroundImage: "url(background-large-obelisk.jpg)" }}
-    >
+    <div id="body" style={{ backgroundImage: "url(obelisk-large.jpg)" }}>
       <Navbar />
       <div>
-        <img src="menu-big-logo.png" alt="menu logo"></img>
+        <img
+          src="menu-big-logo.png"
+          alt="menu logo"
+          style={{ height: "100%", width: "100%" }}
+        ></img>
         <>
           <div className="space50"></div>
           <div className="centerMe">

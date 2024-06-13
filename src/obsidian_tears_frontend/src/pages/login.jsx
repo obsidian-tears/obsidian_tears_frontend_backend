@@ -1,16 +1,18 @@
 import * as React from "react";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
-import { connectToPlug } from "../providers/plugProvider";
+import { connectToPlug, connectToPlugMobile } from "../providers/plugProvider";
+import { PlugMobileProvider } from "@funded-labs/plug-mobile-sdk";
 
 const Login = (props) => {
   // asset urls
   const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
 
   const handlePlugButton = async () => {
-    if (!window.ic || !window.ic.plug)
-      window.open("https://plugwallet.ooo/", "_blank");
-    else await connectToPlug(props.saveLogin, props.saveActors);
+    if (window.ic?.plug) await connectToPlug(props.saveLogin, props.saveActors);
+    else if (PlugMobileProvider.isMobileBrowser())
+      await connectToPlugMobile(props.saveLogin, props.saveActors);
+    else window.open("https://plugwallet.ooo/", "_blank");
   };
 
   return (
@@ -20,7 +22,7 @@ const Login = (props) => {
         <img
           src="menu-big-logo.png"
           alt="menu logo"
-          style={{ height: "100%", width: "100%" }}
+          style={{ width: "100%", maxWidth: "765px" }}
         ></img>
         <>
           <div className="space50"></div>

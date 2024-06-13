@@ -19,6 +19,7 @@ const NftSelector = (props) => {
 
   const loadCharacters = async () => {
     const registry = await props.charActor.getRegistry();
+    console.log("registry", registry);
     const address = principalToAccountIdentifier(props.principal);
     console.log(`address: ${address}`);
     const nfts = registry.filter((val, _i, _arr) => val[1] == address);

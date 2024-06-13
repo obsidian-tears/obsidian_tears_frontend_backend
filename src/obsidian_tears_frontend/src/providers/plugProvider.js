@@ -35,33 +35,36 @@ export const connectToPlug = async (saveLogin, saveActors) => {
 };
 
 export const connectToPlugMobile = async () => {
+  console.log("start");
   const provider = new PlugMobileProvider({
     debug: true,
     walletConnectProjectId: "6829ff2dda2dbd53d98341bedaabdb9c",
     window: window,
   });
-
-  await provider.initialize();
-
+  console.log("finished new Provider");
+  await provider.initialize().catch(console.log);
+  console.log("finished initialize");
   if (!provider.isPaired()) {
     await provider.pair().catch(console.log);
+    console.log("finished not paired");
   }
 
   const agent = await provider.createAgent({
     host: "https://icp0.io",
     targets: WHITELIST,
   });
-
+  console.log("finished createAgent");
   const gameActor = Actor.createActor(backendIdlFactory, {
     agent: agent,
     canisterId: backendCanisterId,
   });
-
+  console.log("finished backend actor");
   const charActor = Actor.createActor(characterIdlFactory, {
     agent: agent,
     canisterId: characterCanisterId,
   });
-
+  console.log("finished char actor");
   saveActors(gameActor, charActor);
   saveLogin("plug", provider.localIdentity);
+  console.log("finished method");
 };

@@ -54,4 +54,8 @@
     // The default behavior is to allow raw access.
     allow_raw_access: false,
   },
+  {
+    match: ".well-known",
+    ignore: false,
+  },
 ]

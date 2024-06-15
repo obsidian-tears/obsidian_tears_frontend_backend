@@ -187,6 +187,22 @@ const Game = (props) => {
     }
   };
 
+  React.useEffect(() => {
+    // Override console.error
+    // Assume any error level in this component means
+    // failed fetching of Unity files
+    const originalConsoleError = console.error;
+    console.error = function (...args) {
+      setLoaderErrored(true);
+      originalConsoleError.apply(console, args);
+    };
+
+    return () => {
+      // Restore original console.error when component is unmounted
+      console.error = originalConsoleError;
+    };
+  }, []);
+
   return (
     <>
       <div>

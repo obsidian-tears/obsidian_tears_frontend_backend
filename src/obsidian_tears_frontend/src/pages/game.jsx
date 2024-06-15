@@ -190,7 +190,7 @@ const Game = (props) => {
   return (
     <>
       <div>
-        {!document.fullscreenElement && (
+        {!document.fullscreenElement && isLoaded === true && (
           // Full Screen
           <div
             style={{

@@ -5,9 +5,25 @@ import { isMobileOrTablet } from "../utils";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
+  const [loaderErrored, setLoaderErrored] = React.useState(false);
+
+  const handleCacheControl = (url) => {
+    if (url.match(/\.data/) || url.match(/\.wasm/)) {
+      return "must-revalidate";
+    }
+    return "no-store";
+  };
+
+  const unityContextArgs = {
+    ...unityUrls,
+    productName: "Obsidian Tears",
+    productVersion: "1.0.0",
+    companyName: "Obsidian Tears LLC",
+    cacheControl: handleCacheControl,
+  };
 
   const { unityProvider, isLoaded, addEventListener, sendMessage } =
-    useUnityContext(unityUrls);
+    useUnityContext(unityContextArgs);
 
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
@@ -149,7 +165,19 @@ const Game = (props) => {
     return Math.floor(Math.random() * max);
   };
 
+  const hasLoaderErrored = () => {
+    let script = window.document.querySelector(
+      'script[src="'.concat(unityContextArgs.loaderUrl, '"]')
+    );
+    return script.getAttribute("data-status") === "error";
+  };
+
   const updateLoadingPercentage = (percent) => {
+    if (hasLoaderErrored()) {
+      setLoaderErrored(true);
+      return;
+    }
+
     if (percent < 97) {
       let nextPercent = percent + getRandomInt(4);
       setLoadingPercentage(nextPercent);
@@ -176,11 +204,23 @@ const Game = (props) => {
         )}
         <div className="unityContainer">
           {isLoaded === false && (
-            // We'll conditionally render the loading overlay if the Unity
-            // Application is not loaded.
-            <div className="loading-overlay">
-              <p>Downloading... ({loadingPercentage}%)</p>
-            </div>
+            <>
+              {loaderErrored === false && (
+                // We'll conditionally render the loading overlay if the Unity
+                // Application is not loaded.
+                <div className="loading-overlay">
+                  <p>Downloading... ({loadingPercentage}%)</p>
+                </div>
+              )}
+              {loaderErrored === true && (
+                <div className="loading-overlay">
+                  <p>
+                    Game failed to download. Please attempt to refresh page or
+                    contact us in Discord.
+                  </p>
+                </div>
+              )}
+            </>
           )}
           <Unity ref={ref} className="unity" unityProvider={unityProvider} />
         </div>

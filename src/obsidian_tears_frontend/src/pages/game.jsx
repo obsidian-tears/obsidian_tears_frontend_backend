@@ -7,9 +7,10 @@ const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
   const [loaderErrored, setLoaderErrored] = React.useState(false);
 
+  // TODO: improve cache setting and reading
   const handleCacheControl = (url) => {
     if (url.match(/\.data/) || url.match(/\.wasm/)) {
-      return "must-revalidate";
+      return "must-revalidate"; // "must-revalidate" || "immutable"
     }
     return "no-store";
   };

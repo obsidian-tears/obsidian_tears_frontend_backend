@@ -219,18 +219,18 @@ const Game = (props) => {
             onClick={handleRequestFullscreen}
           ></div>
         )}
-        <div className="unityContainer">
+        <div className="absolute w-full h-full">
           {isLoaded === false && (
             <>
               {loaderErrored === false && (
                 // We'll conditionally render the loading overlay if the Unity
                 // Application is not loaded.
-                <div className="loading-overlay">
+                <div className="absolute top-0 left-0 w-full h-full bg-sky-700 text-white flex justify-center items-center">
                   <p>Downloading... ({loadingPercentage}%)</p>
                 </div>
               )}
               {loaderErrored === true && (
-                <div className="loading-overlay">
+                <div className="absolute top-0 left-0 w-full h-full bg-sky-700 text-white flex justify-center items-center">
                   <p>
                     Game failed to download. Please attempt to refresh page or
                     contact us in Discord.
@@ -239,7 +239,11 @@ const Game = (props) => {
               )}
             </>
           )}
-          <Unity ref={ref} className="unity" unityProvider={unityProvider} />
+          <Unity
+            ref={ref}
+            className="w-full h-full"
+            unityProvider={unityProvider}
+          />
         </div>
       </div>
     </>

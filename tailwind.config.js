@@ -5,7 +5,12 @@ module.exports = {
     fontFamily: {
       title: ["Raleway", "ui-sans-serif"],
     },
-    extend: {},
+    extend: {
+      colors: {
+        "regal-blue": "#081F31",
+        "button-brown": "#945D52",
+      },
+    },
   },
   plugins: [],
 };

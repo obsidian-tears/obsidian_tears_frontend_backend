@@ -103,7 +103,7 @@ const NftSelector = (props) => {
           <>
             <div className="w-full p-2 m-0 relative text-center">
               <br></br>
-              <h2 className="text-white font-title text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+              <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
                 Select a Hero to start the game
               </h2>
               <br></br>
@@ -113,7 +113,7 @@ const NftSelector = (props) => {
               <div className="w-full p-2 m-0 relative text-center">
                 <br></br>
                 <h2
-                  className="text-white font-title text-3xl mt-0 mr-0 ml-0 mb-6 text-center"
+                  className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center"
                   style={{ fontSize: "26px", fontWeight: 500 }}
                 >
                   Oops... No NFTs found in this wallet.
@@ -150,7 +150,7 @@ const NftSelector = (props) => {
           </>
         ) : (
           <div className="w-full p-2 m-0 relative text-center">
-            <h2 className="text-white font-title text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+            <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
               Loading NFTs...
             </h2>
           </div>

@@ -22,7 +22,7 @@ const Game = (props) => {
     productName: "Obsidian Tears",
     productVersion: "1.0.0",
     companyName: "Obsidian Tears LLC",
-    cacheControl: handleCacheControl,
+    // cacheControl: handleCacheControl,
   };
 
   const { unityProvider, isLoaded, addEventListener, sendMessage } =

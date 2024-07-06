@@ -7,13 +7,15 @@ const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
   const [loaderErrored, setLoaderErrored] = React.useState(false);
 
-  // TODO: improve cache setting and reading
-  const handleCacheControl = (url) => {
-    if (url.match(/\.data/) || url.match(/\.wasm/)) {
-      return "must-revalidate"; // "must-revalidate" || "immutable"
-    }
-    return "no-store";
-  };
+  // TODO: improve cache
+  // It worked on .data, but not on .wasm
+  // An error happened due to file name not changing on new version.
+  // const handleCacheControl = (url) => {
+  //  if (url.match(/\.data/) || url.match(/\.wasm/)) {
+  //    return "must-revalidate"; // "must-revalidate" || "immutable"
+  //  }
+  //  return "no-store";
+  // };
 
   const unityContextArgs = {
     ...unityUrls,

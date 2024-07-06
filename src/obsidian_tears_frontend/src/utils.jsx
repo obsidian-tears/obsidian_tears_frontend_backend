@@ -44,12 +44,17 @@ export const isMobileOrTablet = () => {
   if (userAgent.includes("mobi") || userAgent.includes("tablet")) {
     return true;
   }
+  let regexp = /android|iphone|kindle|ipad/i;
+  if (regexp.test(userAgent)) {
+    return true;
+  }
+
   // Screen is higher than it’s wide, so we have portrait mode
-  if (height > width && width <= 600 && height <= 1200) {
+  if (height > width && width <= 600 && height <= 1100) {
     return true;
   }
   // Screen is wider than it’s high, so we have landscape mode
-  if (width > height && height <= 600 && width <= 1200) {
+  if (width > height && height <= 600 && width <= 1100) {
     return true;
   }
 

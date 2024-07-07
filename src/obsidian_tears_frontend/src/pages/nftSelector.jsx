@@ -94,38 +94,40 @@ const NftSelector = (props) => {
   }, []);
 
   return (
-    <div id="body">
+    <div className="w-full h-full m-0 bg-no-repeat bg-fixed bg-cover bg-sky-700 pt-20 pb-20 text-center">
       <Navbar logout={props.logout} />
       <div>
         <img src="menu-big-logo.png" alt="menu logo"></img>
 
         {!loading ? (
           <>
-            <div className="centerMe">
+            <div className="w-full p-2 m-0 relative text-center">
               <br></br>
-              <h2 className="title">Select a Hero to start the game</h2>
+              <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+                Select a Hero to start the game
+              </h2>
               <br></br>
             </div>
 
             {myNfts.length == 0 && (
-              <div className="centerMe">
+              <div className="w-full p-2 m-0 relative text-center">
                 <br></br>
                 <h2
-                  className="title"
+                  className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center"
                   style={{ fontSize: "26px", fontWeight: 500 }}
                 >
                   Oops... No NFTs found in this wallet.
                 </h2>
               </div>
             )}
-            <div className="container">
+            <div className="w-full grid grid-cols-3 auto-rows-fr gap-20 h-full m-0 text-center pt-7">
               {myNfts.map((nft, i) => (
                 <div key={i}>
                   <a href={nftBaseUrl + nft[0]} target="_blank">
                     <img
                       alt="nft"
                       src={nftBaseUrl + nft[0]}
-                      height="230px;"
+                      className="h-56"
                     ></img>
                   </a>
                   <button
@@ -136,7 +138,7 @@ const NftSelector = (props) => {
                   >
                     Select
                     <ClipLoader
-                      className="spinner"
+                      className="ml-2"
                       size={20}
                       loading={loadingNft && i == clickIndex}
                       color="gray"
@@ -147,8 +149,10 @@ const NftSelector = (props) => {
             </div>
           </>
         ) : (
-          <div className="centerMe">
-            <h2 className="title">Loading NFTs...</h2>
+          <div className="w-full p-2 m-0 relative text-center">
+            <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+              Loading NFTs...
+            </h2>
           </div>
         )}
       </div>

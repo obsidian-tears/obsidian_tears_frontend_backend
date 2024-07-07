@@ -7,6 +7,8 @@ import NftSelector from "./pages/nftSelector";
 
 import { StoicIdentity } from "ic-stoic-identity";
 
+import "../assets/main.css";
+
 const ObsidianTears = () => {
   // loginInfo {identity, principal, loggedInWith ("plug", "stoic" or "" if not logged)}
   const [loginInfo, setLoginInfo] = React.useState({});

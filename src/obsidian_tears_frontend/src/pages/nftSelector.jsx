@@ -9,6 +9,7 @@ const NftSelector = (props) => {
   const [clickIndex, setClickIndex] = React.useState(-1);
   const [loading, setLoading] = React.useState(true);
   const [myNfts, setMyNfts] = React.useState([]);
+  const [showError, setShowError] = React.useState(false);
 
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -18,13 +19,18 @@ const NftSelector = (props) => {
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
   const loadCharacters = async () => {
-    const registry = await props.charActor.getRegistry();
-    const address = principalToAccountIdentifier(props.principal);
-    console.log(`address: ${address}`);
-    const nfts = registry.filter((val, _i, _arr) => val[1] == address);
-    console.log(`nfts: ${nfts}`);
-    setMyNfts(nfts);
-    setLoading(false);
+    try {
+      const registry = await props.charActor.getRegistry();
+      const address = principalToAccountIdentifier(props.principal);
+      console.log(`address: ${address}`);
+      const nfts = registry.filter((val, _i, _arr) => val[1] == address);
+      console.log(`nfts: ${nfts}`);
+      setMyNfts(nfts);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error in loadCharacters:", error);
+      setShowError(true);
+    }
   };
 
   const getCharacterData = async (nftIndex) => {
@@ -149,11 +155,33 @@ const NftSelector = (props) => {
             </div>
           </>
         ) : (
-          <div className="w-full p-2 m-0 relative text-center">
-            <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
-              Loading NFTs...
-            </h2>
-          </div>
+          <>
+            <div className="w-full p-2 m-0 relative text-center">
+              <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+                Loading NFTs...
+              </h2>
+            </div>
+            {showError && (
+              <div className=" w-full bg-transparent flex justify-center">
+                <div className="bg-card-gray w-5/6 lg:w-1/2 max-w-96 rounded-2xl flex flex-col items-center border">
+                  <h2 className="mt-4 mb-8 font-mochiy text-white text-2xl">
+                    There was an error connecting to the Stoic Wallet
+                  </h2>
+                  <ul className="text-left mb-4 mx-4 text-white text-lg font-mochiy space-y-4">
+                    <li>1. Open a new tab.</li>
+                    <li>
+                      2. Go to{" "}
+                      <strong>
+                        <i>chrome://flags/#third-party-storage-partitioning</i>
+                      </strong>
+                      .
+                    </li>
+                    <li>3. Disable the feature and restart your browser.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway } from "react-use";
 import { AiOutlineRollback } from "react-icons/ai";
 import { CgLogOut } from "react-icons/cg";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart, FiHome } from "react-icons/fi";
 
 const Navbar = (props) => {
   const [open, setOpen] = useState(false);
@@ -16,10 +16,16 @@ const Navbar = (props) => {
   return (
     <nav className="flex justify-start w-full py-4 px-10 overflow-hidden">
       {/* LOGO */}
-      <img alt="logo" src="header_logo.png" className="w-20 h-20"></img>
-      <h1 className="uppercase font-mochiy hidden sm:flex items-center pl-4 text-4xl lg:text-xl xl:text-4xl text-white">
-        obsidian tears
-      </h1>
+      <img
+        alt="logo"
+        src="header-logo.png"
+        className="w-16 h-16 md:w-20 md:h-20"
+      ></img>
+      <img
+        alt="big-logo"
+        src="menu-big-logo.png"
+        className="w-64 h-16 md:w-96 md:h-20"
+      ></img>
       {/* MOBILE UI WITH SIDEBAR & HAMBURGER MENU */}
       <button
         onClick={toggleSidebar}
@@ -38,7 +44,7 @@ const Navbar = (props) => {
               aria-label="Sidebar"
             >
               <div className="flex items-center justify-between p-5 border-b-2 border-white text-white bg-regal-blue">
-                <span className="text-white font-mochiy">Welcome</span>
+                <span className="text-white font-mochiy">Menu</span>
                 <button
                   onClick={toggleSidebar}
                   className="p-3 border-2 border-white rounded-xl text-white"
@@ -75,24 +81,22 @@ const Navbar = (props) => {
       <div className="ml-auto my-auto hidden lg:block">
         <button
           className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 rounded-2xl"
-          onClick={() =>
-            window.open("https://entrepot.app/marketplace/obsidian-tears")
-          }
+          onClick={() => window.open("https://obsidiantears.xyz")}
         >
-          Shop NFT Heroes
+          Website
         </button>
         <button
-          className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 mx-4 rounded-2xl"
+          className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 ml-4 rounded-2xl"
           onClick={() =>
             window.open("https://entrepot.app/marketplace/obsidian-tears")
           }
         >
-          Shop NFT Items
+          Shop NFTs
         </button>
         {props.logout && (
           <div className="float-right">
             <button
-              className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 rounded-2xl"
+              className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 ml-4 rounded-2xl"
               onClick={async () => await props.logout()}
             >
               Logout
@@ -106,12 +110,12 @@ const Navbar = (props) => {
 
 const items = [
   {
-    title: "Shop NFT Heroes",
-    Icon: FiShoppingCart,
-    href: "https://entrepot.app/marketplace/obsidian-tears",
+    title: "Website",
+    Icon: FiHome,
+    href: "https://obsidiantears.xyz",
   },
   {
-    title: "Shop NFT Items",
+    title: "Shop NFTs",
     Icon: FiShoppingCart,
     href: "https://entrepot.app/marketplace/obsidian-tears",
   },

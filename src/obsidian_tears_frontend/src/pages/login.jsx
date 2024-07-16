@@ -82,10 +82,10 @@ const Login = (props) => {
               className="w-10/12 lg:w-1/2 flex items-center justify-center rounded-2xl mb-8 lg:m-auto"
               width="560"
               height="315"
-              src="https://www.youtube.com/embed/kyqpSycLASY?si=wUeIqm6ieZkbgGEr&amp;start=7"
-              title="YouTube video player"
+              src="https://www.youtube.com/embed/PqlVY9Qy74M?si=1xoMgW24S7MdmpME"
+              title="Obsidian Tears Trailer"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             ></iframe>

@@ -1,5 +1,5 @@
 [dependencies]
-base = "0.11.1"
+base = "0.11.2"
 canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#master@32d1f3a48b1bc12d727b896a69b08bb5f3e5860d"
 map = "9.0.1"
 fuzz = "0.2.1"

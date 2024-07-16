@@ -12,7 +12,7 @@
     "Canister"
   ],
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "build": "webpack",
     "prebuild": "dfx generate",
     "local": "./scripts/deploy-all-local.sh",

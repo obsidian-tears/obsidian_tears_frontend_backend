@@ -9,7 +9,8 @@ const NftSelector = (props) => {
   const [clickIndex, setClickIndex] = React.useState(-1);
   const [loading, setLoading] = React.useState(true);
   const [myNfts, setMyNfts] = React.useState([]);
-  const [showError, setShowError] = React.useState(false);
+  const [showLoadCharacterError, setShowLoadCharacterError] =
+    React.useState(false);
 
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -19,18 +20,22 @@ const NftSelector = (props) => {
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
   const loadCharacters = async () => {
+    let registry;
     try {
-      const registry = await props.charActor.getRegistry();
-      const address = principalToAccountIdentifier(props.principal);
-      console.log(`address: ${address}`);
-      const nfts = registry.filter((val, _i, _arr) => val[1] == address);
-      console.log(`nfts: ${nfts}`);
-      setMyNfts(nfts);
-      setLoading(false);
+      registry = await props.charActor.getRegistry();
     } catch (error) {
       console.error("Error in loadCharacters:", error);
-      setShowError(true);
+      setShowLoadCharacterError(true);
+      return;
     }
+
+    const address = principalToAccountIdentifier(props.principal);
+    console.log(`address: ${address}`);
+    const nfts = registry.filter((val, _i, _arr) => val[1] == address);
+    console.log(`nfts: ${nfts}`);
+
+    setMyNfts(nfts);
+    setLoading(false);
   };
 
   const getCharacterData = async (nftIndex) => {
@@ -100,11 +105,9 @@ const NftSelector = (props) => {
   }, []);
 
   return (
-    <div className="w-full h-full m-0 bg-no-repeat bg-fixed bg-cover bg-sky-700 pt-20 pb-20 text-center">
+    <div className="w-full h-full m-0 text-center">
       <Navbar logout={props.logout} />
       <div>
-        <img src="menu-big-logo.png" alt="menu logo"></img>
-
         {!loading ? (
           <>
             <div className="w-full p-2 m-0 relative text-center">
@@ -161,23 +164,43 @@ const NftSelector = (props) => {
                 Loading NFTs...
               </h2>
             </div>
-            {showError && (
-              <div className=" w-full bg-transparent flex justify-center">
-                <div className="bg-card-gray w-5/6 lg:w-1/2 max-w-96 rounded-2xl flex flex-col items-center border">
-                  <h2 className="mt-4 mb-8 font-mochiy text-white text-2xl">
-                    There was an error connecting to the Stoic Wallet
-                  </h2>
-                  <ul className="text-left mb-4 mx-4 text-white text-lg font-mochiy space-y-4">
-                    <li>1. Open a new tab.</li>
-                    <li>
-                      2. Go to{" "}
-                      <strong>
-                        <i>chrome://flags/#third-party-storage-partitioning</i>
-                      </strong>
-                      .
-                    </li>
-                    <li>3. Disable the feature and restart your browser.</li>
-                  </ul>
+            {showLoadCharacterError && (
+              <div className="w-full flex justify-center">
+                <div className="w-5/6 lg:w-1/2 max-w-96 h-full">
+                  <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex flex-col">
+                    There was an error with Stoic Wallet
+                  </div>
+                  <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-left text-red-700">
+                    <p>
+                      The most probable cause is due to a new feature in Chrome
+                      that is incompatible with Stoic Wallet.
+                    </p>
+                    <br />
+                    <p>
+                      To fix this issue, follow the steps mention on their{" "}
+                      <a
+                        href="https://x.com/stoicwalletapp/status/1706317772194517482?s=46&t=4XqsIm2zxxeH9ADUYAWcfQ"
+                        target="_blank"
+                        className="text-blue-500 underline"
+                      >
+                        X post
+                      </a>
+                      :{" "}
+                    </p>
+                    <ul>
+                      <li>1. Open a new tab.</li>
+                      <li>
+                        2. Go to{" "}
+                        <strong>
+                          <i>
+                            chrome://flags/#third-party-storage-partitioning
+                          </i>
+                        </strong>
+                        .
+                      </li>
+                      <li>3. Disable the feature and restart your browser.</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}

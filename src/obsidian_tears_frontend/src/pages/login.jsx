@@ -15,7 +15,7 @@ const Login = (props) => {
   };
 
   return (
-    <div className="w-full h-full m-0 bg-regal-blue text-center">
+    <div className="w-full h-full m-0 text-center">
       <Navbar />
       {/* HERO */}
       <div className="w-full h-full px-10 flex justify-center pb-8">

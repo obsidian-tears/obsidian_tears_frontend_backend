@@ -79,7 +79,7 @@ export const characterIdlFactory = ({ IDL }) => {
       callback: IDL.Func(
         [HttpStreamingCallbackToken],
         [HttpStreamingCallbackResponse],
-        ["query"]
+        ["query"],
       ),
     }),
   });
@@ -134,7 +134,7 @@ export const characterIdlFactory = ({ IDL }) => {
   });
   const Result = IDL.Variant({
     ok: IDL.Vec(
-      IDL.Tuple(TokenIndex, IDL.Opt(Listing), IDL.Opt(IDL.Vec(IDL.Nat8)))
+      IDL.Tuple(TokenIndex, IDL.Opt(Listing), IDL.Opt(IDL.Vec(IDL.Nat8))),
     ),
     err: CommonError,
   });
@@ -178,12 +178,12 @@ export const characterIdlFactory = ({ IDL }) => {
     allPayments: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount)))],
-      ["query"]
+      ["query"],
     ),
     allSettlements: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, Settlement))],
-      ["query"]
+      ["query"],
     ),
     availableCycles: IDL.Func([], [IDL.Nat], ["query"]),
     balance: IDL.Func([BalanceRequest], [BalanceResponse], ["query"]),
@@ -199,23 +199,23 @@ export const characterIdlFactory = ({ IDL }) => {
     failedSales: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(AccountIdentifier, SubAccount))],
-      ["query"]
+      ["query"],
     ),
     getMetadata: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, Metadata))],
-      ["query"]
+      ["query"],
     ),
     getMinter: IDL.Func([], [IDL.Principal], ["query"]),
     getRegistry: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier))],
-      ["query"]
+      ["query"],
     ),
     getTokens: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, Metadata))],
-      ["query"]
+      ["query"],
     ),
     historicExport: IDL.Func([], [IDL.Bool], []),
     http_request: IDL.Func([HttpRequest], [HttpResponse], ["query"]),
@@ -226,12 +226,12 @@ export const characterIdlFactory = ({ IDL }) => {
     listings: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, Listing, Metadata))],
-      ["query"]
+      ["query"],
     ),
     lock: IDL.Func(
       [TokenIdentifier__1, IDL.Nat64, AccountIdentifier, SubAccount],
       [Result_7],
-      []
+      [],
     ),
     metadata: IDL.Func([TokenIdentifier__1], [Result_6], ["query"]),
     payments: IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount))], ["query"]),
@@ -240,7 +240,7 @@ export const characterIdlFactory = ({ IDL }) => {
     reserve: IDL.Func(
       [IDL.Nat64, IDL.Nat64, AccountIdentifier, SubAccount],
       [Result_5],
-      []
+      [],
     ),
     retreive: IDL.Func([AccountIdentifier], [Result_4], []),
     saleTransactions: IDL.Func([], [IDL.Vec(SaleTransaction)], ["query"]),
@@ -248,19 +248,19 @@ export const characterIdlFactory = ({ IDL }) => {
     salesSettlements: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(AccountIdentifier, Sale))],
-      ["query"]
+      ["query"],
     ),
     setMinter: IDL.Func([IDL.Principal], [], []),
     settle: IDL.Func([TokenIdentifier__1], [Result_3], []),
     settlements: IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier, IDL.Nat64))],
-      ["query"]
+      ["query"],
     ),
     stats: IDL.Func(
       [],
       [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
-      ["query"]
+      ["query"],
     ),
     supply: IDL.Func([TokenIdentifier__1], [Result_2], ["query"]),
     toAddress: IDL.Func([IDL.Text, IDL.Nat], [AccountIdentifier], ["query"]),
@@ -273,10 +273,10 @@ export const characterIdlFactory = ({ IDL }) => {
       [],
       [
         IDL.Vec(
-          IDL.Tuple(TokenIndex, AccountIdentifier, SubAccount, IDL.Nat64)
+          IDL.Tuple(TokenIndex, AccountIdentifier, SubAccount, IDL.Nat64),
         ),
       ],
-      ["query"]
+      ["query"],
     ),
   });
   return ObsidianTears;

@@ -9,6 +9,8 @@ const NftSelector = (props) => {
   const [clickIndex, setClickIndex] = React.useState(-1);
   const [loading, setLoading] = React.useState(true);
   const [myNfts, setMyNfts] = React.useState([]);
+  const [showLoadCharacterError, setShowLoadCharacterError] =
+    React.useState(false);
 
   // asset urls
   const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
@@ -18,11 +20,20 @@ const NftSelector = (props) => {
       : `https://${characterCanisterId}.raw.icp0.io/?index=`;
 
   const loadCharacters = async () => {
-    const registry = await props.charActor.getRegistry();
+    let registry;
+    try {
+      registry = await props.charActor.getRegistry();
+    } catch (error) {
+      console.error("Error in loadCharacters:", error);
+      setShowLoadCharacterError(true);
+      return;
+    }
+
     const address = principalToAccountIdentifier(props.principal);
     console.log(`address: ${address}`);
     const nfts = registry.filter((val, _i, _arr) => val[1] == address);
     console.log(`nfts: ${nfts}`);
+
     setMyNfts(nfts);
     setLoading(false);
   };
@@ -94,11 +105,9 @@ const NftSelector = (props) => {
   }, []);
 
   return (
-    <div className="w-full h-full m-0 bg-no-repeat bg-fixed bg-cover bg-sky-700 pt-20 pb-20 text-center">
+    <div className="w-full h-full m-0 text-center">
       <Navbar logout={props.logout} />
       <div>
-        <img src="menu-big-logo.png" alt="menu logo"></img>
-
         {!loading ? (
           <>
             <div className="w-full p-2 m-0 relative text-center">
@@ -149,11 +158,53 @@ const NftSelector = (props) => {
             </div>
           </>
         ) : (
-          <div className="w-full p-2 m-0 relative text-center">
-            <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
-              Loading NFTs...
-            </h2>
-          </div>
+          <>
+            <div className="w-full p-2 m-0 relative text-center">
+              <h2 className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center">
+                Loading NFTs...
+              </h2>
+            </div>
+            {showLoadCharacterError && (
+              <div className="w-full flex justify-center">
+                <div className="w-5/6 lg:w-1/2 max-w-96 h-full">
+                  <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex flex-col">
+                    There was an error with Stoic Wallet
+                  </div>
+                  <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-left text-red-700">
+                    <p>
+                      The most probable cause is due to a new feature in Chrome
+                      that is incompatible with Stoic Wallet.
+                    </p>
+                    <br />
+                    <p>
+                      To fix this issue, follow the steps mention on their{" "}
+                      <a
+                        href="https://x.com/stoicwalletapp/status/1706317772194517482?s=46&t=4XqsIm2zxxeH9ADUYAWcfQ"
+                        target="_blank"
+                        className="text-blue-500 underline"
+                      >
+                        X post
+                      </a>
+                      :{" "}
+                    </p>
+                    <ul>
+                      <li>1. Open a new tab.</li>
+                      <li>
+                        2. Go to{" "}
+                        <strong>
+                          <i>
+                            chrome://flags/#third-party-storage-partitioning
+                          </i>
+                        </strong>
+                        .
+                      </li>
+                      <li>3. Disable the feature and restart your browser.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

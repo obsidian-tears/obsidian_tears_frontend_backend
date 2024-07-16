@@ -61,7 +61,7 @@ const Game = (props) => {
         let result = await props.gameActor.saveGame(
           props.selectedNftInfo.index,
           gameData,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -77,7 +77,7 @@ const Game = (props) => {
       addEventListener("LoadGame", async function (objectName) {
         let result = await props.gameActor.loadGame(
           props.selectedNftInfo.index,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
@@ -99,20 +99,20 @@ const Game = (props) => {
         async function (shopIndex, itemIndex, qty, objectName) {
           // TODO: please remove once Unity has removed it
           console.log("Frontend - Event BuyItem deprecated");
-        }
+        },
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActor.openChest(
           props.selectedNftInfo.index,
           chestId,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
           sendMessage(
             objectName,
             "ListenOpenChest",
-            JSON.stringify(result["Ok"])
+            JSON.stringify(result["Ok"]),
           );
         }
         if (result["Err"]) {
@@ -121,7 +121,7 @@ const Game = (props) => {
           sendMessage(
             objectName,
             "DisplayError",
-            JSON.stringify(result["Err"])
+            JSON.stringify(result["Err"]),
           );
           console.log("Error in OpenChest");
         }
@@ -137,14 +137,14 @@ const Game = (props) => {
           let result = await props.gameActor.defeatMonster(
             props.selectedNftInfo.index,
             monsterIndex,
-            props.selectedNftInfo.authToken
+            props.selectedNftInfo.authToken,
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];
             sendMessage(
               objectName,
               "ListenDefeatMonster",
-              JSON.stringify(result["Ok"])
+              JSON.stringify(result["Ok"]),
             );
           }
           if (result["Err"]) {
@@ -153,11 +153,11 @@ const Game = (props) => {
             sendMessage(
               objectName,
               "DisplayError",
-              JSON.stringify(result["Err"])
+              JSON.stringify(result["Err"]),
             );
             console.log("Error in LoadGame");
           }
-        }
+        },
       );
     }
 
@@ -170,7 +170,7 @@ const Game = (props) => {
 
   const hasLoaderErrored = () => {
     let script = window.document.querySelector(
-      'script[src="'.concat(unityContextArgs.loaderUrl, '"]')
+      'script[src="'.concat(unityContextArgs.loaderUrl, '"]'),
     );
     return script.getAttribute("data-status") === "error";
   };

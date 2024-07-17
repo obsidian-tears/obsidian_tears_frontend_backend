@@ -1,4 +1,5 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import { useRef, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { AnimatePresence, motion } from "framer-motion";
@@ -106,6 +107,11 @@ const Navbar = (props) => {
       </div>
     </nav>
   );
+};
+
+// Define prop types
+Navbar.propTypes = {
+  logout: PropTypes.func,
 };
 
 const items = [

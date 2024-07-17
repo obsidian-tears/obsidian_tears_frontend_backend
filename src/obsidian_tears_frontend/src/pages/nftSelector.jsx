@@ -1,4 +1,5 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import ClipLoader from "react-spinners/ClipLoader";
 import Navbar from "../components/navbar";
 import { characterCanisterId, network } from "../env";
@@ -31,7 +32,7 @@ const NftSelector = (props) => {
 
     const address = principalToAccountIdentifier(props.principal);
     console.log(`address: ${address}`);
-    const nfts = registry.filter((val, _i, _arr) => val[1] == address);
+    const nfts = registry.filter((val) => val[1] == address);
     console.log(`nfts: ${nfts}`);
 
     setMyNfts(nfts);
@@ -40,7 +41,7 @@ const NftSelector = (props) => {
 
   const getCharacterData = async (nftIndex) => {
     const metadata = await props.charActor.getMetadata();
-    const meta = metadata.filter((val, _i, _arr) => val[0] == nftIndex);
+    const meta = metadata.filter((val) => val[0] == nftIndex);
 
     const nft = meta[0][1];
     const index = meta[0][0];
@@ -132,7 +133,11 @@ const NftSelector = (props) => {
             <div className="w-full grid grid-cols-3 auto-rows-fr gap-20 h-full m-0 text-center pt-7">
               {myNfts.map((nft, i) => (
                 <div key={i}>
-                  <a href={nftBaseUrl + nft[0]} target="_blank">
+                  <a
+                    href={nftBaseUrl + nft[0]}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     <img
                       alt="nft"
                       src={nftBaseUrl + nft[0]}
@@ -182,6 +187,7 @@ const NftSelector = (props) => {
                         href="https://x.com/stoicwalletapp/status/1706317772194517482?s=46&t=4XqsIm2zxxeH9ADUYAWcfQ"
                         target="_blank"
                         className="text-blue-500 underline"
+                        rel="noreferrer"
                       >
                         X post
                       </a>
@@ -209,6 +215,15 @@ const NftSelector = (props) => {
       </div>
     </div>
   );
+};
+
+// Define prop types
+NftSelector.propTypes = {
+  charActor: PropTypes.object,
+  principal: PropTypes.string,
+  setNftInfo: PropTypes.func,
+  gameActor: PropTypes.object,
+  logout: PropTypes.func,
 };
 
 export default NftSelector;

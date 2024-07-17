@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 import { isMobileOrTablet } from "../utils";
@@ -96,10 +97,11 @@ const Game = (props) => {
       });
       addEventListener(
         "BuyItem",
-        async function (shopIndex, itemIndex, qty, objectName) {
-          // TODO: please remove once Unity has removed it
-          console.log("Frontend - Event BuyItem deprecated");
-        },
+        // Throwed a ESlint error
+        // async function (shopIndex, itemIndex, qty, objectName) {
+        //   // TODO: please remove once Unity has removed it
+        //   console.log("Frontend - Event BuyItem deprecated");
+        // },
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActor.openChest(
@@ -127,10 +129,11 @@ const Game = (props) => {
         }
         //todo: check result, take action on error, put the item in the game on success
       });
-      addEventListener("EquipItems", async function (itemIndices, objectName) {
-        // TODO: please remove once Unity has removed it
-        console.log("Frontend - Event EquipItems deprecated");
-      });
+      // Throwed a ESlint error
+      // addEventListener("EquipItems", async function (itemIndices, objectName) {
+      //   // TODO: please remove once Unity has removed it
+      //   console.log("Frontend - Event EquipItems deprecated");
+      // });
       addEventListener(
         "DefeatMonster",
         async function (monsterIndex, objectName) {
@@ -250,6 +253,12 @@ const Game = (props) => {
       </div>
     </>
   );
+};
+
+// Define prop types
+Game.propTypes = {
+  selectedNftInfo: PropTypes.object,
+  gameActor: PropTypes.object,
 };
 
 export default Game;

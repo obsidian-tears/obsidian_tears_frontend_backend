@@ -96,6 +96,7 @@ const Game = (props) => {
       });
       addEventListener(
         "BuyItem",
+        // eslint-disable-next-line no-unused-vars
         async function (shopIndex, itemIndex, qty, objectName) {
           // TODO: please remove once Unity has removed it
           console.log("Frontend - Event BuyItem deprecated");
@@ -125,8 +126,9 @@ const Game = (props) => {
           );
           console.log("Error in OpenChest");
         }
-        //todo: check result, take action on error, put the item in the game on success
+        // TODO: check result, take action on error, put the item in the game on success
       });
+      // eslint-disable-next-line no-unused-vars
       addEventListener("EquipItems", async function (itemIndices, objectName) {
         // TODO: please remove once Unity has removed it
         console.log("Frontend - Event EquipItems deprecated");

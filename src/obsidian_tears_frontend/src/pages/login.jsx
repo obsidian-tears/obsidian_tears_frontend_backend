@@ -1,5 +1,4 @@
 import * as React from "react";
-import PropTypes from "prop-types";
 import { useState } from "react";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
@@ -142,12 +141,6 @@ const Login = (props) => {
       </div>
     </div>
   );
-};
-
-// Define prop types
-Login.propTypes = {
-  saveLogin: PropTypes.func,
-  saveActors: PropTypes.func,
 };
 
 export default Login;

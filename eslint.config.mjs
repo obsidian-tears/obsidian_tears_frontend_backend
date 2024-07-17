@@ -22,6 +22,11 @@ export default [
   pluginJs.configs.recommended,
   pluginReactConfig,
   {
+    "rules": {
+        "react/prop-types": "off"
+    }
+  },
+  {
     settings: {
       react: {
         version: "detect",

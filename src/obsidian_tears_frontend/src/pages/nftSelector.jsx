@@ -1,5 +1,4 @@
 import * as React from "react";
-import PropTypes from "prop-types";
 import ClipLoader from "react-spinners/ClipLoader";
 import Navbar from "../components/navbar";
 import { characterCanisterId, network } from "../env";
@@ -215,15 +214,6 @@ const NftSelector = (props) => {
       </div>
     </div>
   );
-};
-
-// Define prop types
-NftSelector.propTypes = {
-  charActor: PropTypes.object,
-  principal: PropTypes.string,
-  setNftInfo: PropTypes.func,
-  gameActor: PropTypes.object,
-  logout: PropTypes.func,
 };
 
 export default NftSelector;

@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 import { isMobileOrTablet } from "../utils";
@@ -253,12 +252,6 @@ const Game = (props) => {
       </div>
     </>
   );
-};
-
-// Define prop types
-Game.propTypes = {
-  selectedNftInfo: PropTypes.object,
-  gameActor: PropTypes.object,
 };
 
 export default Game;

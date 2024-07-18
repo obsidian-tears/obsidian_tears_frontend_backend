@@ -7,6 +7,8 @@ import { AiOutlineRollback } from "react-icons/ai";
 import { CgLogOut } from "react-icons/cg";
 import { FiShoppingCart, FiHome } from "react-icons/fi";
 
+const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
+
 const Navbar = (props) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -80,13 +82,17 @@ const Navbar = (props) => {
       {/* DESKTOP UI WITH BUTTONS */}
       <div className="ml-auto my-auto hidden lg:block">
         <button
-          className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 rounded-2xl"
+          className="text-white text-lg font-mochiy uppercase w-40 px-4 py-2 mr-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
+          active:transform active:translate-y-[2px]"
+          style={backgroundImageWood2}
           onClick={() => window.open("https://obsidiantears.xyz")}
         >
           Website
         </button>
         <button
-          className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 ml-4 rounded-2xl"
+          className="text-white text-lg font-mochiy uppercase w-40 px-4 py-2 mr-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
+          active:transform active:translate-y-[2px]"
+          style={backgroundImageWood2}
           onClick={() =>
             window.open("https://entrepot.app/marketplace/obsidian-tears")
           }
@@ -96,7 +102,9 @@ const Navbar = (props) => {
         {props.logout && (
           <div className="float-right">
             <button
-              className="bg-button-brown hover:bg-yellow-900 active:bg-yellow-950 focus:outline-none focus:ring focus:ring-yellow-900 uppercase text-white text-lg font-mochiy px-4 py-2 ml-4 rounded-2xl"
+              className="text-white text-lg font-mochiy uppercase w-40 px-4 py-2 mr-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
+          active:transform active:translate-y-[2px]"
+              style={backgroundImageWood2}
               onClick={async () => await props.logout()}
             >
               Logout

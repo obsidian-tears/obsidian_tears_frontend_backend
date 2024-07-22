@@ -129,9 +129,12 @@ const NftSelector = (props) => {
                 </h2>
               </div>
             )}
-            <div className="w-full grid grid-cols-3 auto-rows-fr gap-20 h-full m-0 text-center pt-7">
+            <div className="w-full grid grid-cols-5 auto-rows-fr gap-20 h-full m-0 text-center pt-7">
               {myNfts.map((nft, i) => (
-                <div key={i}>
+                <div
+                  key={i}
+                  className="flex flex-col justify-between items-center"
+                >
                   <a
                     href={nftBaseUrl + nft[0]}
                     target="_blank"
@@ -144,7 +147,8 @@ const NftSelector = (props) => {
                     ></img>
                   </a>
                   <button
-                    className="buttonWoodGrid"
+                    className="text-white text-lg font-mochiy uppercase w-40 px-4 py-2 mr-5 mt-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
+                    active:transform active:translate-y-[2px]"
                     style={backgroundImageWood2}
                     onClick={() => handleNftSelect(nft, i)}
                     disabled={loadingNft}

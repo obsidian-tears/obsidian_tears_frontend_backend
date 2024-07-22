@@ -79,7 +79,7 @@ const Navbar = (props) => {
         )}
       </AnimatePresence>
       {/* DESKTOP UI WITH BUTTONS */}
-      <div className="ml-auto my-auto hidden lg:block">
+      <div className="hidden lg:flex lg:items-center ml-auto">
         <ObsidianButton
           buttonText="Website"
           clickCallback={() => window.open("https://obsidiantears.xyz")}

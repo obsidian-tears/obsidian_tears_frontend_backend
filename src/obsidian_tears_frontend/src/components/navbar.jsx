@@ -6,7 +6,7 @@ import { useClickAway } from "react-use";
 import { AiOutlineRollback } from "react-icons/ai";
 import { CgLogOut } from "react-icons/cg";
 import { FiShoppingCart, FiHome } from "react-icons/fi";
-import ObsidianButton from "./obsidianButton";
+import { ObsidianButton } from "./obsidianButtons";
 
 const Navbar = (props) => {
   const [open, setOpen] = useState(false);

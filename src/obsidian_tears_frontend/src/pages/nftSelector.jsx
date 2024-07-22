@@ -1,11 +1,10 @@
 import * as React from "react";
-import ClipLoader from "react-spinners/ClipLoader";
 import Navbar from "../components/navbar";
 import { characterCanisterId, network } from "../env";
 import principalToAccountIdentifier from "../utils";
+import { ObsidianButtonWithLoader } from "../components/obsidianButtons";
 
 const NftSelector = (props) => {
-  const [loadingNft, setLoadingNft] = React.useState(false);
   const [clickIndex, setClickIndex] = React.useState(-1);
   const [loading, setLoading] = React.useState(true);
   const [myNfts, setMyNfts] = React.useState([]);
@@ -13,7 +12,6 @@ const NftSelector = (props) => {
     React.useState(false);
 
   // asset urls
-  const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
   const nftBaseUrl =
     network == "local"
       ? `http://127.0.0.1:4943/?canisterId=${characterCanisterId}&index=`
@@ -93,10 +91,8 @@ const NftSelector = (props) => {
   };
 
   const handleNftSelect = async (nft, i) => {
-    setLoadingNft(true);
     setClickIndex(i);
     await props.setNftInfo(await getNftInfo(nft[0]));
-    setLoadingNft(false);
     setClickIndex(-1);
   };
 
@@ -146,21 +142,13 @@ const NftSelector = (props) => {
                       className="h-56"
                     ></img>
                   </a>
-                  <button
-                    className="text-white text-lg font-mochiy uppercase w-40 px-4 py-2 mr-5 mt-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
-                    active:transform active:translate-y-[2px]"
-                    style={backgroundImageWood2}
-                    onClick={() => handleNftSelect(nft, i)}
-                    disabled={loadingNft}
-                  >
-                    Select
-                    <ClipLoader
-                      className="ml-2"
-                      size={20}
-                      loading={loadingNft && i == clickIndex}
-                      color="gray"
-                    />
-                  </button>
+                  <ObsidianButtonWithLoader
+                    buttonText="Select"
+                    clickCallback={() => handleNftSelect(nft, i)}
+                    extraClasses={"mt-5"}
+                    isLoading={clickIndex == i}
+                    disabled={clickIndex != -1}
+                  ></ObsidianButtonWithLoader>
                 </div>
               ))}
             </div>

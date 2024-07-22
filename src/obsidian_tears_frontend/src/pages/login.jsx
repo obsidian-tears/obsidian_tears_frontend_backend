@@ -3,13 +3,14 @@ import { useState } from "react";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
 import { connectToPlug } from "../providers/plugProvider";
-
-const backgroundImageWood2 = { backgroundImage: "url(button-wood-2.png)" };
-const backgroundImageWood3 = { backgroundImage: "url(button-wood-3.png)" };
+import {
+  ObsidianButton,
+  LargeObsidianButton,
+} from "../components/obsidianButtons";
 
 const Login = (props) => {
-  const [openPlay, setPlay] = useState(true);
-  const togglePlay = () => setPlay((prev) => !prev);
+  const [openLogin, setLogin] = useState(true);
+  const toggleLogin = () => setLogin((prev) => !prev);
 
   const handlePlugButton = async () => {
     if (!window.ic || !window.ic.plug)
@@ -24,55 +25,39 @@ const Login = (props) => {
       <div className="w-full h-full px-10 flex justify-center pb-8">
         <div className="bg-[url('obelisk-large.png')] bg-no-repeat bg-cover bg-center rounded-2xl w-full h-full flex flex-col items-center justify-center">
           <div className="h-24 w-full">{/* SPACER */}</div>
-          {/* PLAY BUTTON */}
-          {openPlay && (
+          {/* LOGIN BUTTON */}
+          {openLogin && (
             <div className="h-80 w-full bg-transparent flex justify-center">
               <div className="bg-transparent w-1/2 max-w-96 rounded-2xl flex flex-col items-center justify-center">
-                <button
-                  type="button"
-                  className="text-white text-lg font-mochiy uppercase w-full max-w-[160px] sm:px-4 px-2 py-2 mr-5 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
-          active:transform active:translate-y-[2px]"
-                  style={backgroundImageWood2}
-                  onClick={togglePlay}
-                >
-                  Play
-                </button>
+                <ObsidianButton
+                  buttonText="Login"
+                  clickCallback={toggleLogin}
+                  extraClasses={"ml-5"}
+                ></ObsidianButton>
               </div>
             </div>
           )}
           {/* SIGN IN */}
-          {!openPlay && (
+          {!openLogin && (
             <div className="h-80 w-full bg-transparent flex justify-center">
-              <div className="bg-card-gray w-5/6 lg:w-1/2 max-w-96 rounded-2xl flex flex-col items-center border">
+              <div className="bg-card-beige w-5/6 lg:w-1/2 max-w-96 rounded-2xl flex flex-col items-center border border-regal-blue">
                 <h2 className="mt-4 mb-8 font-mochiy text-white text-2xl">
                   Sign In
                 </h2>
-                <button
-                  className="text-white text-lg font-mochiy uppercase w-2/3 px-4 py-3 my-3 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
-                  active:transform active:translate-y-[2px]"
-                  style={backgroundImageWood3}
-                  onClick={async () => await handlePlugButton()}
-                >
-                  NFID
-                </button>
-                <button
-                  className="text-white text-lg font-mochiy uppercase w-2/3 px-4 py-3 my-3 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
-                  active:transform active:translate-y-[2px]"
-                  style={backgroundImageWood3}
-                  onClick={async () => await handlePlugButton()}
-                >
-                  Plug
-                </button>
-                <button
-                  className="text-white text-lg font-mochiy uppercase w-2/3 px-4 py-3 my-3 border-0 bg-cover bg-center focus:outline-none focus:ring focus:ring-yellow-900 hover:transform hover:translate-y-[-2px]
-                  active:transform active:translate-y-[2px]"
-                  style={backgroundImageWood3}
-                  onClick={async () =>
+                <LargeObsidianButton
+                  buttonText="NFID"
+                  clickCallback={async () => await handlePlugButton()}
+                ></LargeObsidianButton>
+                <LargeObsidianButton
+                  buttonText="Plug"
+                  clickCallback={async () => await handlePlugButton()}
+                ></LargeObsidianButton>
+                <LargeObsidianButton
+                  buttonText="Stoic"
+                  clickCallback={async () =>
                     await connectToStoic(props.saveLogin, props.saveActors)
                   }
-                >
-                  Stoic
-                </button>
+                ></LargeObsidianButton>
               </div>
             </div>
           )}

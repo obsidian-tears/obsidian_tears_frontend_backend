@@ -117,12 +117,13 @@ const NftSelector = (props) => {
             {myNfts.length == 0 && (
               <div className="w-full p-2 m-0 relative text-center">
                 <br></br>
-                <h2
-                  className="text-white font-raleway text-3xl mt-0 mr-0 ml-0 mb-6 text-center"
-                  style={{ fontSize: "26px", fontWeight: 500 }}
-                >
+                <h2 className="text-white font-raleway text-3xl">
                   Oops... No NFTs found in this wallet.
                 </h2>
+                <br></br>
+                <p className="text-white font-raleway text-xl">
+                  Account ID: {principalToAccountIdentifier(props.principal)}
+                </p>
               </div>
             )}
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 auto-rows-fr gap-10 sm:gap-12 md:gap-16 lg:gap-20 h-full m-0 text-center pt-7 px-5">

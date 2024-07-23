@@ -16,8 +16,11 @@ export const connectToNFID = async (saveLogin, saveActors) => {
   });
 
   const delegationIdentity = await nfid.getDelegation({
-    // TODO: COnfigure with custom domain
-    //derivationOrigin: "https://boxcc-qiaaa-aaaan-qc7aq-cai.ic0.app",
+    // Only for custom domain
+    derivationOrigin:
+      network === "local"
+        ? undefined
+        : "https://boxcc-qiaaa-aaaan-qc7aq-cai.ic0.app",
 
     // 8 hours in nanoseconds
     maxTimeToLive: BigInt(8) * BigInt(3_600_000_000_000),

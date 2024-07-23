@@ -20,12 +20,12 @@ const Navbar = (props) => {
       <img
         alt="logo"
         src="header-logo.png"
-        className="w-16 h-16 md:w-20 md:h-20"
+        className="w-10 h-10 md:w-20 md:h-20"
       ></img>
       <img
         alt="big-logo"
         src="menu-big-logo.png"
-        className="w-64 h-16 md:w-96 md:h-20"
+        className="w-40 h-10 md:w-96 md:h-20"
       ></img>
       {/* MOBILE UI WITH SIDEBAR & HAMBURGER MENU */}
       <button

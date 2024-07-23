@@ -125,7 +125,7 @@ const NftSelector = (props) => {
                 </h2>
               </div>
             )}
-            <div className="w-full grid grid-cols-5 auto-rows-fr gap-20 h-full m-0 text-center pt-7">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 auto-rows-fr gap-10 sm:gap-12 md:gap-16 lg:gap-20 h-full m-0 text-center pt-7 px-5">
               {myNfts.map((nft, i) => (
                 <div
                   key={i}

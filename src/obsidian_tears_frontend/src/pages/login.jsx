@@ -2,7 +2,8 @@ import * as React from "react";
 import { useState } from "react";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
-import { connectToPlug } from "../providers/plugProvider";
+import { connectToPlug, connectToPlugMobile } from "../providers/plugProvider";
+import { PlugMobileProvider } from "@funded-labs/plug-mobile-sdk";
 import { connectToNFID } from "../providers/nfidProvider";
 import {
   ObsidianButton,
@@ -14,9 +15,10 @@ const Login = (props) => {
   const toggleLogin = () => setLogin((prev) => !prev);
 
   const handlePlugButton = async () => {
-    if (!window.ic || !window.ic.plug)
-      window.open("https://plugwallet.ooo/", "_blank");
-    else await connectToPlug(props.saveLogin, props.saveActors);
+    if (window.ic?.plug) await connectToPlug(props.saveLogin, props.saveActors);
+    else if (PlugMobileProvider.isMobileBrowser())
+      await connectToPlugMobile(props.saveLogin, props.saveActors);
+    else window.open("https://plugwallet.ooo/", "_blank");
   };
 
   return (

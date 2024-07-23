@@ -62,9 +62,11 @@
   ],
   "dependencies": {
     "@dfinity/agent": "latest",
+    "@dfinity/auth-client": "^2.0.0",
     "@dfinity/candid": "latest",
     "@dfinity/identity": "latest",
     "@dfinity/principal": "latest",
+    "@nfid/embed": "^0.10.3",
     "framer-motion": "latest",
     "react": "latest",
     "react-dom": "latest",

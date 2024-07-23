@@ -3,6 +3,7 @@ import { useState } from "react";
 import Navbar from "../components/navbar";
 import { connectToStoic } from "../providers/stoicProvider";
 import { connectToPlug } from "../providers/plugProvider";
+import { connectToNFID } from "../providers/nfidProvider";
 import {
   ObsidianButton,
   LargeObsidianButton,
@@ -46,7 +47,9 @@ const Login = (props) => {
                 </h2>
                 <LargeObsidianButton
                   buttonText="NFID"
-                  clickCallback={async () => await handlePlugButton()}
+                  clickCallback={async () =>
+                    await connectToNFID(props.saveLogin, props.saveActors)
+                  }
                 ></LargeObsidianButton>
                 <LargeObsidianButton
                   buttonText="Plug"

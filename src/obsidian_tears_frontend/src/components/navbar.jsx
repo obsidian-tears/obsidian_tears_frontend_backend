@@ -85,7 +85,7 @@ const Navbar = (props) => {
           clickCallback={() => window.open("https://obsidiantears.xyz")}
         ></ObsidianButton>
         <ObsidianButton
-          buttonText="Shop NFTs"
+          buttonText="Buy NFT"
           clickCallback={() =>
             window.open("https://entrepot.app/marketplace/obsidian-tears")
           }

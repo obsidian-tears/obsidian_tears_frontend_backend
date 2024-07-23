@@ -6,6 +6,7 @@ import Login from "./pages/login";
 import NftSelector from "./pages/nftSelector";
 
 import { StoicIdentity } from "ic-stoic-identity";
+import { AuthClient } from "@dfinity/auth-client";
 
 import "../assets/main.css";
 
@@ -42,6 +43,9 @@ const ObsidianTears = () => {
       await window.ic.plug.disconnect();
     } else if (loginInfo.loggedInWith === "stoic") {
       await StoicIdentity.disconnect();
+    } else if (loginInfo.loggedInWith === "nfid") {
+      let client = await AuthClient.create();
+      client.logout();
     }
 
     setRoute("login");

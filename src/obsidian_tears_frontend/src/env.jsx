@@ -28,7 +28,9 @@ const buildUnityUrls = () => {
     query = "?canisterId=" + canisterIds[network]["unityCanister"];
   } else {
     // ic or staging
-    host = "https://" + canisterIds[network]["unityCanister"] + ".icp0.io/";
+    // Important to be "raw" due to big files being loaded
+    // in range/batches and sporadically giving errors on certification
+    host = "https://" + canisterIds[network]["unityCanister"] + ".raw.icp0.io/";
     query = "";
   }
 

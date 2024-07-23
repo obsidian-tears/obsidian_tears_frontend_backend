@@ -5,9 +5,28 @@ import { isMobileOrTablet } from "../utils";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
+  const [loaderErrored, setLoaderErrored] = React.useState(false);
+
+  // TODO: improve cache
+  // It worked on .data, but not on .wasm
+  // An error happened due to file name not changing on new version.
+  // const handleCacheControl = (url) => {
+  //  if (url.match(/\.data/) || url.match(/\.wasm/)) {
+  //    return "must-revalidate"; // "must-revalidate" || "immutable"
+  //  }
+  //  return "no-store";
+  // };
+
+  const unityContextArgs = {
+    ...unityUrls,
+    productName: "Obsidian Tears",
+    productVersion: "1.0.0",
+    companyName: "Obsidian Tears LLC",
+    // cacheControl: handleCacheControl,
+  };
 
   const { unityProvider, isLoaded, addEventListener, sendMessage } =
-    useUnityContext(unityUrls);
+    useUnityContext(unityContextArgs);
 
   const ref = React.useRef();
   const handleRequestFullscreen = () => ref.current?.requestFullscreen();
@@ -42,7 +61,7 @@ const Game = (props) => {
         let result = await props.gameActor.saveGame(
           props.selectedNftInfo.index,
           gameData,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.saveGame = result["Ok"];
@@ -58,7 +77,7 @@ const Game = (props) => {
       addEventListener("LoadGame", async function (objectName) {
         let result = await props.gameActor.loadGame(
           props.selectedNftInfo.index,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.loadData = result["Ok"];
@@ -77,23 +96,24 @@ const Game = (props) => {
       });
       addEventListener(
         "BuyItem",
+        // eslint-disable-next-line no-unused-vars
         async function (shopIndex, itemIndex, qty, objectName) {
           // TODO: please remove once Unity has removed it
           console.log("Frontend - Event BuyItem deprecated");
-        }
+        },
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
         let result = await props.gameActor.openChest(
           props.selectedNftInfo.index,
           chestId,
-          props.selectedNftInfo.authToken
+          props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
           window.chestData = result["Ok"];
           sendMessage(
             objectName,
             "ListenOpenChest",
-            JSON.stringify(result["Ok"])
+            JSON.stringify(result["Ok"]),
           );
         }
         if (result["Err"]) {
@@ -102,12 +122,13 @@ const Game = (props) => {
           sendMessage(
             objectName,
             "DisplayError",
-            JSON.stringify(result["Err"])
+            JSON.stringify(result["Err"]),
           );
           console.log("Error in OpenChest");
         }
-        //todo: check result, take action on error, put the item in the game on success
+        // TODO: check result, take action on error, put the item in the game on success
       });
+      // eslint-disable-next-line no-unused-vars
       addEventListener("EquipItems", async function (itemIndices, objectName) {
         // TODO: please remove once Unity has removed it
         console.log("Frontend - Event EquipItems deprecated");
@@ -118,14 +139,14 @@ const Game = (props) => {
           let result = await props.gameActor.defeatMonster(
             props.selectedNftInfo.index,
             monsterIndex,
-            props.selectedNftInfo.authToken
+            props.selectedNftInfo.authToken,
           );
           if (result["Ok"]) {
             window.monsterData = result["Ok"];
             sendMessage(
               objectName,
               "ListenDefeatMonster",
-              JSON.stringify(result["Ok"])
+              JSON.stringify(result["Ok"]),
             );
           }
           if (result["Err"]) {
@@ -134,11 +155,11 @@ const Game = (props) => {
             sendMessage(
               objectName,
               "DisplayError",
-              JSON.stringify(result["Err"])
+              JSON.stringify(result["Err"]),
             );
             console.log("Error in LoadGame");
           }
-        }
+        },
       );
     }
 
@@ -149,7 +170,19 @@ const Game = (props) => {
     return Math.floor(Math.random() * max);
   };
 
+  const hasLoaderErrored = () => {
+    let script = window.document.querySelector(
+      'script[src="'.concat(unityContextArgs.loaderUrl, '"]'),
+    );
+    return script.getAttribute("data-status") === "error";
+  };
+
   const updateLoadingPercentage = (percent) => {
+    if (hasLoaderErrored()) {
+      setLoaderErrored(true);
+      return;
+    }
+
     if (percent < 97) {
       let nextPercent = percent + getRandomInt(4);
       setLoadingPercentage(nextPercent);
@@ -159,10 +192,26 @@ const Game = (props) => {
     }
   };
 
+  React.useEffect(() => {
+    // Override console.error
+    // Assume any error level in this component means
+    // failed fetching of Unity files
+    const originalConsoleError = console.error;
+    console.error = function (...args) {
+      setLoaderErrored(true);
+      originalConsoleError.apply(console, args);
+    };
+
+    return () => {
+      // Restore original console.error when component is unmounted
+      console.error = originalConsoleError;
+    };
+  }, []);
+
   return (
     <>
       <div>
-        {!document.fullscreenElement && (
+        {!document.fullscreenElement && isLoaded === true && (
           // Full Screen
           <div
             style={{
@@ -174,15 +223,31 @@ const Game = (props) => {
             onClick={handleRequestFullscreen}
           ></div>
         )}
-        <div className="unityContainer">
+        <div className="absolute w-full h-full">
           {isLoaded === false && (
-            // We'll conditionally render the loading overlay if the Unity
-            // Application is not loaded.
-            <div className="loading-overlay">
-              <p>Downloading... ({loadingPercentage}%)</p>
-            </div>
+            <>
+              {loaderErrored === false && (
+                // We'll conditionally render the loading overlay if the Unity
+                // Application is not loaded.
+                <div className="absolute top-0 left-0 w-full h-full bg-sky-700 text-white flex justify-center items-center">
+                  <p>Downloading... ({loadingPercentage}%)</p>
+                </div>
+              )}
+              {loaderErrored === true && (
+                <div className="absolute top-0 left-0 w-full h-full bg-sky-700 text-white flex justify-center items-center">
+                  <p>
+                    Game failed to download. Please attempt to refresh page or
+                    contact us in Discord.
+                  </p>
+                </div>
+              )}
+            </>
           )}
-          <Unity ref={ref} className="unity" unityProvider={unityProvider} />
+          <Unity
+            ref={ref}
+            className="w-full h-full"
+            unityProvider={unityProvider}
+          />
         </div>
       </div>
     </>

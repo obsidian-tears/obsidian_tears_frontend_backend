@@ -34,7 +34,7 @@ export const connectToPlug = async (saveLogin, saveActors) => {
   saveLogin("plug", plug.principalId);
 };
 
-export const connectToPlugMobile = async () => {
+export const connectToPlugMobile = async (saveLogin, saveActors) => {
   console.log("start");
   const provider = new PlugMobileProvider({
     debug: true,

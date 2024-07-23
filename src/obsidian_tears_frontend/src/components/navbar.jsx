@@ -14,6 +14,24 @@ const Navbar = (props) => {
   useClickAway(ref, () => setOpen(false));
   const toggleSidebar = () => setOpen((prev) => !prev);
 
+  const items = [
+    {
+      title: "Website",
+      Icon: FiHome,
+      href: "https://obsidiantears.xyz",
+    },
+    {
+      title: "Buy NFT",
+      Icon: FiShoppingCart,
+      href: "https://entrepot.app/marketplace/obsidian-tears",
+    },
+    {
+      title: "Logout",
+      Icon: CgLogOut,
+      clickCallback: async () => await props.logout(),
+    },
+  ];
+
   return (
     <nav className="flex justify-start w-full py-4 px-10 overflow-hidden">
       {/* LOGO */}
@@ -56,12 +74,16 @@ const Navbar = (props) => {
               </div>
               <ul>
                 {items.map((item, idx) => {
-                  const { title, href, Icon } = item;
+                  const { title, href, Icon, clickCallback } = item;
                   if (item.title === "Logout" && !props.logout) return;
                   return (
                     <li key={title}>
                       <a
-                        onClick={toggleSidebar}
+                        onClick={
+                          clickCallback
+                            ? toggleSidebar && clickCallback
+                            : toggleSidebar
+                        }
                         href={href}
                         className="flex items-center justify-between gap-5 p-5 transition-all border-b-2 hover:bg-zinc-900 border-white text-white font-mochiy"
                       >
@@ -104,20 +126,6 @@ const Navbar = (props) => {
     </nav>
   );
 };
-
-const items = [
-  {
-    title: "Website",
-    Icon: FiHome,
-    href: "https://obsidiantears.xyz",
-  },
-  {
-    title: "Shop NFTs",
-    Icon: FiShoppingCart,
-    href: "https://entrepot.app/marketplace/obsidian-tears",
-  },
-  { title: "Logout", Icon: CgLogOut },
-];
 
 const framerSidebarPanel = {
   initial: { x: "100%" },

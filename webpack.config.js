@@ -1,6 +1,4 @@
-const {
-  sentryWebpackPlugin
-} = require("@sentry/webpack-plugin");
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 require("dotenv").config();
 const path = require("path");
@@ -54,31 +52,37 @@ module.exports = {
       { test: /\.css$/, use: ["style-loader", "css-loader", "postcss-loader"] },
     ],
   },
-  plugins: [new HtmlWebpackPlugin({
-    template: path.join(__dirname, frontend_entry),
-    cache: false,
-  }), new webpack.EnvironmentPlugin([
-    ...Object.keys(process.env).filter((key) => {
-      if (key.includes("CANISTER")) return true;
-      if (key.includes("DFX")) return true;
-      return false;
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, frontend_entry),
+      cache: false,
     }),
-  ]), new webpack.ProvidePlugin({
-    Buffer: [require.resolve("buffer/"), "Buffer"],
-    process: require.resolve("process/browser"),
-  }), new CopyPlugin({
-    patterns: [
-      {
-        from: `src/${frontendDirectory}/src/.ic-assets.json*`,
-        to: ".ic-assets.json5",
-        noErrorOnMissing: true,
-      },
-    ],
-  }), sentryWebpackPlugin({
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    org: "obsidian-tears",
-    project: "javascript-react"
-  })],
+    new webpack.EnvironmentPlugin([
+      ...Object.keys(process.env).filter((key) => {
+        if (key.includes("CANISTER")) return true;
+        if (key.includes("DFX")) return true;
+        return false;
+      }),
+    ]),
+    new webpack.ProvidePlugin({
+      Buffer: [require.resolve("buffer/"), "Buffer"],
+      process: require.resolve("process/browser"),
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: `src/${frontendDirectory}/src/.ic-assets.json*`,
+          to: ".ic-assets.json5",
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "obsidian-tears",
+      project: "javascript-react",
+    }),
+  ],
   // proxy /api to port 4943 during development.
   // if you edit dfx.json to define a project-specific local network, change the port to match.
   devServer: {

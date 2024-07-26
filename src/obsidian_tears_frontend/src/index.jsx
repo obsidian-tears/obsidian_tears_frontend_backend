@@ -1,3 +1,5 @@
+// Sentry initialization should be imported first!
+import "./libs/instrument";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 

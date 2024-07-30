@@ -1,4 +1,4 @@
-import { Actor, HttpAgent } from "@dfinity/agent";
+import { Actor } from "@dfinity/agent";
 import { canisterId as backendCanisterId } from "../../../declarations/obsidian_tears_backend";
 import { idlFactory as backendIdlFactory } from "../../../declarations/obsidian_tears_backend/obsidian_tears_backend.did.js";
 import { characterIdlFactory } from "../../idl_factories/characterIdlFactory.did";

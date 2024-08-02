@@ -69,7 +69,11 @@ const ObsidianTears = () => {
         />
       )}
       {route === "game" && (
-        <Game gameActor={gameActor} selectedNftInfo={selectedNftInfo} />
+        <Game
+          gameActor={gameActor}
+          selectedNftInfo={selectedNftInfo}
+          principal={loginInfo.principal}
+        />
       )}
     </>
   );

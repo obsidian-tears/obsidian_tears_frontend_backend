@@ -1,4 +1,5 @@
 import React from "react";
+import { FullStory, init, isInitialized } from "@fullstory/browser";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 import { isMobileOrTablet } from "../utils";
@@ -50,6 +51,16 @@ const Game = (props) => {
   };
 
   React.useEffect(() => {
+    // Initialize Fullstory and record for a random sample set to 1/3
+    if (!isInitialized() && Math.random() < 1 / 3) {
+      init({ orgId: "o-201F1E-na1" });
+      FullStory("setIdentity", {
+        uid: props.principal,
+      });
+      console.log("Principal: ", props.principal);
+      console.log("Fullstory is: ", isInitialized());
+    }
+
     if (isLoaded) {
       checkMobile();
       initDataUnity();

@@ -66,6 +66,7 @@
     "@dfinity/candid": "latest",
     "@dfinity/identity": "latest",
     "@dfinity/principal": "latest",
+    "@fullstory/browser": "latest",
     "@nfid/embed": "latest",
     "framer-motion": "latest",
     "react": "latest",

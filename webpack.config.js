@@ -1,3 +1,5 @@
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+
 require("dotenv").config();
 const path = require("path");
 const webpack = require("webpack");
@@ -74,6 +76,11 @@ module.exports = {
           noErrorOnMissing: true,
         },
       ],
+    }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "obsidian-tears",
+      project: "javascript-react",
     }),
   ],
   // proxy /api to port 4943 during development.

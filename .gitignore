@@ -18,3 +18,5 @@ dist/
 
 # env files
 .env
+# Sentry Config File
+.env.sentry

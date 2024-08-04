@@ -14,10 +14,9 @@ These canisters interact with several other canisters, including the obsidian te
 - 4 - "git pull origin main" (this will update your branch to most recent version of main)
 - 5 - delete current build files (obsidian_tears -> src -> obsidian_tears_frontend -> assets -> unity)
 - 6 - copy/move there the current build files
-- 7 - "dfx identity list" (check you are using the right identity, if need to change: dfx identity use {identity name})
-- 8 - dfx deploy --network ic
+- 7 - commit and push to github (it will launch action to deploy the committed build)
 
-Video showing these steps (no sound): https://www.loom.com/share/1bd60c64d55142b5ab890f67f17b79bc
+Video showing these steps (no sound): https://www.loom.com/share/f107b84b9638409da4e176ed692ca49c
 
 # Local Setup
 

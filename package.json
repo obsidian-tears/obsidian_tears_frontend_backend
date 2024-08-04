@@ -68,7 +68,7 @@
     "@dfinity/principal": "latest",
     "@nfid/embed": "latest",
     "@sentry/react": "latest",
-    "@sentry/webpack-plugin": "^2.21.1",
+    "@sentry/webpack-plugin": "latest",
     "framer-motion": "latest",
     "react": "latest",
     "react-dom": "latest",

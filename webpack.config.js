@@ -21,7 +21,7 @@ module.exports = {
     // to replace the extension to `.js`.
     index: path.join(__dirname, frontend_entry).replace(/\.html$/, ".jsx"),
   },
-  devtool: "source-map",
+  devtool: isDevelopment ? "source-map" : false,
   optimization: {
     minimize: !isDevelopment,
     minimizer: [new TerserPlugin()],

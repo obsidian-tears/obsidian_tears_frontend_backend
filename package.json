@@ -77,5 +77,8 @@
     "ts-loader": "latest",
     "ts-node": "latest",
     "typescript": "latest"
+  },
+  "engines": {
+    "node": "^20"
   }
 }

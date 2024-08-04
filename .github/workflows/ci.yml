@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - run: npm clean-install
       - name: "run eslint"
         run: npm run eslint:check
@@ -28,8 +28,10 @@ jobs:
           dfx start --background
           dfx stop
       - name: "install mops packages"
+        # TODO: remove when new stable is released
+        # https://github.com/ZenVoich/mops/issues/240
         run: |
-          npm i -g ic-mops
+          npm i -g ic-mops@0.45.1-pre.0
           mops install
       - name: "run tests"
         run: npm test

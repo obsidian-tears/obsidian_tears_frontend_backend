@@ -25,7 +25,7 @@
     "test": "mops test"
   },
   "devDependencies": {
-    "@eslint/js": "^9.7.0",
+    "@eslint/js": "latest",
     "@types/node": "latest",
     "assert": "latest",
     "autoprefixer": "latest",
@@ -33,10 +33,10 @@
     "copy-webpack-plugin": "latest",
     "css-loader": "latest",
     "dotenv": "latest",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react": "^7.34.4",
+    "eslint": "latest",
+    "eslint-plugin-react": "latest",
     "events": "latest",
-    "globals": "^15.8.0",
+    "globals": "latest",
     "html-webpack-plugin": "latest",
     "husky": "latest",
     "ic-stoic-identity": "latest",
@@ -77,5 +77,8 @@
     "ts-loader": "latest",
     "ts-node": "latest",
     "typescript": "latest"
+  },
+  "engines": {
+    "node": "^20"
   }
 }

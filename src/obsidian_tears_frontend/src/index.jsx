@@ -13,7 +13,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import "../assets/main.css";
 
 const ObsidianTears = () => {
-  // loginInfo {identity, principal, loggedInWith ("plug", "stoic" or "" if not logged)}
+  // loginInfo {identity, principal, loggedInWith ("plug", "stoic", "nfid" or "" if not logged)}
   const [loginInfo, setLoginInfo] = React.useState({});
   const [route, setRoute] = React.useState("login"); // "login" -> "nftSelector" -> "game"
   const [gameActor, setGameActor] = React.useState(null);
@@ -66,7 +66,7 @@ const ObsidianTears = () => {
           setNftInfo={setNftInfo}
           gameActor={gameActor}
           charActor={charActor}
-          principal={loginInfo.principal}
+          loginInfo={loginInfo}
           logout={logout}
         />
       )}

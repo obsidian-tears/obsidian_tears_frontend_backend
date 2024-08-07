@@ -1,5 +1,7 @@
 import * as React from "react";
 import Navbar from "../components/navbar";
+import StoicErrorCard from "../components/stoicErrorCard";
+import LoginErrorCard from "../components/loginErrorCard";
 import { characterCanisterId, network } from "../env";
 import principalToAccountIdentifier from "../utils";
 import { ObsidianButtonWithLoader } from "../components/obsidianButtons";
@@ -27,7 +29,7 @@ const NftSelector = (props) => {
       return;
     }
 
-    const address = principalToAccountIdentifier(props.principal);
+    const address = principalToAccountIdentifier(props.loginInfo.principal);
     console.log(`address: ${address}`);
     const nfts = registry.filter((val) => val[1] == address);
     console.log(`nfts: ${nfts}`);
@@ -122,7 +124,8 @@ const NftSelector = (props) => {
                 </h2>
                 <br></br>
                 <p className="text-white font-raleway text-xl">
-                  Account ID: {principalToAccountIdentifier(props.principal)}
+                  Account ID:{" "}
+                  {principalToAccountIdentifier(props.loginInfo.principal)}
                 </p>
               </div>
             )}
@@ -161,47 +164,14 @@ const NftSelector = (props) => {
                 Loading NFTs...
               </h2>
             </div>
-            {showLoadCharacterError && (
-              <div className="w-full flex justify-center">
-                <div className="w-5/6 lg:w-1/2 max-w-96 h-full">
-                  <div className="bg-red-500 text-white font-bold rounded-t px-4 py-2 flex flex-col">
-                    There was an error with Stoic Wallet
-                  </div>
-                  <div className="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-left text-red-700">
-                    <p>
-                      The most probable cause is due to a new feature in Chrome
-                      that is incompatible with Stoic Wallet.
-                    </p>
-                    <br />
-                    <p>
-                      To fix this issue, follow the steps mention on their{" "}
-                      <a
-                        href="https://x.com/stoicwalletapp/status/1706317772194517482?s=46&t=4XqsIm2zxxeH9ADUYAWcfQ"
-                        target="_blank"
-                        className="text-blue-500 underline"
-                        rel="noreferrer"
-                      >
-                        X post
-                      </a>
-                      :{" "}
-                    </p>
-                    <ul>
-                      <li>1. Open a new tab.</li>
-                      <li>
-                        2. Go to{" "}
-                        <strong>
-                          <i>
-                            chrome://flags/#third-party-storage-partitioning
-                          </i>
-                        </strong>
-                        .
-                      </li>
-                      <li>3. Disable the feature and restart your browser.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
+            {showLoadCharacterError &&
+              props.loginInfo.loggedInWith == "stoic" && (
+                <StoicErrorCard></StoicErrorCard>
+              )}
+            {showLoadCharacterError &&
+              props.loginInfo.loggedInWith != "stoic" && (
+                <LoginErrorCard></LoginErrorCard>
+              )}
           </>
         )}
       </div>

@@ -22,7 +22,7 @@ jobs:
       - name: "audit"
         # Moderate is necessary due to
         # unmaintained stoic wallet package
-        run: $ npm audit --audit-level=moderate
+        run: npm audit --audit-level=moderate
       - name: "install dfx"
         uses: dfinity/setup-dfx@main
       - name: "install moc"

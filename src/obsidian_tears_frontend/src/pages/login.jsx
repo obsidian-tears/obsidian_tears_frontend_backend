@@ -139,33 +139,36 @@ const Login = (props) => {
               How do I get a Hero NFT?
             </h4>
             <p className="h-80 max-w-96 md:max-w-full text-start font-jura text-white p-8">
-              The Hero NFT can be purchased using the ICP Token on{" "}
+              The Hero NFT can be purchased with ICP on{" "}
               <strong>Entrepot</strong>.
               <br />
-              This will require you to setup a crypto wallet specific to the IC
-              Blockchain, like{" "}
+              <br />
+              This will require you to setup a crypto wallet specific to the IC,
+              like{" "}
               <a
                 href="https://plugwallet.ooo/"
                 target="_blank"
-                className="text-blue-500 underline"
+                className="text-blue-700 underline font-bold"
                 rel="noreferrer"
               >
                 Plug
               </a>{" "}
-              and transfer ICP to it from an Exchange, like Binance, Coinbase,
-              OKX, etc. You can also top-up from credit card directly with{" "}
+              and transfer ICP to it from an Exchange (Binance, Coinbase, OKX,
+              ...). You can also top-up from credit card directly with{" "}
               <a
-                href="https://checkout.banxa.com/?fiatAmount=50&fiatType=USD&coinAmount=0.00244394&coinType=ICP&lockFiat=true&blockchain=BTC&orderMode=BUY&backgroundColor=2a1a47&primaryColor=9b6ef7&secondaryColor=8b55f6&textColor=ffffff"
+                href="https://checkout.banxa.com/?fiatAmount=60&fiatType=USD&coinType=ICP&lockFiat=true&orderMode=BUY&backgroundColor=2a1a47&primaryColor=9b6ef7&secondaryColor=8b55f6&textColor=ffffff"
                 target="_blank"
-                className="text-blue-500 underline"
+                className="text-blue-700 underline font-bold"
                 rel="noreferrer"
               >
                 Banxa
               </a>
               .
               <br />
+              <br />
               For the best gameplay experience, we recommend signing in through
-              NFID with Gmail, but would require you to transfer the NFT to it.
+              NFID with Gmail, but would require you to later transfer the NFT
+              to it.
               <br />
               <br />
               Stoic is unmaintained and unless you already have been using it,

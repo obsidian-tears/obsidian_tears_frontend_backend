@@ -91,32 +91,54 @@ const Login = (props) => {
           </div>
         </div>
       </div>
-      {/* 3 CARD INFO SECTION */}
-      <div className="w-full h-full px-10 flex flex-col lg:flex-row justify-center pb-8">
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              I need an NFT hero?
-            </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
-              Yes. Obsidian Tears is hosted 100% on a blockchain called the
-              Internet Computer Blockchain. All of the game data is stored,
-              saved, and runs on the blockchain. Each Hero NFT is like an access
-              token to the game. Also, each NFT is unique in physical
-              attributes, making each distinct from the others. They come in
-              several classes—Fighters, Rangers, Mages, and more. Each class
-              offers its own in-game advantages like buffed stats and exclusive
-              access to certain items and abilities. Join our Discord for more
-              Information!
-            </p>
+      {/* 1 CARD INFO SECTION */}
+      <div className="w-full h-full px-10 flex pb-8">
+        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col">
+          <div className="h-96 w-full flex flex-col items-center">
+            <h3 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              I need an Hero NFT?
+            </h3>
+            <div className="h-80 max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              <p>
+                <strong>Yes.</strong> Obsidian Tears is hosted 100% on a
+                blockchain called the Internet Computer. All of the game assets,
+                website frontend and backend, saved data and nfts are stored and
+                retrieved from the blockchain, allowing 100% of the game to be
+                decentralized and to{" "}
+                <strong>exist in many years to come</strong>.
+                <br />
+                <br />
+                Each Hero NFT is much more than an access token to the game:
+              </p>
+              <ul className="list-disc pl-6">
+                <li>It unlocks the associated save data</li>
+                <li>
+                  Soon, it will allow to mint items in limited quantities per
+                  Hero NFT
+                </li>
+                <li>
+                  Each has different physical attributes and belongs to a class
+                </li>
+              </ul>
+              <br />
+              <p>
+                They come in three different classes:{" "}
+                <strong>Fighters, Rangers and Mages</strong>. Each offers its
+                own in-game advantages like buffed stats and exclusive access to
+                certain items and abilities.
+              </p>
+            </div>
           </div>
         </div>
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center my-8 lg:my-0 lg:mx-8">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              How do I get an NFT?
+      </div>
+      {/* 2 CARD INFO SECTION */}
+      <div className="w-full h-full px-10 flex flex-col lg:flex-row justify-center pb-8">
+        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center my-8 lg:my-0 lg:mr-8">
+          <div className="h-96 w-full flex flex-col items-center">
+            <h4 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              How do I get a Hero NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
+            <p className="h-80 max-w-96 md:max-w-full flex text-start font-jura text-white p-8">
               The Hero NFT can be purchased using the ICP Token on Entrepot.
               This will require you to have a crypto wallet specific to the IC
               Blockchain. For the best gameplay experience, we recommend signing
@@ -126,13 +148,13 @@ const Login = (props) => {
           </div>
         </div>
         <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              NFT ITEMS
+          <div className="h-96 w-full flex flex-col items-center">
+            <h4 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              How do I get Items NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
+            <p className="h-80 max-w-96 md:max-w-full flex text-start font-jura text-white p-8">
               In-Game Items are tradeable NFT’s. Weapons, spell scrolls, and
-              consumeables are all yours once found and can be traded or sold on
+              consumables are all yours once found and can be traded or sold on
               Entrepot.
             </p>
           </div>

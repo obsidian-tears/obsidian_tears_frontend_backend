@@ -138,12 +138,39 @@ const Login = (props) => {
             <h4 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
               How do I get a Hero NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex text-start font-jura text-white p-8">
-              The Hero NFT can be purchased using the ICP Token on Entrepot.
-              This will require you to have a crypto wallet specific to the IC
-              Blockchain. For the best gameplay experience, we recommend signing
-              in through NFID. Plug and Stoic both have issues related to the
-              wallet themselves. To visit Entrepot, Please visit the link below.
+            <p className="h-80 max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              The Hero NFT can be purchased using the ICP Token on{" "}
+              <strong>Entrepot</strong>.
+              <br />
+              This will require you to setup a crypto wallet specific to the IC
+              Blockchain, like{" "}
+              <a
+                href="https://plugwallet.ooo/"
+                target="_blank"
+                className="text-blue-500 underline"
+                rel="noreferrer"
+              >
+                Plug
+              </a>{" "}
+              and transfer ICP to it from an Exchange, like Binance, Coinbase,
+              OKX, etc. You can also top-up from credit card directly with{" "}
+              <a
+                href="https://checkout.banxa.com/?fiatAmount=50&fiatType=USD&coinAmount=0.00244394&coinType=ICP&lockFiat=true&blockchain=BTC&orderMode=BUY&backgroundColor=2a1a47&primaryColor=9b6ef7&secondaryColor=8b55f6&textColor=ffffff"
+                target="_blank"
+                className="text-blue-500 underline"
+                rel="noreferrer"
+              >
+                Banxa
+              </a>
+              .
+              <br />
+              For the best gameplay experience, we recommend signing in through
+              NFID with Gmail, but would require you to transfer the NFT to it.
+              <br />
+              <br />
+              Stoic is unmaintained and unless you already have been using it,
+              we don&apos;t recommend setting it up.
+              <br />
             </p>
           </div>
         </div>

@@ -47,6 +47,15 @@ const Game = (props) => {
     console.log("CheckMobile:");
     console.log(isTabletOrMobile);
     sendMessage("CheckMobile", "CheckMobilePlatform", isTabletOrMobile ? 1 : 0);
+
+    if (isTabletOrMobile) {
+      // Lock screen orientation to landscape
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch((error) => {
+          console.log("Error locking screen orientation:", error);
+        });
+      }
+    }
   };
 
   React.useEffect(() => {

@@ -92,13 +92,13 @@ const Login = (props) => {
         </div>
       </div>
       {/* 1 CARD INFO SECTION */}
-      <div className="w-full h-full px-10 flex pb-8">
+      <div className="w-full h-full px-10 flex">
         <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col">
-          <div className="h-96 w-full flex flex-col items-center">
-            <h3 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+          <div className="w-full flex flex-col items-center">
+            <h3 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
               I need an Hero NFT?
             </h3>
-            <div className="h-80 max-w-96 md:max-w-full text-start font-jura text-white p-8">
+            <div className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
               <p>
                 <strong>Yes.</strong> Obsidian Tears is hosted 100% on a
                 blockchain called the Internet Computer. All of the game assets,
@@ -133,12 +133,12 @@ const Login = (props) => {
       </div>
       {/* 2 CARD INFO SECTION */}
       <div className="w-full h-full px-10 flex flex-col lg:flex-row justify-center pb-8">
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center my-8 lg:my-0 lg:mr-8">
-          <div className="h-96 w-full flex flex-col items-center">
-            <h4 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+        <div className="bg-card-beige rounded-2xl w-full h-full items-center justify-center mt-8 lg:mr-8">
+          <div className="w-full flex flex-col items-center">
+            <h4 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
               How do I get a Hero NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full text-start font-jura text-white p-8">
+            <p className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
               The Hero NFT can be purchased with ICP on{" "}
               <strong>Entrepot</strong>.
               <br />
@@ -177,15 +177,25 @@ const Login = (props) => {
             </p>
           </div>
         </div>
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center">
-          <div className="h-96 w-full flex flex-col items-center">
-            <h4 className="h-12 flex items-center justify-center font-mochiy text-xl text-white pt-8">
+        <div className="bg-card-beige rounded-2xl w-full min-h-full items-center justify-center mt-8">
+          <div className="w-full flex flex-col items-center">
+            <h4 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
               How do I get Items NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex text-start font-jura text-white p-8">
-              In-Game Items are tradeable NFT’s. Weapons, spell scrolls, and
-              consumables are all yours once found and can be traded or sold on
-              Entrepot.
+            <p className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              <strong>Note:</strong> In order to avoid exploits and to improve
+              item&apos;s economy,{" "}
+              <strong>this feature is not yet published in production.</strong>
+              <br />
+              <br />
+              In-Game Items are tradeable NFTs. Weapons, spell scrolls and
+              consumables are all yours once found in-game and can be traded or
+              sold on Entrepot.
+              <br />
+              <br />
+              Each Hero NFT will only be able to mint a limited number of items
+              and items will have a limited number of times that can be
+              purchased and consumed into a game.
             </p>
           </div>
         </div>

@@ -26,8 +26,12 @@ const buildUnityUrls = () => {
   if (network == "local") {
     host = "http://127.0.0.1:4943/";
     query = "?canisterId=" + canisterIds[network]["unityCanister"];
+  } else if (network == "staging") {
+    // use custom domain with CDN
+    host = "https://unity-staging.obsidiantears.xyz/";
+    query = "";
   } else {
-    // ic or staging
+    // ic or beta
     // Important to be "raw" due to big files being loaded
     // in range/batches and sporadically giving errors on certification
     host = "https://" + canisterIds[network]["unityCanister"] + ".raw.icp0.io/";

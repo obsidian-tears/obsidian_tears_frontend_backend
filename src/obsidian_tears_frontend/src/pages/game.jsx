@@ -48,14 +48,14 @@ const Game = (props) => {
     console.log(isTabletOrMobile);
     sendMessage("CheckMobile", "CheckMobilePlatform", isTabletOrMobile ? 1 : 0);
 
-    if (isTabletOrMobile) {
-      // Lock screen orientation to landscape
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("landscape").catch((error) => {
-          console.log("Error locking screen orientation:", error);
-        });
-      }
-    }
+    // if (isTabletOrMobile) {
+    //   // Lock screen orientation to landscape
+    //   if (screen.orientation && screen.orientation.lock) {
+    //     screen.orientation.lock("landscape").catch((error) => {
+    //       console.log("Error locking screen orientation:", error);
+    //     });
+    //   }
+    // }
   };
 
   React.useEffect(() => {
@@ -219,6 +219,22 @@ const Game = (props) => {
 
   return (
     <>
+      <style>
+        {`
+          @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
+            html {
+              transform: rotate(-90deg);
+              transform-origin: left top;
+              width: 100vh;
+              height: 100vw;
+              overflow-x: hidden;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
+          }
+        `}
+      </style>
       <div>
         {!document.fullscreenElement && isLoaded === true && (
           // Full Screen

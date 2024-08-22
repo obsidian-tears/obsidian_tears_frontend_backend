@@ -15,19 +15,16 @@ export const connectToPlug = async (saveLogin, saveActors) => {
   // handle if timeout / not allowed
   if (!(await window.ic.plug.isConnected())) return;
 
-  // extract the original agent
-  let agent = plug.agent.agent;
-
   if (network === "local") {
-    agent.fetchRootKey();
+    plug.agent.agent.fetchRootKey();
   }
 
   const gameActor = Actor.createActor(backendIdlFactory, {
-    agent: agent,
+    agent: plug.agent,
     canisterId: backendCanisterId,
   });
   const charActor = Actor.createActor(characterIdlFactory, {
-    agent: agent,
+    agent: plug.agent,
     canisterId: characterCanisterId,
   });
 

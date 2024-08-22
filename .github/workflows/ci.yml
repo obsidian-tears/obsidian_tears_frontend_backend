@@ -22,7 +22,10 @@ jobs:
       - name: "audit"
         # Moderate is necessary due to
         # unmaintained stoic wallet package
-        run: npm audit --audit-level=moderate
+        # High is temporarily necessary due to
+        # micromatch not being patched yet
+        # https://github.com/advisories/GHSA-952p-6rrq-rcjv
+        run: npm audit --audit-level=high
       - name: "install dfx"
         uses: dfinity/setup-dfx@main
       - name: "install moc"

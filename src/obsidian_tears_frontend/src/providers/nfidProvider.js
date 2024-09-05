@@ -11,7 +11,7 @@ export const connectToNFID = async (saveLogin, saveActors) => {
   const nfid = await NFID.init({
     application: {
       name: "Obsidian Tears",
-      logo: "https://staging.obsidiantears.xyz/header-logo.png",
+      logo: "https://game.obsidiantears.xyz/header-logo.png",
     },
   });
 

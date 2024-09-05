@@ -72,6 +72,7 @@
     "framer-motion": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "react-ga4": "latest",
     "react-icons": "latest",
     "react-spinners": "latest",
     "react-unity-webgl": "latest",

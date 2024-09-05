@@ -5,6 +5,7 @@ import LoginErrorCard from "../components/loginErrorCard";
 import { characterCanisterId, network } from "../env";
 import principalToAccountIdentifier from "../utils";
 import { ObsidianButtonWithLoader } from "../components/obsidianButtons";
+import { showedNFTsEvent } from "../libs/analytics";
 
 const NftSelector = (props) => {
   const [clickIndex, setClickIndex] = React.useState(-1);
@@ -33,6 +34,8 @@ const NftSelector = (props) => {
     console.log(`address: ${address}`);
     const nfts = registry.filter((val) => val[1] == address);
     console.log(`nfts: ${nfts}`);
+
+    showedNFTsEvent(nfts);
 
     setMyNfts(nfts);
     setLoading(false);

@@ -6,6 +6,8 @@ import { createRoot } from "react-dom/client";
 import Game from "./pages/game";
 import Login from "./pages/login";
 import NftSelector from "./pages/nftSelector";
+import { initAnalytics, loggedInEvent } from "./libs/analytics";
+import { network } from "./env.jsx";
 
 import { StoicIdentity } from "ic-stoic-identity";
 import { AuthClient } from "@dfinity/auth-client";
@@ -27,6 +29,7 @@ const ObsidianTears = () => {
   };
 
   const saveLogin = async (loggedInWith, principal) => {
+    loggedInEvent(loggedInWith, principal);
     setLoginInfo({
       loggedInWith,
       principal,
@@ -58,6 +61,7 @@ const ObsidianTears = () => {
 
   return (
     <>
+      {network == "ic" && initAnalytics()}
       {route === "login" && (
         <Login saveLogin={saveLogin} saveActors={saveActors} />
       )}

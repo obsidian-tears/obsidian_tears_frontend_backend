@@ -2,6 +2,12 @@ import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { unityUrls } from "../env";
 import { isMobileOrTablet } from "../utils";
+import {
+  downloadStartedEvent,
+  downloadEndedEvent,
+  gameSavedEvent,
+  gameLoadedEvent,
+} from "../libs/analytics";
 
 const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
@@ -53,9 +59,11 @@ const Game = (props) => {
     if (isLoaded) {
       checkMobile();
       initDataUnity();
+      downloadEndedEvent();
 
       // register unity functions
       addEventListener("SaveGame", async function (gameData, objectName) {
+        gameSavedEvent();
         window.saveData = gameData;
         // call the actor function
         let result = await props.gameActor.saveGame(
@@ -75,6 +83,7 @@ const Game = (props) => {
         }
       });
       addEventListener("LoadGame", async function (objectName) {
+        gameLoadedEvent();
         let result = await props.gameActor.loadGame(
           props.selectedNftInfo.index,
           props.selectedNftInfo.authToken,
@@ -193,6 +202,8 @@ const Game = (props) => {
   };
 
   React.useEffect(() => {
+    downloadStartedEvent();
+
     // Override console.error
     // Assume any error level in this component means
     // failed fetching of Unity files

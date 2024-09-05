@@ -34,7 +34,7 @@ const buildUnityUrls = () => {
     // ic or beta
     // Important to be "raw" due to big files being loaded
     // in range/batches and sporadically giving errors on certification
-    host = "https://" + canisterIds[network]["unityCanister"] + ".raw.icp0.io/";
+    host = "https://unity-ic.obsidiantears.xyz/";
     query = "";
   }
 

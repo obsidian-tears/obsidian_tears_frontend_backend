@@ -1,6 +1,11 @@
 import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
-import { unityUrls } from "../env";
+import { Actor, HttpAgent } from "@dfinity/agent";
+import {
+  canisterId as backendCanisterId,
+  idlFactory as backendIdlFactory,
+} from "../../../declarations/obsidian_tears_backend";
+import { unityUrls, network } from "../env";
 import { isMobileOrTablet } from "../utils";
 import {
   downloadStartedEvent,
@@ -55,6 +60,20 @@ const Game = (props) => {
     sendMessage("CheckMobile", "CheckMobilePlatform", isTabletOrMobile ? 1 : 0);
   };
 
+  // always generate new actors to avoid
+  // outdated sessions due to lengthy game play
+  const getAnonGameActor = () => {
+    const agent = new HttpAgent();
+    if (network === "local") {
+      agent.fetchRootKey();
+    }
+
+    return Actor.createActor(backendIdlFactory, {
+      agent,
+      canisterId: backendCanisterId,
+    });
+  };
+
   React.useEffect(() => {
     if (isLoaded) {
       checkMobile();
@@ -66,7 +85,8 @@ const Game = (props) => {
         gameSavedEvent();
         window.saveData = gameData;
         // call the actor function
-        let result = await props.gameActor.saveGame(
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.saveGame(
           props.selectedNftInfo.index,
           gameData,
           props.selectedNftInfo.authToken,
@@ -84,7 +104,8 @@ const Game = (props) => {
       });
       addEventListener("LoadGame", async function (objectName) {
         gameLoadedEvent();
-        let result = await props.gameActor.loadGame(
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.loadGame(
           props.selectedNftInfo.index,
           props.selectedNftInfo.authToken,
         );
@@ -112,7 +133,8 @@ const Game = (props) => {
         },
       );
       addEventListener("OpenChest", async function (chestId, objectName) {
-        let result = await props.gameActor.openChest(
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.openChest(
           props.selectedNftInfo.index,
           chestId,
           props.selectedNftInfo.authToken,
@@ -145,7 +167,8 @@ const Game = (props) => {
       addEventListener(
         "DefeatMonster",
         async function (monsterIndex, objectName) {
-          let result = await props.gameActor.defeatMonster(
+          const gameActor = getAnonGameActor();
+          let result = await gameActor.defeatMonster(
             props.selectedNftInfo.index,
             monsterIndex,
             props.selectedNftInfo.authToken,

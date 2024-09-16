@@ -1,6 +1,11 @@
 import React from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
-import { unityUrls } from "../env";
+import { Actor, HttpAgent } from "@dfinity/agent";
+import {
+  canisterId as backendCanisterId,
+  idlFactory as backendIdlFactory,
+} from "../../../declarations/obsidian_tears_backend";
+import { unityUrls, network } from "../env";
 import { isMobileOrTablet } from "../utils";
 import {
   downloadStartedEvent,
@@ -55,6 +60,20 @@ const Game = (props) => {
     sendMessage("CheckMobile", "CheckMobilePlatform", isTabletOrMobile ? 1 : 0);
   };
 
+  // always generate new actors to avoid
+  // outdated sessions due to lengthy game play
+  const getAnonGameActor = () => {
+    const agent = new HttpAgent();
+    if (network === "local") {
+      agent.fetchRootKey();
+    }
+
+    return Actor.createActor(backendIdlFactory, {
+      agent,
+      canisterId: backendCanisterId,
+    });
+  };
+
   React.useEffect(() => {
     if (isLoaded) {
       checkMobile();
@@ -66,7 +85,8 @@ const Game = (props) => {
         gameSavedEvent();
         window.saveData = gameData;
         // call the actor function
-        let result = await props.gameActor.saveGame(
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.saveGame(
           props.selectedNftInfo.index,
           gameData,
           props.selectedNftInfo.authToken,
@@ -78,13 +98,14 @@ const Game = (props) => {
         if (result["Err"]) {
           // TODO send message to display unity error
           window.saveGame = result["Err"];
-          console.log("Error in SaveGame");
-          console.log(result["Err"]);
+          console.error("Error in SaveGame");
+          console.error(result["Err"]);
         }
       });
       addEventListener("LoadGame", async function (objectName) {
         gameLoadedEvent();
-        let result = await props.gameActor.loadGame(
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.loadGame(
           props.selectedNftInfo.index,
           props.selectedNftInfo.authToken,
         );
@@ -98,8 +119,8 @@ const Game = (props) => {
           if (result["Err"]["Other"] == "No save data")
             sendMessage(objectName, "ListenLoadGame", "{}");
           else {
-            console.log("Error in LoadGame");
-            console.log(result["Err"]);
+            console.error("Error in LoadGame");
+            console.error(result["Err"]);
           }
         }
       });
@@ -108,66 +129,51 @@ const Game = (props) => {
         // eslint-disable-next-line no-unused-vars
         async function (shopIndex, itemIndex, qty, objectName) {
           // TODO: please remove once Unity has removed it
-          console.log("Frontend - Event BuyItem deprecated");
+          console.error("Frontend - Event BuyItem deprecated");
         },
       );
-      addEventListener("OpenChest", async function (chestId, objectName) {
-        let result = await props.gameActor.openChest(
+      /**
+      addEventListener("MintItem", async function (encryptedToken, objectName) {
+        const gameActor = getAnonGameActor();
+        let result = await gameActor.mintItem(
           props.selectedNftInfo.index,
-          chestId,
+          encryptedToken,
           props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
-          window.chestData = result["Ok"];
           sendMessage(
             objectName,
-            "ListenOpenChest",
+            "ListenMintItem",
             JSON.stringify(result["Ok"]),
           );
         }
         if (result["Err"]) {
-          // TODO send message to display unity error
-          window.chestData = result["Err"];
           sendMessage(
             objectName,
-            "DisplayError",
+            "ListenMintItem",
             JSON.stringify(result["Err"]),
           );
-          console.log("Error in OpenChest");
+          console.log("Error in Mint Item");
         }
-        // TODO: check result, take action on error, put the item in the game on success
+        // TODO: check result, take action on error, handle the success on game
+      });
+      */
+      // eslint-disable-next-line no-unused-vars
+      addEventListener("OpenChest", async function (chestId, objectName) {
+        // TODO: please remove once Unity has removed it
+        console.error("Frontend - Event OpenChest deprecated");
       });
       // eslint-disable-next-line no-unused-vars
       addEventListener("EquipItems", async function (itemIndices, objectName) {
         // TODO: please remove once Unity has removed it
-        console.log("Frontend - Event EquipItems deprecated");
+        console.error("Frontend - Event EquipItems deprecated");
       });
       addEventListener(
         "DefeatMonster",
+        // eslint-disable-next-line no-unused-vars
         async function (monsterIndex, objectName) {
-          let result = await props.gameActor.defeatMonster(
-            props.selectedNftInfo.index,
-            monsterIndex,
-            props.selectedNftInfo.authToken,
-          );
-          if (result["Ok"]) {
-            window.monsterData = result["Ok"];
-            sendMessage(
-              objectName,
-              "ListenDefeatMonster",
-              JSON.stringify(result["Ok"]),
-            );
-          }
-          if (result["Err"]) {
-            // TODO send message to display unity error
-            window.monsterData = result["Err"];
-            sendMessage(
-              objectName,
-              "DisplayError",
-              JSON.stringify(result["Err"]),
-            );
-            console.log("Error in LoadGame");
-          }
+          // TODO: please remove once Unity has removed it
+          console.error("Frontend - Event DefeatMonster deprecated");
         },
       );
     }

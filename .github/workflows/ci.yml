@@ -20,12 +20,7 @@ jobs:
       - name: "check prettier"
         run: npm run prettier:check
       - name: "audit"
-        # Moderate is necessary due to
-        # unmaintained stoic wallet package
-        # High is temporarily necessary due to
-        # micromatch not being patched yet
-        # https://github.com/advisories/GHSA-952p-6rrq-rcjv
-        run: npm audit --audit-level=high
+        run: npm audit
       - name: "install dfx"
         uses: dfinity/setup-dfx@main
       - name: "install moc"
@@ -33,10 +28,8 @@ jobs:
           dfx start --background
           dfx stop
       - name: "install mops packages"
-        # TODO: remove when new stable is released
-        # https://github.com/ZenVoich/mops/issues/240
         run: |
-          npm i -g ic-mops@0.45.1-pre.0
+          npm i -g ic-mops
           mops install
       - name: "run tests"
         run: npm test

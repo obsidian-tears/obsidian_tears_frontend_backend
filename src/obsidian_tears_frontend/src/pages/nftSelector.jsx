@@ -96,7 +96,8 @@ const NftSelector = (props) => {
   };
 
   const handleNftSelect = async (nft, i) => {
-    if (nft[0] > 123) {
+    // TODO: remove once fully deployed to all hero NFTs
+    if (network == "ic" && nft[0] > 123) {
       alert(
         "Game is only available to OG NFTs, full public release will come soon.",
       );

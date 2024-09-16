@@ -74,9 +74,7 @@ const ObsidianTears = () => {
           logout={logout}
         />
       )}
-      {route === "game" && (
-        <Game gameActor={gameActor} selectedNftInfo={selectedNftInfo} />
-      )}
+      {route === "game" && <Game selectedNftInfo={selectedNftInfo} />}
     </>
   );
 };

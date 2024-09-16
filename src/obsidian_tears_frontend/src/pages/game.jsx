@@ -132,32 +132,36 @@ const Game = (props) => {
           console.log("Frontend - Event BuyItem deprecated");
         },
       );
-      addEventListener("OpenChest", async function (chestId, objectName) {
+      /**
+      addEventListener("MintItem", async function (encryptedToken, objectName) {
         const gameActor = getAnonGameActor();
-        let result = await gameActor.openChest(
+        let result = await gameActor.mintItem(
           props.selectedNftInfo.index,
-          chestId,
+          encryptedToken,
           props.selectedNftInfo.authToken,
         );
         if (result["Ok"]) {
-          window.chestData = result["Ok"];
           sendMessage(
             objectName,
-            "ListenOpenChest",
+            "ListenMintItem",
             JSON.stringify(result["Ok"]),
           );
         }
         if (result["Err"]) {
-          // TODO send message to display unity error
-          window.chestData = result["Err"];
           sendMessage(
             objectName,
-            "DisplayError",
+            "ListenMintItem",
             JSON.stringify(result["Err"]),
           );
-          console.log("Error in OpenChest");
+          console.log("Error in Mint Item");
         }
-        // TODO: check result, take action on error, put the item in the game on success
+        // TODO: check result, take action on error, handle the success on game
+      });
+      */
+      // eslint-disable-next-line no-unused-vars
+      addEventListener("OpenChest", async function (chestId, objectName) {
+        // TODO: please remove once Unity has removed it
+        console.log("Frontend - Event OpenChest deprecated");
       });
       // eslint-disable-next-line no-unused-vars
       addEventListener("EquipItems", async function (itemIndices, objectName) {
@@ -166,31 +170,10 @@ const Game = (props) => {
       });
       addEventListener(
         "DefeatMonster",
+        // eslint-disable-next-line no-unused-vars
         async function (monsterIndex, objectName) {
-          const gameActor = getAnonGameActor();
-          let result = await gameActor.defeatMonster(
-            props.selectedNftInfo.index,
-            monsterIndex,
-            props.selectedNftInfo.authToken,
-          );
-          if (result["Ok"]) {
-            window.monsterData = result["Ok"];
-            sendMessage(
-              objectName,
-              "ListenDefeatMonster",
-              JSON.stringify(result["Ok"]),
-            );
-          }
-          if (result["Err"]) {
-            // TODO send message to display unity error
-            window.monsterData = result["Err"];
-            sendMessage(
-              objectName,
-              "DisplayError",
-              JSON.stringify(result["Err"]),
-            );
-            console.log("Error in LoadGame");
-          }
+          // TODO: please remove once Unity has removed it
+          console.log("Frontend - Event DefeatMonster deprecated");
         },
       );
     }

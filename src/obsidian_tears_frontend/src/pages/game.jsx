@@ -98,8 +98,8 @@ const Game = (props) => {
         if (result["Err"]) {
           // TODO send message to display unity error
           window.saveGame = result["Err"];
-          console.log("Error in SaveGame");
-          console.log(result["Err"]);
+          console.error("Error in SaveGame");
+          console.error(result["Err"]);
         }
       });
       addEventListener("LoadGame", async function (objectName) {
@@ -119,8 +119,8 @@ const Game = (props) => {
           if (result["Err"]["Other"] == "No save data")
             sendMessage(objectName, "ListenLoadGame", "{}");
           else {
-            console.log("Error in LoadGame");
-            console.log(result["Err"]);
+            console.error("Error in LoadGame");
+            console.error(result["Err"]);
           }
         }
       });
@@ -129,7 +129,7 @@ const Game = (props) => {
         // eslint-disable-next-line no-unused-vars
         async function (shopIndex, itemIndex, qty, objectName) {
           // TODO: please remove once Unity has removed it
-          console.log("Frontend - Event BuyItem deprecated");
+          console.error("Frontend - Event BuyItem deprecated");
         },
       );
       /**
@@ -161,19 +161,19 @@ const Game = (props) => {
       // eslint-disable-next-line no-unused-vars
       addEventListener("OpenChest", async function (chestId, objectName) {
         // TODO: please remove once Unity has removed it
-        console.log("Frontend - Event OpenChest deprecated");
+        console.error("Frontend - Event OpenChest deprecated");
       });
       // eslint-disable-next-line no-unused-vars
       addEventListener("EquipItems", async function (itemIndices, objectName) {
         // TODO: please remove once Unity has removed it
-        console.log("Frontend - Event EquipItems deprecated");
+        console.error("Frontend - Event EquipItems deprecated");
       });
       addEventListener(
         "DefeatMonster",
         // eslint-disable-next-line no-unused-vars
         async function (monsterIndex, objectName) {
           // TODO: please remove once Unity has removed it
-          console.log("Frontend - Event DefeatMonster deprecated");
+          console.error("Frontend - Event DefeatMonster deprecated");
         },
       );
     }

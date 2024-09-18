@@ -62,11 +62,9 @@ const Game = (props) => {
 
   // always generate new actors to avoid
   // outdated sessions due to lengthy game play
-  const getAnonGameActor = () => {
-    const agent = new HttpAgent();
-    if (network === "local") {
-      agent.fetchRootKey();
-    }
+  const getAnonGameActor = async () => {
+    let options = { shouldFetchRootKey: network === "local" };
+    const agent = await HttpAgent.create(options);
 
     return Actor.createActor(backendIdlFactory, {
       agent,
@@ -85,7 +83,7 @@ const Game = (props) => {
         gameSavedEvent();
         window.saveData = gameData;
         // call the actor function
-        const gameActor = getAnonGameActor();
+        const gameActor = await getAnonGameActor();
         let result = await gameActor.saveGame(
           props.selectedNftInfo.index,
           gameData,
@@ -104,7 +102,7 @@ const Game = (props) => {
       });
       addEventListener("LoadGame", async function (objectName) {
         gameLoadedEvent();
-        const gameActor = getAnonGameActor();
+        const gameActor = await getAnonGameActor();
         let result = await gameActor.loadGame(
           props.selectedNftInfo.index,
           props.selectedNftInfo.authToken,
@@ -134,7 +132,7 @@ const Game = (props) => {
       );
       /**
       addEventListener("MintItem", async function (encryptedToken, objectName) {
-        const gameActor = getAnonGameActor();
+        const gameActor = await getAnonGameActor();
         let result = await gameActor.mintItem(
           props.selectedNftInfo.index,
           encryptedToken,

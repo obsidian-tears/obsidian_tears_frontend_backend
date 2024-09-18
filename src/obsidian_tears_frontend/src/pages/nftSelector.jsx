@@ -80,12 +80,12 @@ const NftSelector = (props) => {
 
   const getNftInfo = async (index) => {
     const authToken = await props.gameActor.getAuthToken(index);
-    if (authToken.Err) {
-      console.error(authToken.Err);
+    if (authToken.err) {
+      console.error(authToken.err);
       return;
     }
 
-    const nftInfo = await getCharacterData(index);
+    let nftInfo = await getCharacterData(index);
     if (nftInfo == undefined) {
       console.error("Unable to get nft metadata");
       return;

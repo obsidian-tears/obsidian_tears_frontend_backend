@@ -104,7 +104,7 @@ actor class _ObsidianTearsBackend() = this {
     let resultItem : Result.Result<[TokenIndex], CommonError> = await itemActor.tokens(address);
     let itemIndeces = switch (resultItem) {
       case (#ok(itemIndeces)) itemIndeces;
-      case (#err(_e))[];
+      case (#err(_e)) [];
     };
     for (index in itemIndeces.vals()) {
       Map.set(itemRegistry, tokenHash, index, address);

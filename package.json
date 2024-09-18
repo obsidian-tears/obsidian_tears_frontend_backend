@@ -61,11 +61,11 @@
     "last 2 edge version"
   ],
   "dependencies": {
-    "@dfinity/agent": "latest",
-    "@dfinity/auth-client": "latest",
-    "@dfinity/candid": "latest",
-    "@dfinity/identity": "latest",
-    "@dfinity/principal": "latest",
+    "@dfinity/agent": "~2.0.0",
+    "@dfinity/auth-client": "~2.0.0",
+    "@dfinity/candid": "~2.0.0",
+    "@dfinity/identity": "~2.0.0",
+    "@dfinity/principal": "~2.0.0",
     "@nfid/embed": "latest",
     "@sentry/react": "latest",
     "@sentry/webpack-plugin": "latest",

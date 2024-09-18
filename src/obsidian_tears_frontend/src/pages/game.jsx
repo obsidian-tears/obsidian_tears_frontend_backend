@@ -18,22 +18,20 @@ const Game = (props) => {
   const [loadingPercentage, setLoadingPercentage] = React.useState(0);
   const [loaderErrored, setLoaderErrored] = React.useState(false);
 
-  // TODO: improve cache
-  // It worked on .data, but not on .wasm
-  // An error happened due to file name not changing on new version.
-  // const handleCacheControl = (url) => {
-  //  if (url.match(/\.data/) || url.match(/\.wasm/)) {
-  //    return "must-revalidate"; // "must-revalidate" || "immutable"
-  //  }
-  //  return "no-store";
-  // };
+  // When releasing a new production version, always change the name!
+  const handleCacheControl = (url) => {
+    if (network === "ic" && url.match(/\.data/)) {
+      return "immutable";
+    }
+    return "no-store";
+  };
 
   const unityContextArgs = {
     ...unityUrls,
     productName: "Obsidian Tears",
     productVersion: "1.0.0",
     companyName: "Obsidian Tears LLC",
-    // cacheControl: handleCacheControl,
+    cacheControl: handleCacheControl,
   };
 
   const { unityProvider, isLoaded, addEventListener, sendMessage } =

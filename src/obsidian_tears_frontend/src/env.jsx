@@ -38,12 +38,21 @@ const buildUnityUrls = () => {
     query = "";
   }
 
-  return {
-    loaderUrl: host + "unity/Build/Desktop.loader.js" + query,
-    dataUrl: host + "unity/Build/Desktop.data" + query,
-    frameworkUrl: host + "unity/Build/Desktop.framework.js" + query,
-    codeUrl: host + "unity/Build/Desktop.wasm" + query,
-  };
+  if (network === "ic") {
+    return {
+      loaderUrl: host + "unity/Build/Brotli.loader.js" + query,
+      dataUrl: host + "unity/Build/Brotli.data.unityweb" + query,
+      frameworkUrl: host + "unity/Build/Brotli.framework.js.unityweb" + query,
+      codeUrl: host + "unity/Build/Brotli.wasm.unityweb" + query,
+    };
+  } else {
+    return {
+      loaderUrl: host + "unity/Build/Desktop.loader.js" + query,
+      dataUrl: host + "unity/Build/Desktop.data" + query,
+      frameworkUrl: host + "unity/Build/Desktop.framework.js" + query,
+      codeUrl: host + "unity/Build/Desktop.wasm" + query,
+    };
+  }
 };
 
 export const characterCanisterId = canisterIds[network]["characterCanister"];

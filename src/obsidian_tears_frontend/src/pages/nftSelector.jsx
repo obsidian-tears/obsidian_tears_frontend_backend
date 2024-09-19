@@ -96,14 +96,6 @@ const NftSelector = (props) => {
   };
 
   const handleNftSelect = async (nft, i) => {
-    // TODO: remove once fully deployed to all hero NFTs
-    if (network == "ic" && nft[0] > 123) {
-      alert(
-        "Game is only available to OG NFTs, full public release will come soon.",
-      );
-      return;
-    }
-
     setClickIndex(i);
     await props.setNftInfo(await getNftInfo(nft[0]));
     setClickIndex(-1);

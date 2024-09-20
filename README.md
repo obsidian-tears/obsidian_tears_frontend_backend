@@ -48,6 +48,69 @@ The order is:
 3. OT Items NFT (b77ix-eeaaa-aaaaa-qaada-cai);
 4. OT Game -> Webserver (avqkn-guaaa-aaaaa-qaaea-cai);
 
+# Minting Roadmap
+
+Desired "minting" UX:
+
+1. User plays game, and every time a new item is added to inventory,
+2. the "mintItem" (ReactController) call is sent to frontend.
+3. Frontend does:
+
+   - calls query to backend to know if ID has already been max minted or not.
+   - if ID is unknown, console.error it (and allow Sentry to log it) and return error to game.
+   - Only do update calls on items expected to be minted.
+
+4. Backend does:
+
+   - decrypt item id;
+   - get MintItemRegistry(hero_id), check how many times id has been minted;
+   - get max times it can be minted from MintItemReference;
+   - if times it has been minted < max times, allow to proceed to mint (else return error with message)
+   - for minting: call Item NFT Canister, request to mint (ID, Account ID).
+   - on error, add to failedMintQueue to be retried later by timer.
+   - update MintItemRegistry and always return success.
+
+5. Backend confirms if more can be minted and returns success or error.
+   - On success, show in game UI;
+   - On error, don't show in game, to avoid bothering. Or show in grey, lower end, informing the error message ("item previously minted on this NFT (1/1)");
+
+Other Requirements:
+
+- It should not be possible to mint more than expected (Backend holds a record of IDs per hero NFT).
+- It should not be easy to impersonate Unity game / React Controller (the token index should be encrypted with a private key that only unity and backend knows of).
+
+Desired "consuming" UX:
+
+1. User has items NFTs associated with same Account that holds HERO NFT (through minting or through purchasing on Entrepot Marketplace.)
+2. After choosing an Hero NFT, if Items NFTs exist, a "Consume Items" UI will appear, showing all Item NFTs that exist on that account and therefore can be "consumed". A "consume" button appears below each Item NFT.
+3. If user clicks on "Consume" button, it will "spin" and do the consume actions:
+
+   - call backend "consumeItem(id)";
+   - backend requests ItemNFT canister to burn NFT;
+   - backend adds id to "consumedQueue" of that Hero NFT. Returns success.
+   - Spinner stops and success message is shown ("Item consumed, it will be in Inventory when you load game.")
+   - User can repeat action on other items;
+
+4. If user clicks on "Continue to Game" button, it moves on to start the game.
+5. When user clicks on LoadGame (on Menu or inside game):
+   - After backend checks if a saved game exists, it will check if any items exist in "consumedQueue";
+   - If no, move on. If yes, then parse string and find position of "inventory:", then add the each of the new ids to the beginning of the string;
+   - return final string as the game load response;
+
+Cards for Minting UX:
+
+- Unity, add secret of Private Key added on build arg. Add encryption function;
+- Unity, call "MintItem" (encryptedItemId, object) and listen for result;
+- Unity, handle success with "minted notification" and "error" with greyed out notification.
+- Backend, create MintItemRegistry(Hero ID) and allow it to be "get" with Max Items Reference.
+- Backend, create failedMintQueue and add retry Timer and query call.
+- Backend, create update call of MintItem(Hero NFT Index, encryptedItemId, auth token), full code.
+- Frontend, handle MintItem call, do query, then update and handle error cases.
+
+Cards for Consuming UX:
+
+- TODO;
+
 ---
 
 # Generic IC instructions

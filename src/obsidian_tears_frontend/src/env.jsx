@@ -31,7 +31,7 @@ const buildUnityUrls = () => {
     host = "https://unity-staging.obsidiantears.xyz/";
     query = "";
   } else {
-    // ic or beta
+    // ic
     // Important to be "raw" due to big files being loaded
     // in range/batches and sporadically giving errors on certification
     host = "https://unity-ic.obsidiantears.xyz/";
@@ -39,11 +39,13 @@ const buildUnityUrls = () => {
   }
 
   if (network === "ic") {
+    let version = "v1.0";
     return {
-      loaderUrl: host + "unity/Build/Brotli.loader.js" + query,
-      dataUrl: host + "unity/Build/Brotli.data.unityweb" + query,
-      frameworkUrl: host + "unity/Build/Brotli.framework.js.unityweb" + query,
-      codeUrl: host + "unity/Build/Brotli.wasm.unityweb" + query,
+      loaderUrl: host + "unity/Build/" + version + ".loader.js" + query,
+      dataUrl: host + "unity/Build/" + version + ".data.unityweb" + query,
+      frameworkUrl:
+        host + "unity/Build/" + version + ".framework.js.unityweb" + query,
+      codeUrl: host + "unity/Build/" + version + ".wasm.unityweb" + query,
     };
   } else {
     return {

@@ -19,8 +19,8 @@ const Game = (props) => {
   const [loaderErrored, setLoaderErrored] = React.useState(false);
 
   // When releasing a new production version, always change the name!
-  const handleCacheControl = (url) => {
-    if (network === "ic" && url.match(/\.data/)) {
+  const handleCacheControl = () => {
+    if (network === "ic") {
       return "immutable";
     }
     return "no-store";

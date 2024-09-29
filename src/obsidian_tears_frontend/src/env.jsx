@@ -39,7 +39,7 @@ const buildUnityUrls = () => {
   }
 
   if (network === "ic") {
-    let version = "v1.0";
+    let version = "v1.2";
     return {
       loaderUrl: host + "unity/Build/" + version + ".loader.js" + query,
       dataUrl: host + "unity/Build/" + version + ".data.unityweb" + query,

@@ -91,49 +91,111 @@ const Login = (props) => {
           </div>
         </div>
       </div>
-      {/* 3 CARD INFO SECTION */}
+      {/* 1 CARD INFO SECTION */}
+      <div className="w-full h-full px-10 flex">
+        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col">
+          <div className="w-full flex flex-col items-center">
+            <h3 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              I need a Hero NFT?
+            </h3>
+            <div className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              <p>
+                <strong>Yes.</strong> Obsidian Tears is hosted 100% on a
+                blockchain called the Internet Computer. All of the game assets,
+                website frontend and backend, saved data and nfts are stored and
+                retrieved from the blockchain, allowing 100% of the game to be
+                decentralized and to{" "}
+                <strong>exist in many years to come</strong>.
+                <br />
+                <br />
+                Each Hero NFT is much more than an access token to the game:
+              </p>
+              <ul className="list-disc pl-6">
+                <li>It unlocks the associated save data</li>
+                <li>
+                  Soon, it will allow to mint items in limited quantities per
+                  Hero NFT
+                </li>
+                <li>
+                  Each has different physical attributes and belongs to a class
+                </li>
+              </ul>
+              <br />
+              <p>
+                They come in three different classes:{" "}
+                <strong>Fighters, Rangers and Mages</strong>. Each offers its
+                own in-game advantages like buffed stats and exclusive access to
+                certain items and abilities.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* 2 CARD INFO SECTION */}
       <div className="w-full h-full px-10 flex flex-col lg:flex-row justify-center pb-8">
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              I need an NFT hero?
+        <div className="bg-card-beige rounded-2xl w-full h-full items-center justify-center mt-8 lg:mr-8">
+          <div className="w-full flex flex-col items-center">
+            <h4 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              How do I get a Hero NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
-              Yes. Obsidian Tears is hosted 100% on a blockchain called the
-              Internet Computer Blockchain. All of the game data is stored,
-              saved, and runs on the blockchain. Each Hero NFT is like an access
-              token to the game. Also, each NFT is unique in physical
-              attributes, making each distinct from the others. They come in
-              several classes—Fighters, Rangers, Mages, and more. Each class
-              offers its own in-game advantages like buffed stats and exclusive
-              access to certain items and abilities. Join our Discord for more
-              Information!
+            <p className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              The Hero NFT can be purchased with ICP on{" "}
+              <strong>Entrepot</strong>.
+              <br />
+              <br />
+              This will require you to setup a crypto wallet specific to the IC,
+              like{" "}
+              <a
+                href="https://plugwallet.ooo/"
+                target="_blank"
+                className="text-blue-700 underline font-bold"
+                rel="noreferrer"
+              >
+                Plug
+              </a>{" "}
+              and transfer ICP to it from an Exchange (Binance, Coinbase, OKX,
+              ...). You can also top-up from credit card directly with{" "}
+              <a
+                href="https://checkout.banxa.com/?fiatAmount=60&fiatType=USD&coinType=ICP&lockFiat=true&orderMode=BUY&backgroundColor=2a1a47&primaryColor=9b6ef7&secondaryColor=8b55f6&textColor=ffffff"
+                target="_blank"
+                className="text-blue-700 underline font-bold"
+                rel="noreferrer"
+              >
+                Banxa
+              </a>
+              .
+              <br />
+              <br />
+              For the best gameplay experience, we recommend signing in through
+              NFID with Gmail, but would require you to later transfer the NFT
+              to it.
+              <br />
+              <br />
+              Stoic is unmaintained and unless you already have been using it,
+              we don&apos;t recommend setting it up.
+              <br />
             </p>
           </div>
         </div>
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center my-8 lg:my-0 lg:mx-8">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              How do I get an NFT?
+        <div className="bg-card-beige rounded-2xl w-full min-h-full items-center justify-center mt-8">
+          <div className="w-full flex flex-col items-center">
+            <h4 className="flex items-center justify-center font-mochiy text-xl text-white pt-8">
+              How do I get Items NFT?
             </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
-              The Hero NFT can be purchased using the ICP Token on Entrepot.
-              This will require you to have a crypto wallet specific to the IC
-              Blockchain. For the best gameplay experience, we recommend signing
-              in through NFID. Plug and Stoic both have issues related to the
-              wallet themselves. To visit Entrepot, Please visit the link below.
-            </p>
-          </div>
-        </div>
-        <div className="bg-card-beige rounded-2xl w-full h-full flex flex-col items-center justify-center">
-          <div className="h-96 w-full flex flex-col items-center justify-center">
-            <h4 className="h-12 flex items-center justify-center font-jura text-xl md:text-2xl text-white">
-              NFT ITEMS
-            </h4>
-            <p className="h-80 max-w-96 md:max-w-full flex items-top justify-center font-jura text-xs md:text-2xl lg:text-sm text-white px-4">
-              In-Game Items are tradeable NFT’s. Weapons, spell scrolls, and
-              consumeables are all yours once found and can be traded or sold on
-              Entrepot.
+            <p className="max-w-96 md:max-w-full text-start font-jura text-white p-8">
+              <strong>Note:</strong> In order to avoid exploits and to improve
+              item&apos;s economy,{" "}
+              <strong>this feature is not yet published in production.</strong>
+              <br />
+              <br />
+              In-Game Items are tradeable NFTs. Weapons, spell scrolls and
+              consumables are all yours once found in-game and can be traded or
+              sold on Entrepot.
+              <br />
+              <br />
+              Each Hero NFT will only be able to mint a limited number of items
+              and items will have a limited number of times that can be
+              purchased and consumed into a game.
             </p>
           </div>
         </div>
